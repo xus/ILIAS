@@ -15,14 +15,26 @@
 		"geshi/geshi": "dev-master",
 		"tecnickcom/tcpdf": "^6.2.12",
 		"pimple/pimple" : "^3.0",
-		"symfony/yaml": "^3.1"
+		"symfony/yaml": "^3.1",
+		"jakoch/phantomjs-installer": "2.1.1-p05"
 	},
+	 "config": {
+        "bin-dir": "bin"
+    },
 	"require-dev": {
 		"mikey179/vfsStream": "^1.6"
 	},
 	"autoload": {
 		"psr-4" : { "ILIAS\\" : "../../src" }
 	},
+	"scripts": {
+        "post-install-cmd": [
+            "PhantomInstaller\\Installer::installPhantomJS"
+        ],
+        "post-update-cmd": [
+            "PhantomInstaller\\Installer::installPhantomJS"
+        ]
+    },
 	"extra": {
 		"cweagans/composer-patches" : {
 			"source" : "https://github.com/cweagans/composer-patches",
@@ -128,7 +140,7 @@
 			"wrapped_by": "",
 			"last_update": "2016-07-07",
 			"last_update_by": "Michael Jansen <mjansen@databay.de>"
-		},
+		},		
 		"patches": {
 			"tecnickcom/tcpdf": {
 				"ILIAS TCPDF Patches": "patches/tcpdf.patch"

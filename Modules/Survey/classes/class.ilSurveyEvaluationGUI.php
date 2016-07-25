@@ -305,7 +305,7 @@ class ilSurveyEvaluationGUI
 	*/
 	function evaluationdetails()
 	{
-		$this->evaluation(1);
+		$this->evaluation(1);	
 	}
 	
 	function exportCumulatedResults($details = 0)
@@ -806,7 +806,14 @@ class ilSurveyEvaluationGUI
 			$button->setCaption("print");
 			$button->setOnClick("window.print(); return false;");
 			$button->setOmitPreventDoubleSubmission(true);
-			$ilToolbar->addButtonInstance($button);								
+			$ilToolbar->addButtonInstance($button);				
+						
+			// patch BGHW 
+			$button = ilLinkButton::getInstance();
+			$button->setCaption("svy_export_pdf");
+			$button->setUrl($this->ctrl->getLinkTarget($this, "evaluationdetailspdf"));
+			$button->setOmitPreventDoubleSubmission(true);
+			$ilToolbar->addButtonInstance($button);			
 			
 			$finished_ids = null;
 			if($appr_id)
@@ -1029,7 +1036,15 @@ class ilSurveyEvaluationGUI
 
 					$chart = $chart[0];
 				}
+				
+				// patch BGHW 
+				$this->ctrl->setParameter($this, "qid", $question->getId());
+				$url = $this->ctrl->getLinkTarget($this, "downloadChart");
+				$this->ctrl->setParameter($this, "qid", "");
+				
 				$a_tpl->setVariable("CHART", $chart);	
+				$a_tpl->setVariable("CHART_DL_URL", $url);	
+				$a_tpl->setVariable("CHART_DL_TXT", $this->lng->txt("svy_chart_download"));	
 			}
 		}
 				
@@ -1648,9 +1663,124 @@ class ilSurveyEvaluationGUI
 			$html = $pskills_gui->getGapAnalysisHTML($appr_id, $sk);
 
 			$tpl->setContent($html);
+		}		
+	}
+	
+	
+	//
+	// PATCH BGHW
+	// 
+		
+	function evaluationdetailspdf()
+	{					
+		$this->callPhantom(
+			$this->ctrl->getLinkTarget($this, "evaluationdetails", "", false, false),
+			"pdf"
+		);
+	}			
+	
+	public function downloadChart()
+	{		
+		$qid = (int)$_GET["qid"];
+		if(!$qid)
+		{
+			return;
 		}
 		
+		$this->ctrl->setParameter($this, "qid", $qid);
+		$url = $this->ctrl->getLinkTarget($this, "renderChartOnly", "", false, false);
+		$this->ctrl->setParameter($this, "qid", "");
+		
+		$this->callPhantom($url, "png");		
 	}
+	
+	public function renderChartOnly()
+	{
+		global $tpl, $ilTabs, $ilMainMenu;
+		
+		$qid = (int)$_GET["qid"];
+		if(!$qid)
+		{
+			return;
+		}
+		
+		$finished_ids = null;
+		if($this->object->get360Mode())
+		{				
+			$appr_id = $this->getAppraiseeId();
+			$finished_ids = $this->object->getFinishedIdsForAppraiseeId($appr_id);				
+			if(!sizeof($finished_ids))
+			{
+				$finished_ids = array(-1);
+			}
+		}			
+		
+		// parse answer data in evaluation results
+		include_once "./Modules/SurveyQuestionPool/classes/class.SurveyQuestion.php";						
+		foreach($this->object->getSurveyQuestions() as $qdata)
+		{						
+			if($qid == $qdata["question_id"])
+			{
+				$q_eval = SurveyQuestion::_instanciateQuestionEvaluation($qdata["question_id"], $finished_ids);		
+				$q_res =  $q_eval->getResults();
+								
+				$chart = $q_eval->getChart($q_res);
+				if($chart)
+				{
+					$dtmpl = new ilTemplate("tpl.il_svy_svy_results_details_single.html", true, true, "Modules/Survey");
+					
+					if(is_array($chart))
+					{
+						// legend
+						if(is_array($chart[1]))
+						{
+							foreach($chart[1] as $legend_item)
+							{						
+								$dtmpl->setCurrentBlock("legend_bl");							
+								$dtmpl->setVariable("LEGEND_CAPTION", $legend_item[0]);								
+								$dtmpl->setVariable("LEGEND_COLOR", $legend_item[1]);								
+								$dtmpl->parseCurrentBlock();	
+							}
+						}
+
+						$chart = $chart[0];
+					}
+					$dtmpl->setVariable("CHART", $chart);	
+				}
+				
+				$ilMainMenu->setMode(ilMainMenuGUI::MODE_TOPBAR_REDUCED);
+				$ilTabs->clearTargets();
+				$tpl->setHeaderActionMenu(null);				
+				$tpl->setTitle(null);
+				$tpl->setTitleIcon(null);
+				$tpl->setLocator(null);
+				$tpl->setContent($dtmpl->get());
+			}
+		}		
+	}
+		
+	protected function callPhantom($a_url, $a_suffix)
+	{				
+		$bin = ILIAS_ABSOLUTE_PATH."/libs/composer/vendor/jakoch/phantomjs/bin/phantomjs.exe";
+		$script = ILIAS_ABSOLUTE_PATH."/Modules/Survey/js/phantom.js";
+		
+		$parts = parse_url(ILIAS_HTTP_PATH);
+		
+		$target = ilUtil::ilTempnam().".".$a_suffix;
+	
+		$args = array(
+			session_id(),
+			$parts["host"],
+			$parts["path"],
+			CLIENT_ID,
+			"\"".ILIAS_HTTP_PATH."/".$a_url."\"",
+			$target
+		);
+		
+		exec($bin." ".$script." ".implode(" ", $args));
+		
+		ilUtil::deliverFile($target, "survey.".$a_suffix);
+	}	
 }
 
 ?>

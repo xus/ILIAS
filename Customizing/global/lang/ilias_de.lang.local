@@ -13,3 +13,5 @@ survey#:#svy_eval_captions#:#Kennzahl
 survey#:#svy_eval_captions_abs_perc#:#Anzahl und Prozent
 survey#:#svy_eval_captions_abs#:#Anzahl
 survey#:#svy_eval_captions_perc#:#Prozent
+survey#:#svy_chart_download#:#Diagramm herunterladen
+survey#:#svy_export_pdf#:#Export PDF
