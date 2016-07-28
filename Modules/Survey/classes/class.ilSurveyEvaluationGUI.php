@@ -1761,8 +1761,12 @@ class ilSurveyEvaluationGUI
 		
 	protected function callPhantom($a_url, $a_suffix)
 	{				
-		$bin = ILIAS_ABSOLUTE_PATH."/libs/composer/vendor/jakoch/phantomjs/bin/phantomjs.exe";
 		$script = ILIAS_ABSOLUTE_PATH."/Modules/Survey/js/phantom.js";
+		
+		// :TODO:
+		$bin = ilUtil::isWindows()
+			? ILIAS_ABSOLUTE_PATH."/libs/composer/vendor/jakoch/phantomjs/bin/phantomjs.exe"
+			: ILIAS_ABSOLUTE_PATH."/libs/composer/vendor/jakoch/phantomjs/bin/phantomjs";		
 		
 		$parts = parse_url(ILIAS_HTTP_PATH);
 		
