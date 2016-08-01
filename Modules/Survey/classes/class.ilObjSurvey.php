@@ -6172,6 +6172,10 @@ class ilObjSurvey extends ilObject
 		// yeah, I know...
 		$_GET["ref_id"] = $this->getRefId();
 		$ilCtrl->setParameterByClass("ilSurveyEvaluationGUI", "ref_id", $this->getRefId());
+		
+		// oh dear, we need the current session in the DB when calling phantomjs
+		session_write_close();	
+		session_start();
 			
 		include_once "./Modules/Survey/classes/class.ilSurveyEvaluationGUI.php";		
 		$gui = new ilSurveyEvaluationGUI($this);
