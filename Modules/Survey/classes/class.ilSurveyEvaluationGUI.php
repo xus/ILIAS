@@ -1759,7 +1759,7 @@ class ilSurveyEvaluationGUI
 		}		
 	}
 		
-	protected function callPhantom($a_url, $a_suffix)
+	public function callPhantom($a_url, $a_suffix, $a_return = false)
 	{				
 		$script = ILIAS_ABSOLUTE_PATH."/Modules/Survey/js/phantom.js";
 		
@@ -1783,7 +1783,14 @@ class ilSurveyEvaluationGUI
 		
 		exec($bin." ".$script." ".implode(" ", $args));
 		
-		ilUtil::deliverFile($target, "survey.".$a_suffix);
+		if(!$a_return)
+		{
+			ilUtil::deliverFile($target, "survey.".$a_suffix);
+		}
+		else
+		{
+			return $target;
+		}
 	}	
 }
 

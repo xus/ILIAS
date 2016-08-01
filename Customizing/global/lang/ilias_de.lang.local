@@ -15,3 +15,8 @@ survey#:#svy_eval_captions_abs#:#Anzahl
 survey#:#svy_eval_captions_perc#:#Prozent
 survey#:#svy_chart_download#:#Diagramm herunterladen
 survey#:#svy_export_pdf#:#Export PDF
+survey#:#svy_notification_tutor_results#:#Eine E-Mail mit den Umfrageergebnissen
+survey#:#svy_notification_tutor_results_info#:#Nach dem Ablauf des Enddatum wird eine E-Mail mit den detailierten Umfrageergebnissen versendet.
+survey#:#svy_notification_tutor_results_alert#:#Diese Funktion erfordert ein Enddatum.
+survey#:#survey_results_tutor_subject#:#Ergebnisse der Umfrage "%s"
+survey#:#survey_results_tutor_body#:#Im Anhang finden Sie die Ergebnisse der folgenden Umfrage
