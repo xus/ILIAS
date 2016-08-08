@@ -171,6 +171,9 @@ class ilObjSurvey extends ilObject
 	
 	protected $view_own_results; // [bool]
 	protected $mail_own_results; // [bool]
+	protected $mail_confirmation; // [bool]
+	
+	protected $anon_user_list; // [bool]
 	
 	const NOTIFICATION_PARENT_COURSE = 1;
 	const NOTIFICATION_INVITED_USERS = 2;
@@ -263,6 +266,17 @@ class ilObjSurvey extends ilObject
 	{
 		parent::read();
 		$this->loadFromDb();
+	}
+	
+	/**
+	* Adds a question to the survey (used in importer!)
+	*
+	* @param	integer	$question_id The question id of the question
+	* @access	public
+	*/
+	function addQuestion($question_id)
+	{
+		array_push($this->questions, $question_id);
 	}
 	
 	/**
@@ -442,7 +456,7 @@ class ilObjSurvey extends ilObject
 		}
 	}
 	
-	function &getSurveyParticipants($finished_ids = null)
+	function &getSurveyParticipants($finished_ids = null, $force_non_anonymous = false)
 	{
 		global $ilDB;
 		
@@ -459,7 +473,7 @@ class ilObjSurvey extends ilObject
 		{
 			while ($row = $ilDB->fetchAssoc($result))
 			{
-				$userdata = $this->getUserDataFromActiveId($row["finished_id"]);
+				$userdata = $this->getUserDataFromActiveId($row["finished_id"], $force_non_anonymous = false);
 				$userdata["finished"] = (bool)$row["state"];
 				$userdata["finished_tstamp"] = $row["tstamp"];
 				$participants[$userdata["sortname"] . $userdata["active_id"]] = $userdata;
@@ -710,7 +724,9 @@ class ilObjSurvey extends ilObject
 				"own_results_view" => array("integer", $this->hasViewOwnResults()),
 				"own_results_mail" => array("integer", $this->hasMailOwnResults()),
 				"tutor_res_status" => array("integer", (int)$this->getTutorResultsStatus()),
-				"tutor_res_reci" => array("text", implode(";", (array)$this->getTutorResultsRecipients()))
+				"tutor_res_reci" => array("text", implode(";", (array)$this->getTutorResultsRecipients())),
+				"confirmation_mail" => array("integer", $this->hasMailConfirmation()),				
+				"anon_user_list" => array("integer", $this->hasAnonymousUserList())
  			));
 			$this->setSurveyId($next_id);
 		}
@@ -756,7 +772,9 @@ class ilObjSurvey extends ilObject
 				"own_results_view" => array("integer", $this->hasViewOwnResults()),
 				"own_results_mail" => array("integer", $this->hasMailOwnResults()),
 				"tutor_res_status" => array("integer", (int)$this->getTutorResultsStatus()),
-				"tutor_res_reci" => array("text", implode(";", (array)$this->getTutorResultsRecipients()))
+				"tutor_res_reci" => array("text", implode(";", (array)$this->getTutorResultsRecipients())),
+				"confirmation_mail" => array("integer", $this->hasMailConfirmation()),				
+				"anon_user_list" => array("integer", $this->hasAnonymousUserList())				
 			), array(
 			"survey_id" => array("integer", $this->getSurveyId())
 			));
@@ -1054,6 +1072,9 @@ class ilObjSurvey extends ilObject
 			
 			$this->setViewOwnResults($data["own_results_view"]);
 			$this->setMailOwnResults($data["own_results_mail"]);
+			$this->setMailConfirmation($data["confirmation_mail"]);
+			
+			$this->setAnonymousUserList($data["anon_user_list"]);			
 		}
 		
 		// moved activation to ilObjectActivation
@@ -3149,7 +3170,7 @@ class ilObjSurvey extends ilObject
 	* @return array An array containing the user data
 	* @access public
 	*/
-	function getUserDataFromActiveId($active_id)
+	function getUserDataFromActiveId($active_id, $force_non_anonymous = false)
 	{
 		global $ilDB;
 
@@ -3177,9 +3198,11 @@ class ilObjSurvey extends ilObject
 		);
 		if ($foundrows)
 		{
-			if (($row["user_fi"] > 0) && ($row["user_fi"] != ANONYMOUS_USER_ID) && 				
-				!$this->hasAnonymizedResults() &&
-				!$this->get360Mode()) // 360° uses ANONYMIZE_CODE_ALL which is wrong - see ilObjSurveyGUI::afterSave()
+			if (($row["user_fi"] > 0) && 
+					(($row["user_fi"] != ANONYMOUS_USER_ID && 				
+						!$this->hasAnonymizedResults() &&
+						!$this->get360Mode()) ||  // 360° uses ANONYMIZE_CODE_ALL which is wrong - see ilObjSurveyGUI::afterSave()
+					(bool)$force_non_anonymous))
 			{
 				include_once './Services/User/classes/class.ilObjUser.php';
 				if (strlen(ilObjUser::_lookupLogin($row["user_fi"])) == 0)
@@ -3516,6 +3539,9 @@ class ilObjSurvey extends ilObject
 		
 		$custom_properties["own_results_view"] = (int)$this->hasViewOwnResults();
 		$custom_properties["own_results_mail"] = (int)$this->hasMailOwnResults();
+		$custom_properties["confirmation_mail"] = (int)$this->hasMailConfirmation();
+		
+		$custom_properties["anon_user_list"] = (int)$this->hasAnonymousUserList();
 		
 		$custom_properties["mode_360"] = (int)$this->get360Mode();
 		$custom_properties["mode_360_self_eval"] = (int)$this->get360SelfEvaluation();
@@ -3747,6 +3773,12 @@ class ilObjSurvey extends ilObject
 			}
 			else
 			{
+				include_once("./Services/Export/classes/class.ilImport.php");
+				$imp = new ilImport();
+				$imp->getMapping()->addMapping("Modules/Survey", "svy", 0, $this->getId());
+				$imp->importFromDirectory($import_subdir, "svy", "Modules/Survey");
+				return "";
+
 				include_once "./Services/Survey/classes/class.SurveyImportParser.php";
 				$import = new SurveyImportParser($svy_qpl_id, "", TRUE);
 				$import->setSurveyObject($this);
@@ -3850,6 +3882,8 @@ class ilObjSurvey extends ilObject
 		$newObj->setPoolUsage($this->getPoolUsage());
 		$newObj->setViewOwnResults($this->hasViewOwnResults());
 		$newObj->setMailOwnResults($this->hasMailOwnResults());
+		$newObj->setMailConfirmation($this->hasMailConfirmation());
+		$newObj->setAnonymousUserList($this->hasAnonymousUserList());
 		
 		// #12661
 		if($this->get360Mode())
@@ -6074,6 +6108,26 @@ class ilObjSurvey extends ilObject
 	function hasMailOwnResults()
 	{
 		return $this->mail_own_results;
+	}
+	
+	function setMailConfirmation($a_value)
+	{
+		$this->mail_confirmation = (bool)$a_value;
+	}
+	
+	function hasMailConfirmation()
+	{
+		return $this->mail_confirmation;
+	}
+	
+	function setAnonymousUserList($a_value)
+	{
+		$this->anon_user_list = (bool)$a_value;
+	}
+	
+	function hasAnonymousUserList()
+	{
+		return $this->anon_user_list;
 	}
 	
 	public static function getSurveySkippedValue()
