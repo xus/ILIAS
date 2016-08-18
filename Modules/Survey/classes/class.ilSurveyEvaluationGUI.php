@@ -961,10 +961,15 @@ class ilSurveyEvaluationGUI
 				}
 				foreach($grid["rows"] as $cols)
 				{				
-					foreach($cols as $col)
+					foreach($cols as $idx => $col)
 					{						
+						if($idx > 0)
+						{
+							$a_tpl->touchBlock("grid_col_nowrap_bl");
+						}
+						
 						$a_tpl->setCurrentBlock("grid_col_bl");
-						$a_tpl->setVariable("COL_CAPTION", trim($col));														
+						$a_tpl->setVariable("COL_CAPTION", trim($col));																				
 						$a_tpl->parseCurrentBlock();
 					}
 
