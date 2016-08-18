@@ -854,7 +854,7 @@ class ilSurveyEvaluationGUI
 		
 		include_once "./Modules/Survey/classes/tables/class.ilSurveyResultsCumulatedTableGUI.php";
 		$table_gui = new ilSurveyResultsCumulatedTableGUI($this, $details ? 'evaluationdetails' : 'evaluation', $results);	
-		$this->tpl->setVariable('CUMULATED', $table_gui->getHTML().($dtmpl ? $dtmpl->get() : "").$modal);	
+		$this->tpl->setVariable('CUMULATED', /*$table_gui->getHTML().*/($dtmpl ? $dtmpl->get() : "").$modal);	
 		
 		$this->tpl->addCss("./Modules/Survey/templates/default/survey_print.css", "print");
 		$this->tpl->setVariable('FORMACTION', $this->ctrl->getFormAction($this, 'evaluation'));					
@@ -921,7 +921,7 @@ class ilSurveyEvaluationGUI
 		{			
 			if($question_res->getModeValue() !== null)
 			{
-				$kv["mode"] = $question_res->getModeValueAsText();
+				$kv["mode"] = wordwrap($question_res->getModeValueAsText(), 50, "<br />");
 				$kv["mode_nr_of_selections"] = $question_res->getModeNrOfSelections();							
 			}
 			if($question_res->getMedian() !== null)

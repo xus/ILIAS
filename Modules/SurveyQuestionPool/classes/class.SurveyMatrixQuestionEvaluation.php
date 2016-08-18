@@ -48,9 +48,7 @@ class SurveyMatrixQuestionEvaluation extends SurveyQuestionEvaluation
 	
 	
 	public function getGrid($a_results, $a_abs = true, $a_perc = true)
-	{
-		global $lng;
-		
+	{		
 		$res = array(
 			"cols" => array(),
 			"rows" => array()
@@ -80,7 +78,7 @@ class SurveyMatrixQuestionEvaluation extends SurveyQuestionEvaluation
 				{
 					$perc = $var->perc
 						? sprintf("%.2f", $var->perc*100)."%"
-						: null;
+						: "0%";
 					
 					if((bool)$a_abs && (bool)$a_perc)
 					{
@@ -152,7 +150,7 @@ class SurveyMatrixQuestionEvaluation extends SurveyQuestionEvaluation
 			$row_title = $row[0];
 			$row_results = $row[1];
 			
-			$labels[$row_idx] = $row_title;
+			$labels[$row_idx] = wordwrap($row_title, 25, "<br />");
 			
 			$vars = $row_results->getVariables();
 			if($vars)
@@ -163,6 +161,7 @@ class SurveyMatrixQuestionEvaluation extends SurveyQuestionEvaluation
 					{
 						$data[$idx] = $chart->getDataInstance(ilChartGrid::DATA_BARS);
 						$data[$idx]->setLabel($var->cat->title);
+						$data[$idx]->setFill(1);
 						$data[$idx]->setBarOptions(0.5, "center", true);
 						
 						$legend[] = array(
