@@ -717,7 +717,7 @@ class ilSurveyEvaluationGUI
 	function evaluation($details = 0)
 	{
 		global $rbacsystem, $ilToolbar;
-
+		
 		// auth
 		if (!$rbacsystem->checkAccess("write", $_GET["ref_id"]))
 		{			
@@ -985,6 +985,11 @@ class ilSurveyEvaluationGUI
 			include_once "Services/Accordion/classes/class.ilAccordionGUI.php";
 			$acc = new ilAccordionGUI();
 			$acc->setId("svyevaltxt".$question->getId());
+			
+			if($_GET["pdf"])
+			{
+				$acc->setBehaviour(ilAccordionGUI::FORCE_ALL_OPEN);
+			}
 			
 			if(array_key_exists("", $texts))
 			{
@@ -1685,6 +1690,7 @@ class ilSurveyEvaluationGUI
 		
 	function evaluationdetailspdf()
 	{					
+		$this->ctrl->setParameter($this, "pdf", 1);
 		$this->callPhantom(
 			$this->ctrl->getLinkTarget($this, "evaluationdetails", "", false, false),
 			"pdf"
