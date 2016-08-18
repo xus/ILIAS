@@ -150,7 +150,7 @@ class SurveyMatrixQuestionEvaluation extends SurveyQuestionEvaluation
 			$row_title = $row[0];
 			$row_results = $row[1];
 			
-			$labels[$row_idx] = ilUtil::shortenText(wordwrap($row_title, 30, "<br />"), 60, true);
+			$labels[$row_idx] = wordwrap(ilUtil::shortenText($row_title, 60, true), 30, "<br />");
 			
 			$vars = $row_results->getVariables();
 			if($vars)

@@ -856,7 +856,7 @@ class ilSurveyEvaluationGUI
 		$table_gui = new ilSurveyResultsCumulatedTableGUI($this, $details ? 'evaluationdetails' : 'evaluation', $results);	
 		$this->tpl->setVariable('CUMULATED', /*$table_gui->getHTML().*/($dtmpl ? $dtmpl->get() : "").$modal);	
 		
-		$this->tpl->addCss("./Modules/Survey/templates/default/survey_print.css", "print");
+		// $this->tpl->addCss("./Modules/Survey/templates/default/survey_print.css", "print");
 		$this->tpl->setVariable('FORMACTION', $this->ctrl->getFormAction($this, 'evaluation'));					
 	}
 	
@@ -1031,10 +1031,15 @@ class ilSurveyEvaluationGUI
 					if(is_array($chart[1]))
 					{
 						foreach($chart[1] as $legend_item)
-						{						
+						{													
+							$r = hexdec(substr($legend_item[1], 1, 2));
+							$g = hexdec(substr($legend_item[1], 3, 2));
+							$b = hexdec(substr($legend_item[1], 5, 2));
+							
 							$a_tpl->setCurrentBlock("legend_bl");							
 							$a_tpl->setVariable("LEGEND_CAPTION", $legend_item[0]);								
 							$a_tpl->setVariable("LEGEND_COLOR", $legend_item[1]);								
+							$a_tpl->setVariable("LEGEND_COLOR_SVG", $r.",".$g.",".$b);								
 							$a_tpl->parseCurrentBlock();	
 						}
 					}
@@ -1396,11 +1401,13 @@ class ilSurveyEvaluationGUI
 			$data = $this->parseUserSpecificResults($finished_ids);
 		}
 		
-		$this->tpl->addCss("./Modules/Survey/templates/default/survey_print.css", "print");
+		/*
+		$this->tpl->addCss("./Modules/Survey/templates/default/survey_print.css", "print");			
 		$this->tpl->setCurrentBlock("generic_css");
 		$this->tpl->setVariable("LOCATION_GENERIC_STYLESHEET", "./Modules/Survey/templates/default/evaluation_print.css");
 		$this->tpl->setVariable("MEDIA_GENERIC_STYLESHEET", "print");
-		$this->tpl->parseCurrentBlock();				
+		$this->tpl->parseCurrentBlock();						 
+		*/
 		
 		include_once "./Modules/Survey/classes/tables/class.ilSurveyResultsUserTableGUI.php";
 		$table_gui = new ilSurveyResultsUserTableGUI($this, 'evaluationuser', $this->object->hasAnonymizedResults());

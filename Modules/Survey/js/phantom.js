@@ -29,7 +29,17 @@ else
 			height: 500
 		};	
 	}
-   
+	else
+	{	
+		page.paperSize = { 
+			width: 1170,
+			height: 830,
+			format: 'A4', 
+			orientation: 'landscape', // landscape does not really work
+			margin: '1cm' 
+		};
+	}
+	
 	page.open(system.args[5], function() {
 	  page.render(system.args[6]);
 	  phantom.exit();
