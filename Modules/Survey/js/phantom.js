@@ -20,14 +20,19 @@ else
 	});
 	
 	var page = require('webpage').create();	
-		
-	// :TODO:	
+			
 	if(system.args[6].indexOf(".png") > -1)
 	{
 		page.viewportSize = {
 			width: 1170,
 			height: 500
 		};	
+		page.clipRect = { 
+			top: 75, 
+			left: 30,
+			width: 1100, 
+			height: 430 
+		};
 	}
 	else
 	{	
