@@ -30,11 +30,14 @@ else
 	}
 	else
 	{	
+		var pw = 2000;
+		var ph = pw*0.70707070;
+		
 		page.paperSize = { 
-			width: 830,
-			height: 1170,
+			width: pw,
+			height: ph,
 			format: 'A4', 
-			orientation: 'portrait', // landscape does not really work
+			orientation: 'landscape', // landscape does not really work
 			margin: '1cm' 
 		};
 	}
