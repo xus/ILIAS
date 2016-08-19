@@ -30,7 +30,7 @@ else
 	}
 	else
 	{	
-		var pw = 2000;
+		var pw = 1500;
 		var ph = pw*0.70707070;
 		
 		page.paperSize = { 
