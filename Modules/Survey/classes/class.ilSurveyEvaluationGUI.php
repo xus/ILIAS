@@ -854,7 +854,7 @@ class ilSurveyEvaluationGUI
 		
 		include_once "./Modules/Survey/classes/tables/class.ilSurveyResultsCumulatedTableGUI.php";
 		$table_gui = new ilSurveyResultsCumulatedTableGUI($this, $details ? 'evaluationdetails' : 'evaluation', $results);	
-		$this->tpl->setVariable('CUMULATED', /*$table_gui->getHTML().*/($dtmpl ? $dtmpl->get() : "").$modal);	
+		$this->tpl->setVariable('CUMULATED', ($dtmpl ? $dtmpl->get() : $table_gui->getHTML()).$modal);	
 		
 		// $this->tpl->addCss("./Modules/Survey/templates/default/survey_print.css", "print");
 		$this->tpl->setVariable('FORMACTION', $this->ctrl->getFormAction($this, 'evaluation'));					
