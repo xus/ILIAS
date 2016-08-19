@@ -31,10 +31,10 @@ else
 	else
 	{	
 		page.paperSize = { 
-			width: 1170,
-			height: 830,
+			width: 830,
+			height: 1170,
 			format: 'A4', 
-			orientation: 'landscape', // landscape does not really work
+			orientation: 'portrait', // landscape does not really work
 			margin: '1cm' 
 		};
 	}

@@ -295,7 +295,7 @@ abstract class SurveyQuestionEvaluation
 		$chart->setColors($colors);
 			
 		// :TODO:
-		$chart->setsize(700, 400);
+		$chart->setsize(500, 400);
 					
 		$vars = $a_results->getVariables();
 		
