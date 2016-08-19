@@ -1819,17 +1819,30 @@ class ilSurveyEvaluationGUI
 						$chart = $chart[0];
 					}
 					$dtmpl->setVariable("CHART", $chart);	
-				}
-				
-				$ilMainMenu->setMode(ilMainMenuGUI::MODE_TOPBAR_REDUCED);
-				$ilTabs->clearTargets();
-				$tpl->setHeaderActionMenu(null);				
-				$tpl->setTitle(null);
-				$tpl->setTitleIcon(null);
-				$tpl->setLocator(null);
-				$tpl->setContent($dtmpl->get());
+				}				
 			}
 		}		
+		
+		// "print view"	
+		$ptpl = new ilTemplate("tpl.main.html", true, true);		
+		foreach($tpl->css_files as $css)
+		{
+			$ptpl->setCurrentBlock("css_file");
+			$ptpl->setVariable("CSS_FILE", $css["file"]);
+			$ptpl->setVariable("CSS_MEDIA", $css["media"]);
+			$ptpl->parseCurrentBlock();
+		}
+		foreach($tpl->js_files as $js)
+		{
+			$ptpl->setCurrentBlock("js_file");
+			$ptpl->setVariable("JS_FILE", $js);
+			$ptpl->parseCurrentBlock();
+		}
+		$ptpl->setVariable("LOCATION_STYLESHEET", ilUtil::getStyleSheetLocation());
+		$ptpl->setVariable("LOCATION_CONTENT_STYLESHEET", ilUtil::getNewContentStyleSheetLocation());
+		$ptpl->setVariable("CONTENT", $dtmpl->get());
+		echo $ptpl->get();
+		exit();
 	}
 		
 	public function callPhantom($a_url, $a_suffix, $a_return = false)
