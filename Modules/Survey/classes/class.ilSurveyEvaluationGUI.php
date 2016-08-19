@@ -716,7 +716,7 @@ class ilSurveyEvaluationGUI
 	
 	function evaluation($details = 0)
 	{
-		global $rbacsystem, $ilToolbar, $ilSetting, $tree;
+		global $rbacsystem, $ilToolbar, $tree;
 		
 		// auth
 		if (!$rbacsystem->checkAccess("write", $_GET["ref_id"]))
@@ -811,7 +811,9 @@ class ilSurveyEvaluationGUI
 			// patch BGHW 
 			$button = ilLinkButton::getInstance();
 			$button->setCaption("svy_export_pdf");
-			$button->setUrl($this->ctrl->getLinkTarget($this, "evaluationdetailspdf"));
+			$button->setUrl($this->ctrl->getLinkTarget($this, $details
+				? "evaluationdetailspdf"
+				: "evaluationpdf"));
 			$button->setOmitPreventDoubleSubmission(true);
 			$ilToolbar->addButtonInstance($button);			
 			
@@ -1731,6 +1733,15 @@ class ilSurveyEvaluationGUI
 	//
 	// PATCH BGHW
 	// 
+	
+	function evaluationpdf()
+	{					
+		$this->ctrl->setParameter($this, "pdf", 1);
+		$this->callPhantom(
+			$this->ctrl->getLinkTarget($this, "evaluation", "", false, false),
+			"pdf"
+		);
+	}	
 		
 	function evaluationdetailspdf()
 	{					
