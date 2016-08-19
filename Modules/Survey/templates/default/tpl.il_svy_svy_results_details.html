@@ -1,4 +1,5 @@
-<div class="panel panel-default hidden-print">
+<div class="panel panel-default">
+	<div class="panel-heading ilBlockHeader"><h3 class="ilBlockHeader">{TOC_TITLE}</h3></div>
 	<div class="panel-body">
 		<!-- BEGIN toc_bl -->
 		<a href="#{TOC_ID}">{TOC_ITEM}</a><br />
@@ -8,7 +9,7 @@
 
 <!-- BEGIN question_panel_bl -->
 <a name="{ANCHOR_ID}"></a>
-<div class="panel panel-primary" style="page-break-after: always; page-break-inside: avoid;">	
+<div class="panel panel-primary" style="page-break-before: always; page-break-inside: avoid;">	
 	<div class="panel-body">
 		
 		<div class="row">
@@ -67,7 +68,7 @@
 		<!-- END texts_bl -->	
 
 		<!-- BEGIN chart_bl -->
-		<div class="ilFloatLeft">
+		<div class="ilFloatLeft" style="page-break-inside: avoid;">
 			{CHART}
 		</div>
 		<div class="ilFloatLeft" style="padding:10px">
