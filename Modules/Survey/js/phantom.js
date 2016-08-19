@@ -26,10 +26,11 @@ else
 		page.viewportSize = {
 			width: 1170,
 			height: 410
-		};			
+		};					
 	}
 	else
 	{	
+		// :TODO: should be 1170 but somehow the test server scales differently
 		var pw = 1500;
 		var ph = pw*0.70707070;
 		
@@ -43,6 +44,20 @@ else
 	}
 	
 	page.open(system.args[5], function() {
+		
+		// clip chart to minimum dimensions
+		if(system.args[6].indexOf(".png") > -1)
+		{
+			var height = page.evaluate(function(){
+				return document.getElementById('ilChartWrapper').offsetHeight;
+			}); 
+			var width = page.evaluate(function(){
+				return document.getElementById('ilChartWrapper').offsetWidth;
+			}); 	
+
+			page.clipRect = { top: 0, left: 0, width: width, height: height };	
+		}
+		
 	  page.render(system.args[6]);
 	  phantom.exit();
 	});

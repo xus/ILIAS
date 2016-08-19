@@ -809,11 +809,16 @@ class ilSurveyEvaluationGUI
 			$ilToolbar->addButtonInstance($button);				
 						
 			// patch BGHW 
+			$this->ctrl->setParameter($this, "cp", $_POST["cp"]);
+			$this->ctrl->setParameter($this, "vw", $_POST["vw"]);
+			$url = $this->ctrl->getLinkTarget($this, $details
+				? "evaluationdetailspdf"
+				: "evaluationpdf");			
+			$this->ctrl->setParameter($this, "cp", "");
+			$this->ctrl->setParameter($this, "vw", "");
 			$button = ilLinkButton::getInstance();
 			$button->setCaption("svy_export_pdf");
-			$button->setUrl($this->ctrl->getLinkTarget($this, $details
-				? "evaluationdetailspdf"
-				: "evaluationpdf"));
+			$button->setUrl($url);
 			$button->setOmitPreventDoubleSubmission(true);
 			$ilToolbar->addButtonInstance($button);			
 			
@@ -832,11 +837,11 @@ class ilSurveyEvaluationGUI
 				$dtmpl = new ilTemplate("tpl.il_svy_svy_results_details.html", true, true, "Modules/Survey");
 			}			
 			
-			$details_figure = $_POST["cp"]
-				? $_POST["cp"]
+			$details_figure = $_REQUEST["cp"]
+				? $_REQUEST["cp"]
 				: "ap";
-			$details_view = $_POST["vw"]
-				? $_POST["vw"]
+			$details_view = $_REQUEST["vw"]
+				? $_REQUEST["vw"]
 				: "tc";
 			
 			// parse answer data in evaluation results
@@ -1028,31 +1033,29 @@ class ilSurveyEvaluationGUI
 		$texts = $a_eval->getTextAnswers($a_results);
 		if($texts)
 		{			
-			include_once "Services/Accordion/classes/class.ilAccordionGUI.php";
-			$acc = new ilAccordionGUI();
-			$acc->setId("svyevaltxt".$question->getId());
-			
-			if($_GET["pdf"])
-			{
-				$acc->setBehaviour(ilAccordionGUI::FORCE_ALL_OPEN);
-			}
-			
 			if(array_key_exists("", $texts))
 			{
 				$a_tpl->setVariable("TEXT_HEADING", $this->lng->txt("given_answers"));
-				
-				$list = array("<ul class=\"small\">");
 				foreach($texts[""] as $item)
-				{													
-					$list[] = "<li>".nl2br($item)."</li>";																														
-				}				
-				$list[] = "</ul>";			
-				$acc->addItem($this->lng->txt("freetext_answers"), implode("\n", $list));
+				{								
+					$a_tpl->setCurrentBlock("text_direct_item_bl");
+					$a_tpl->setVariable("TEXT_DIRECT", nl2br($item));
+					$a_tpl->parseCurrentBlock();
+				}			
 			}
 			else
-			{						
+			{
+				include_once "Services/Accordion/classes/class.ilAccordionGUI.php";
+				$acc = new ilAccordionGUI();
+				$acc->setId("svyevaltxt".$question->getId());
+
+				if($_GET["pdf"])
+				{
+					$acc->setBehaviour(ilAccordionGUI::FORCE_ALL_OPEN);
+				}
+					
 				$a_tpl->setVariable("TEXT_HEADING", $this->lng->txt("freetext_answers"));
-				
+
 				foreach($texts as $var => $items)
 				{			
 					$list = array("<ul class=\"small\">");
@@ -1062,11 +1065,10 @@ class ilSurveyEvaluationGUI
 					}
 					$list[] = "</ul>";					
 					$acc->addItem($var, implode("\n", $list));
-				}
-				
-			}						
-			
-			$a_tpl->setVariable("TEXT_ACC", $acc->getHTML());
+				}						
+
+				$a_tpl->setVariable("TEXT_ACC", $acc->getHTML());
+			}
 		}
 				
 		// chart
@@ -1737,18 +1739,24 @@ class ilSurveyEvaluationGUI
 	function evaluationpdf()
 	{					
 		$this->ctrl->setParameter($this, "pdf", 1);
+		$this->ctrl->setParameter($this, "cp", $_GET["cp"]);
+		$this->ctrl->setParameter($this, "vw", $_GET["vw"]);
 		$this->callPhantom(
 			$this->ctrl->getLinkTarget($this, "evaluation", "", false, false),
-			"pdf"
+			"pdf",
+			$this->object->getTitle().".pdf"
 		);
 	}	
 		
 	function evaluationdetailspdf()
 	{					
 		$this->ctrl->setParameter($this, "pdf", 1);
+		$this->ctrl->setParameter($this, "cp", $_GET["cp"]);
+		$this->ctrl->setParameter($this, "vw", $_GET["vw"]);
 		$this->callPhantom(
 			$this->ctrl->getLinkTarget($this, "evaluationdetails", "", false, false),
-			"pdf"
+			"pdf",
+			$this->object->getTitle().".pdf"
 		);
 	}			
 	
@@ -1764,12 +1772,15 @@ class ilSurveyEvaluationGUI
 		$url = $this->ctrl->getLinkTarget($this, "renderChartOnly", "", false, false);
 		$this->ctrl->setParameter($this, "qid", "");
 		
-		$this->callPhantom($url, "png");		
+		include_once "./Modules/SurveyQuestionPool/classes/class.SurveyQuestion.php";	
+		$file = $this->object->getTitle()." - ".SurveyQuestion::_getTitle($qid);
+					
+		$this->callPhantom($url, "png", $file.".png");		
 	}
 	
 	public function renderChartOnly()
 	{
-		global $tpl, $ilTabs, $ilMainMenu;
+		global $tpl;
 		
 		$qid = (int)$_GET["qid"];
 		if(!$qid)
@@ -1845,7 +1856,7 @@ class ilSurveyEvaluationGUI
 		exit();
 	}
 		
-	public function callPhantom($a_url, $a_suffix, $a_return = false)
+	public function callPhantom($a_url, $a_suffix, $a_filename, $a_return = false)
 	{				
 		$script = ILIAS_ABSOLUTE_PATH."/Modules/Survey/js/phantom.js";
 		
@@ -1871,7 +1882,7 @@ class ilSurveyEvaluationGUI
 		
 		if(!$a_return)
 		{
-			ilUtil::deliverFile($target, "survey.".$a_suffix);
+			ilUtil::deliverFile($target, $a_filename);
 		}
 		else
 		{
