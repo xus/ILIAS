@@ -1878,7 +1878,12 @@ class ilSurveyEvaluationGUI
 			$target
 		);
 		
-		exec($bin." ".$script." ".implode(" ", $args));
+		$output = $return = "";		
+		exec($bin." ".$script." ".implode(" ", $args), $output, $return);
+		
+		$log = ilLoggerFactory::getLogger("svy");
+		$log->dump($output, ilLogLevel::DEBUG);
+		$log->dump($return, ilLogLevel::DEBUG);		
 		
 		if(!$a_return)
 		{
