@@ -58,6 +58,6 @@ page.open(system.args[5], function() {
 	}
 
   page.render(system.args[6]);
+  
+  phantom.exit();
 });
-
-phantom.exit();
