@@ -5,7 +5,7 @@
         $fields = array(
             'obj_id' => array (
                 'type' => 'integer',
-                'length' => 5,
+                'length' => 4,
                 'notnull' => true
             ),
             'name' => array (
@@ -15,7 +15,7 @@
             )
         );
 
-        $ilDB->createTable('custom_form');
-        $ilDB->addPrimaryKey('custom_form','id');
+        $ilDB->createTable('custom_form', $fields);
+        $ilDB->addPrimaryKey('custom_form','obj_id');
     }
 ?>
