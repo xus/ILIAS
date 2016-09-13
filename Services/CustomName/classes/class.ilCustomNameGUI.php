@@ -40,17 +40,13 @@ class ilCustomNameGUI
 
         switch($next_class)
         {
-            case "view":
-                $cmd = $ilCtrl->getCmd('view');
-                $this->$cmd();
-                break;
+
             // process command, if current class is responsible to do so
             default:
-
                 // determin the current command (take "view" as default)
                 $cmd = $ilCtrl->getCmd("viewuserdatawithpanel");
-
-                if (in_array($cmd, array("viewuserdatawithpanel")))
+                //Ok I had to add "view" to this array to be able to pass to another method in the same class!
+                if (in_array($cmd, array("viewuserdatawithpanel", "view")))
                 {
                     $this->$cmd();
                 }
@@ -127,6 +123,8 @@ class ilCustomNameGUI
 
         include_once('./Services/CustomName/classes/class.ilCustomName.php');
         include_once("./Services/UIComponent/Panel/classes/class.ilPanelGUI.php");
+        include_once('./Services/CustomName/classes/class.ilCustomNameFormGUI.php');
+
 
         $my_panel = ilPanelGUI::getInstance();
 
@@ -142,9 +140,10 @@ class ilCustomNameGUI
         foreach ($user_data as $key => $value){
             $usr_tpl->setVariable(strtoupper($key), $value);
         }
+        // MYLINK is a placeholder to my template tpl.user_template.html
+        $usr_tpl->setVariable("MY_LINK", $ilCtrl->getLinkTarget($this, "viewForm"));
+        //$usr_tpl->setVariable("LINK_HREF", $ilCtrl->getLinkTargetByClass("ilCustomNameFormGUI", "view"));
         $usr_tpl->parseCurrentBlock();
-
-        //$usr_tpl->setVariable("LINK_HREF", $ilCtrl->getLinkTarget($this, "view"));
 
         $my_panel->setBody($usr_tpl->get());
 
