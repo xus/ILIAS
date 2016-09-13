@@ -48,9 +48,9 @@ class ilCustomNameGUI
             default:
 
                 // determin the current command (take "view" as default)
-                $cmd = $ilCtrl->getCmd("viewuserdata");
+                $cmd = $ilCtrl->getCmd("viewuserdatawithpanel");
 
-                if (in_array($cmd, array("viewuserdata")))
+                if (in_array($cmd, array("viewuserdatawithpanel")))
                 {
                     $this->$cmd();
                 }
@@ -118,5 +118,39 @@ class ilCustomNameGUI
 
     }
 
+    /**
+     *  Custom view with some user data USING PANEL COMPONENT
+     */
+    function viewUserDataWithPanel()
+    {
+        global $tpl, $ilCtrl;
+
+        include_once('./Services/CustomName/classes/class.ilCustomName.php');
+        include_once("./Services/UIComponent/Panel/classes/class.ilPanelGUI.php");
+
+        $my_panel = ilPanelGUI::getInstance();
+
+        $cname = new ilCustomName();
+        $user_data = $cname->getDataFromCurrentUser();
+
+        $usr_tpl = new ilTemplate("tpl.user_template.html", true, true, "Services/CustomName");
+
+        $usr_tpl->setCurrentBlock("user_block");
+        /**
+         * placeholders for the template with user data(ID, CITY, COUNTRY, TITLE, TYPE)
+         */
+        foreach ($user_data as $key => $value){
+            $usr_tpl->setVariable(strtoupper($key), $value);
+        }
+        $usr_tpl->parseCurrentBlock();
+
+        //$usr_tpl->setVariable("LINK_HREF", $ilCtrl->getLinkTarget($this, "view"));
+
+        $my_panel->setBody($usr_tpl->get());
+
+        $tpl->setRightContent("Right Content");
+        $tpl->setContent($my_panel->getHTML());
+
+    }
 
 }
