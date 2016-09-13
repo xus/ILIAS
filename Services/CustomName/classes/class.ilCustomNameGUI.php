@@ -40,16 +40,17 @@ class ilCustomNameGUI
 
         switch($next_class)
         {
-            //case "xxxx":
-
-            //break;
+            case "view":
+                $cmd = $ilCtrl->getCmd('view');
+                $this->$cmd();
+                break;
             // process command, if current class is responsible to do so
             default:
 
                 // determin the current command (take "view" as default)
-                $cmd = $ilCtrl->getCmd("viewcustom");
+                $cmd = $ilCtrl->getCmd("viewuserdata");
 
-                if (in_array($cmd, array("viewcustom")))
+                if (in_array($cmd, array("viewuserdata")))
                 {
                     $this->$cmd();
                 }
@@ -81,11 +82,39 @@ class ilCustomNameGUI
         $my_tpl = new ilTemplate("tpl.my_template.html", true, true, "Services/CustomName");
 
         $my_tpl->setCurrentBlock("my_block");
-        $my_tpl->setVariable("TEXT", "title label"));
-        $my_tpl->setVariable("VALUE", "title value");
+        $my_tpl->setVariable("TEXT", "This is the text");
+        $my_tpl->setVariable("VALUE", "This is the value");
         $my_tpl->parseCurrentBlock();
 
         $tpl->setContent($my_tpl->get());
+
+    }
+
+    /**
+     * Custom view with some user data.
+     */
+    function viewUserData()
+    {
+        global $tpl, $ilCtrl;
+
+        include_once('./Services/CustomName/classes/class.ilCustomName.php');
+
+        $cname = new ilCustomName();
+
+        $user_data = $cname->getDataFromCurrentUser();
+
+        $usr_tpl = new ilTemplate("tpl.user_template.html", true, true, "Services/CustomName");
+
+        $usr_tpl->setCurrentBlock("user_block");
+        /**
+         * placeholders for the template with user data(ID, CITY, COUNTRY, TITLE, TYPE)
+         */
+        foreach ($user_data as $key => $value){
+            $usr_tpl->setVariable(strtoupper($key), $value);
+        }
+        $usr_tpl->parseCurrentBlock();
+
+        $tpl->setContent($usr_tpl->get());
 
     }
 
