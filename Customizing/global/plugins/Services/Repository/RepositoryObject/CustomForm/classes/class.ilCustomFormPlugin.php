@@ -43,8 +43,5 @@ class ilCustomFormPlugin extends ilRepositoryObjectPlugin{
     {
         // TODO: Implement uninstallCustom() method.
     }
-    function getPluginName()
-    {
-        // TODO: Implement getPluginName() method.
-    }
+    
 }
