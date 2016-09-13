@@ -2,8 +2,18 @@
 include ("./include/inc.header.php");
 include_once("./Services/CustomName/classes/class.ilCustomNameGUI.php");
 
+// this way ilCtrl will hand over the flow of control to ilCustomNameGUI
+// if you get a "Could not find entry in modules.xml or services.xml for ilcustomnamegui"
+// error, you must reload the ctrl structure information in the setup first (it reads the
+// service.xml) setup -> client -> details -> tools -> reload
+header("Location: ilias.php?baseClass=ilCustomNameGUI");
+exit;
+
+
 /**
  * Example 1: Service execution
+ *
+ * alex: this way ilCtrl would not be informed that the ilCustomNameGUI has been called
  */
 $cname = new ilCustomNameGUI();
 $cname->executeCommand();
