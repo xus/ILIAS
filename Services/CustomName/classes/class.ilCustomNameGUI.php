@@ -46,7 +46,7 @@ class ilCustomNameGUI
                 // determin the current command (take "view" as default)
                 $cmd = $ilCtrl->getCmd("viewuserdatawithpanel");
                 //Ok I had to add "view" to this array to be able to pass to another method in the same class!
-                if (in_array($cmd, array("viewuserdatawithpanel", "view")))
+                if (in_array($cmd, array("viewuserdatawithpanel", "viewForm", "createForm", "save")))
                 {
                     $this->$cmd();
                 }
@@ -91,7 +91,7 @@ class ilCustomNameGUI
      */
     function viewUserData()
     {
-        global $tpl, $ilCtrl;
+        global $tpl;
 
         include_once('./Services/CustomName/classes/class.ilCustomName.php');
 
@@ -125,7 +125,6 @@ class ilCustomNameGUI
         include_once("./Services/UIComponent/Panel/classes/class.ilPanelGUI.php");
         include_once('./Services/CustomName/classes/class.ilCustomNameFormGUI.php');
 
-
         $my_panel = ilPanelGUI::getInstance();
 
         $cname = new ilCustomName();
@@ -141,7 +140,8 @@ class ilCustomNameGUI
             $usr_tpl->setVariable(strtoupper($key), $value);
         }
         // MYLINK is a placeholder to my template tpl.user_template.html
-        $usr_tpl->setVariable("MY_LINK", $ilCtrl->getLinkTarget($this, "viewForm"));
+        $usr_tpl->setVariable("MY_LINK", $ilCtrl->getLinkTarget($this, "createForm"));
+
         //$usr_tpl->setVariable("LINK_HREF", $ilCtrl->getLinkTargetByClass("ilCustomNameFormGUI", "view"));
         $usr_tpl->parseCurrentBlock();
 
@@ -150,6 +150,63 @@ class ilCustomNameGUI
         $tpl->setRightContent("Right Content");
         $tpl->setContent($my_panel->getHTML());
 
+    }
+    /**
+     * Build property form
+     */
+    public function createForm()
+    {
+        global $tpl;
+
+        $form = $this->initForm();
+        $tpl->setContent($form->getHTML());
+    }
+
+    /**
+     * Init property form
+     * @return object
+     */
+    public function initForm()
+    {
+        global $ilCtrl;
+
+        include_once("./Services/Form/classes/class.ilPropertyFormGUI.php");
+
+        $form_gui = new ilPropertyFormGUI();
+        $form_gui->setFormAction($ilCtrl->getFormAction($this));
+        $form_gui->setTitle('THE TITLE');
+        $text_prop = new ilTextInputGUI("Put your Custom Name:", "name");
+        $text_prop->setInfo("This is my advice");
+        $form_gui->addItem($text_prop);
+
+        $form_gui->addCommandButton('save','Save');
+        $form_gui->addCommandButton('view','Cancel');
+
+        return $form_gui;
+    }
+
+    /**
+     * Save object data
+     */
+    public function save()
+    {
+        global $ilCtrl;
+
+        include_once('./Services/CustomName/classes/class.ilCustomName.php');
+
+        $form_gui = $this->initForm();
+        if ($form_gui->checkInput())
+        {
+            $obj = new ilCustomName();
+            $obj->setId($form_gui->getInput("id"));
+            $obj->setName($form_gui->getInput("name"));
+            $obj->save();
+        }
+        else
+        {
+            //Return to the previous view, I have to show an error message to the user.
+            $ilCtrl->redirect($this, 'createForm');
+        }
     }
 
 }

@@ -32,11 +32,9 @@ class CustomNameFormGUI
     }
     public function view()
     {
-        global $ilCtrl;
+        global $tpl, $ilCtrl, $lng;
 
         include_once("./Services/Form/classes/class.ilPropertyFormGUI.php");
-
-        global $tpl, $ilCtrl, $lng;
 
         $form = new ilPropertyFormGUI();
         $form->setFormAction($ilCtrl->getFormAction($this));
