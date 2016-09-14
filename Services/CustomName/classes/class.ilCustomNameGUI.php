@@ -44,9 +44,9 @@ class ilCustomNameGUI
             // process command, if current class is responsible to do so
             default:
                 // determin the current command (take "view" as default)
-                $cmd = $ilCtrl->getCmd("viewuserdatawithpanel");
+                $cmd = $ilCtrl->getCmd("view");
                 //Ok I had to add "view" to this array to be able to pass to another method in the same class!
-                if (in_array($cmd, array("viewuserdatawithpanel", "viewForm", "createForm", "save", "viewTableList")))
+                if (in_array($cmd, array("view", "viewForm", "createForm", "save", "viewTableList", "viewuserdatawithpanel")))
                 {
                     $this->$cmd();
                 }
@@ -62,9 +62,12 @@ class ilCustomNameGUI
      */
     function view()
     {
-        global $tpl;
+        global $tpl,$ilTabs;
 
-        $tpl->setContent("Hi!");
+        $this->setTabs();
+        $ilTabs->activateTab("id_welcome");
+
+        $tpl->setContent("<h1>Hello!</h1><br /> this is the first view, <b>use the tabs to navigate.</b>");
     }
 
     /**
@@ -119,11 +122,16 @@ class ilCustomNameGUI
      */
     function viewUserDataWithPanel()
     {
-        global $tpl, $ilCtrl;
+        global $tpl, $ilCtrl, $ilTabs;
 
         include_once('./Services/CustomName/classes/class.ilCustomName.php');
         include_once("./Services/UIComponent/Panel/classes/class.ilPanelGUI.php");
         include_once('./Services/CustomName/classes/class.ilCustomNameFormGUI.php');
+
+        $this->setTabs();
+        $ilTabs->activateTab("id_list");
+        $ilTabs->setBackTarget($lng->txt("back"), $ilCtrl->getLinkTarget($this, "view"));
+
 
         $my_panel = ilPanelGUI::getInstance();
 
@@ -153,12 +161,16 @@ class ilCustomNameGUI
         $tpl->setContent($my_panel->getHTML());
 
     }
+
     /**
      * Build property form
      */
     public function createForm()
     {
-        global $tpl;
+        global $tpl, $ilTabs;
+
+        $this->setTabs();
+        $ilTabs->activateTab("id_form");
 
         $form = $this->initForm();
         $tpl->setContent($form->getHTML());
@@ -218,12 +230,29 @@ class ilCustomNameGUI
      */
     public function viewTableList()
     {
-        global $tpl;
+        global $tpl,$ilTabs,$lng,$ilCtrl;
+
+        $this->setTabs();
+        $ilTabs->activateTab("id_list");
 
         include_once('./Services/CustomName/classes/class.ilCustomNameTableGUI.php');
 
         $table_gui = new ilCustomNameTableGUI($this);
 
         $tpl->setContent($table_gui->getHTML());
+    }
+
+    /**
+     * TABS Setup
+     */
+    function setTabs()
+    {
+        global $ilTabs, $ilCtrl;
+
+        $ilTabs->addTab("id_welcome", "WELCOME", $ilCtrl->getLinkTarget($this, "view"));
+        $ilTabs->addTab("id_form", "INSERT NAMES", $ilCtrl->getLinkTarget($this, "createForm"));
+        $ilTabs->addTab("id_list", "VIEW LIST", $ilCtrl->getLinkTarget($this, "viewTableList"));
+        $ilTabs->addTab("id_tests", "Other tests", $ilCtrl->getLinkTarget($this,"viewUserDataWithPanel"));
+
     }
 }
