@@ -215,12 +215,14 @@ class ilCustomNameGUI
             $obj->setId($form_gui->getInput("id"));
             $obj->setName($form_gui->getInput("name"));
             $obj->save();
-            //Return to the previous view, I have to show success message to the user.
+
+            ilUtil::sendSuccess("Name created.", true);
             $ilCtrl->redirect($this, 'createForm');
         }
         else
         {
-            //Return to the previous view, I have to show an error message to the user.
+
+            ilUtil::sendFailure("Error creating the name.", true);
             $ilCtrl->redirect($this, 'createForm');
         }
     }
