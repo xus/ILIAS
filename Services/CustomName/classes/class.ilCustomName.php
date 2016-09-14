@@ -43,12 +43,13 @@ class ilCustomName {
 
     /**
      * Save a new entry
-     * @return
+     * @return bool
      */
     public function save()
     {
         global $ilDB;
 
+        //error control here!
         $this->setId($ilDB->nextId('srv_cname_data'));
         $query = 'INSERT INTO srv_cname_data (id,name) ' .
             "VALUES ( " .
@@ -59,8 +60,6 @@ class ilCustomName {
 
         return true;
     }
-
-
 
     /**
      * Get some data for the current user
@@ -81,25 +80,25 @@ class ilCustomName {
     }
 
     /**
-     * Get list of  objects for given type ( WRONG WAY // use the object.)
+     * Get list of  objects
      * @return	array
      */
-    /*
-    static function getUserList()
+
+    static function getCustomNameList()
     {
         global $ilDB;
 
-        $sql = "SELECT firstname,lastname FROM usr_data ORDER BY firstname";
+        $sql = "SELECT id,name FROM srv_cname_data ORDER BY id";
 
         $set = $ilDB->query($sql);
+
         $res = array();
         while($row = $ilDB->fetchAssoc($set))
         {
             $res[] = $row;
         }
-        return $set;
+        return $res;
 
     }
-    */
 
 }

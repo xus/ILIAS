@@ -46,7 +46,7 @@ class ilCustomNameGUI
                 // determin the current command (take "view" as default)
                 $cmd = $ilCtrl->getCmd("viewuserdatawithpanel");
                 //Ok I had to add "view" to this array to be able to pass to another method in the same class!
-                if (in_array($cmd, array("viewuserdatawithpanel", "viewForm", "createForm", "save")))
+                if (in_array($cmd, array("viewuserdatawithpanel", "viewForm", "createForm", "save", "viewTableList")))
                 {
                     $this->$cmd();
                 }
@@ -141,6 +141,7 @@ class ilCustomNameGUI
         }
         // MYLINK is a placeholder to my template tpl.user_template.html
         $usr_tpl->setVariable("MY_LINK", $ilCtrl->getLinkTarget($this, "createForm"));
+        $usr_tpl->setVariable("TABLE_LINK", $ilCtrl->getLinkTarget($this, "viewTableList"));
 
         //$usr_tpl->setVariable("LINK_HREF", $ilCtrl->getLinkTargetByClass("ilCustomNameFormGUI", "view"));
         $usr_tpl->parseCurrentBlock();
@@ -148,6 +149,7 @@ class ilCustomNameGUI
         $my_panel->setBody($usr_tpl->get());
 
         $tpl->setRightContent("Right Content");
+
         $tpl->setContent($my_panel->getHTML());
 
     }
@@ -201,6 +203,8 @@ class ilCustomNameGUI
             $obj->setId($form_gui->getInput("id"));
             $obj->setName($form_gui->getInput("name"));
             $obj->save();
+            //Return to the previous view, I have to show success message to the user.
+            $ilCtrl->redirect($this, 'createForm');
         }
         else
         {
@@ -209,4 +213,17 @@ class ilCustomNameGUI
         }
     }
 
+    /**
+     * View data table
+     */
+    public function viewTableList()
+    {
+        global $tpl;
+
+        include_once('./Services/CustomName/classes/class.ilCustomNameTableGUI.php');
+
+        $table_gui = new ilCustomNameTableGUI($this);
+
+        $tpl->setContent($table_gui->getHTML());
+    }
 }
