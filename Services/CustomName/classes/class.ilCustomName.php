@@ -83,9 +83,9 @@ class ilCustomName {
      * Get list of  objects
      * @return	array
      */
-    static function getCustomNameList($filter = "")
+    static function getCustomNameList($filter = array())
     {
-        die('filter='.$filter);
+//      var_dump($filter); exit;
         global $ilDB;
 
         $sql = "SELECT id,name FROM srv_cname_data ORDER BY id";

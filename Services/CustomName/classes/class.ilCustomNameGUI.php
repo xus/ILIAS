@@ -7,6 +7,8 @@
  *
  * @author Jesús López Reyes <lopez@leifos.com>
  *
+ * after making these changes you need to reload the ctrl structure
+ * @     ilCtrl_Calls ilCustomNameGUI: ilCustomSecondClassGUI
  * @version $Id$
  */
 class ilCustomNameGUI
@@ -20,6 +22,8 @@ class ilCustomNameGUI
     function __construct()
     {
         global $tpl;
+
+        // use DIC instead
 
         $tpl->getStandardTemplate();
     }
@@ -44,9 +48,10 @@ class ilCustomNameGUI
             // process command, if current class is responsible to do so
             default:
                 // determin the current command (take "view" as default)
-                $cmd = $ilCtrl->getCmd("view");
+                $cmd = $ilCtrl->getCmd("viewUserDataWithPanel");
                 //Ok I had to add "view" to this array to be able to pass to another method in the same class!
-                if (in_array($cmd, array("view", "viewForm", "createForm", "save", "viewTableList", "viewuserdatawithpanel")))
+                if (in_array($cmd, array("view", "viewForm", "createForm", "save", "viewTableList", "viewUserDataWithPanel",
+                    "applyFilter", "resetFilter")))
                 {
                     $this->$cmd();
                 }
@@ -254,7 +259,7 @@ class ilCustomNameGUI
      */
     function applyFilter()
     {
-        include_once("./Services/classes/class.ilCustomNameTableGUI.php");
+        include_once('./Services/CustomName/classes/class.ilCustomNameTableGUI.php');
         $table_gui = new ilCustomNameTableGUI($this, "viewTableList");
         $table_gui->writeFilterToSession();        // writes filter to session
         $table_gui->resetOffset();                // sets record offest to 0 (first page)
@@ -266,7 +271,7 @@ class ilCustomNameGUI
      */
     function resetFilter()
     {
-        include_once("./Services/classes/class.ilCustomNameTableGUI.php");
+        include_once('./Services/CustomName/classes/class.ilCustomNameTableGUI.php');
         $table_gui = new ilCustomNameTableGUI($this, "viewTableList");
         $table_gui->resetOffset();                // sets record offest to 0 (first page)
         $table_gui->resetFilter();                // clears filter
@@ -284,6 +289,8 @@ class ilCustomNameGUI
         $ilTabs->addTab("id_form", "INSERT NAMES", $ilCtrl->getLinkTarget($this, "createForm"));
         $ilTabs->addTab("id_list", "VIEW LIST", $ilCtrl->getLinkTarget($this, "viewTableList"));
         $ilTabs->addTab("id_tests", "Other tests", $ilCtrl->getLinkTarget($this,"viewUserDataWithPanel"));
+
+        //$ilTabs->addTab("my_id", "Other Class", $ilCtrl->getLinkTargetByClass("ilCustomSecondClassGUI",""));
 
     }
 }
