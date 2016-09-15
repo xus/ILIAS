@@ -21,6 +21,8 @@ class ilCustomNameTableGUI extends ilTable2GUI
         $this->setFormAction($ilCtrl->getFormAction($a_parent_obj));
         $this->setRowTemplate("tpl.table_row_custom_name_template.html", "Services/CustomName");
 
+        $this->addMultiCommand("deleteRecords", "Delete");
+
         $this->getCustomNameData();
     }
 
@@ -34,8 +36,8 @@ class ilCustomNameTableGUI extends ilTable2GUI
         $cname = new ilCustomName();
 
         //$data = $cname->getCustomNameList();
-        //$data = $cname->getCustomNameList($this->filter["name"]);
-        $data = $cname->getCustomNameList("this is my filter");
+        $data = $cname->getCustomNameList($this->filter);
+        //$data = $cname->getCustomNameList("this is my filter");
 
         $this->setData($data);
     }
@@ -66,7 +68,7 @@ class ilCustomNameTableGUI extends ilTable2GUI
         $this->addFilterItem($ti);
         $ti->readFromSession();
         $this->filter['name'] = $ti->getValue();
-        die("filter name=".$ti->getValue());
+        //die("filter name=".$ti->getValue());
 
         /**
          * this is the HTML output
