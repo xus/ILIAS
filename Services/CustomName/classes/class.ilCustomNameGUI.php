@@ -66,8 +66,8 @@ class ilCustomNameGUI
 
         $this->setTabs();
         $ilTabs->activateTab("id_welcome");
-
-        $tpl->setContent("<h1>Hello!</h1><br /> this is the first view, <b>use the tabs to navigate.</b>");
+        $timestamp = new ilDateTime(time(),IL_CAL_UNIX);
+        $tpl->setContent("<h1>Hello!</h1><br /> this is the first view, <b>use the tabs to navigate.</b><br/><br/>Timestamp: ".$timestamp);
     }
 
     /**
@@ -122,7 +122,7 @@ class ilCustomNameGUI
      */
     function viewUserDataWithPanel()
     {
-        global $tpl, $ilCtrl, $ilTabs;
+        global $tpl, $ilCtrl, $ilTabs, $lng;
 
         include_once('./Services/CustomName/classes/class.ilCustomName.php');
         include_once("./Services/UIComponent/Panel/classes/class.ilPanelGUI.php");
@@ -239,9 +239,38 @@ class ilCustomNameGUI
 
         include_once('./Services/CustomName/classes/class.ilCustomNameTableGUI.php');
 
-        $table_gui = new ilCustomNameTableGUI($this);
+        //$table_gui = new ilCustomNameTableGUI($this);
+        $table_gui = new ilCustomNameTableGUI($this, "viewTableList");
+
+        //FILTERS
+        $table_gui->setFilterCommand("applyFilter");
+        $table_gui->setResetCommand("resetFilter");
 
         $tpl->setContent($table_gui->getHTML());
+    }
+
+    /**
+     * Apply filter
+     */
+    function applyFilter()
+    {
+        include_once("./Services/classes/class.ilCustomNameTableGUI.php");
+        $table_gui = new ilCustomNameTableGUI($this, "viewTableList");
+        $table_gui->writeFilterToSession();        // writes filter to session
+        $table_gui->resetOffset();                // sets record offest to 0 (first page)
+        $this->viewTableList();
+    }
+
+    /**
+     * Reset filter
+     */
+    function resetFilter()
+    {
+        include_once("./Services/classes/class.ilCustomNameTableGUI.php");
+        $table_gui = new ilCustomNameTableGUI($this, "viewTableList");
+        $table_gui->resetOffset();                // sets record offest to 0 (first page)
+        $table_gui->resetFilter();                // clears filter
+        $this->viewTableList();
     }
 
     /**
