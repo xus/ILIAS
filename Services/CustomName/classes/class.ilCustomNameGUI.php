@@ -234,7 +234,7 @@ class ilCustomNameGUI
     }
 
     /**
-     * Delete object  FALTA IMPLEMENTAR getCustomFromMultiaction.
+     * Delete object
      */
     protected function deleteRecords()
     {

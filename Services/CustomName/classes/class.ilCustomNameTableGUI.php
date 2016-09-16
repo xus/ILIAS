@@ -56,11 +56,26 @@ class ilCustomNameTableGUI extends ilTable2GUI
      */
     protected function fillRow($a_set)
     {
+        global $lng, $ilCtrl;
         //include_once("./Services/Form/classes/class.ilPropertyFormGUI.php");
 
         $this->tpl->setVariable("ROW_ID", $a_set["id"]);
         $this->tpl->setVariable("TXT_ID", $a_set["id"]);
         $this->tpl->setVariable("TXT_NAME", $a_set["name"]);
+
+        /**
+         * ACTIONS (edit,delete)
+         */
+        include_once "Services/UIComponent/AdvancedSelectionList/classes/class.ilAdvancedSelectionListGUI.php";
+        $actions = new ilAdvancedSelectionListGUI();
+        $actions-> setListTitle($lng->txt("actions"));
+
+        $ilCtrl->setParameter($this->getParentObject(), "myid", $a_set["id"]);
+        $link = $ilCtrl->getLinkTarget($this->getParentObject(), "editCustomName");
+        $actions->addItem($lng->txt("edit"), "", $link);
+
+        $this->tpl->setVariable("ACTIONS", $actions->getHTML());
+
     }
 
     /**
