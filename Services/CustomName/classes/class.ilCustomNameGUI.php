@@ -48,13 +48,14 @@ class ilCustomNameGUI
             // process command, if current class is responsible to do so
             default:
                 // determin the current command (take "view" as default)
-                $cmd = $ilCtrl->getCmd("viewUserDataWithPanel");
-                //Ok I had to add "view" to this array to be able to pass to another method in the same class!
-                if (in_array($cmd, array("view", "viewForm", "createForm", "save", "viewTableList", "viewUserDataWithPanel",
-                    "applyFilter", "resetFilter")))
+                $cmd = $ilCtrl->getCmd("view");
+
+                //Ok I had to add "view" to this array to be able to pass to another method in the same class!  CASE SENSITIVE!
+                if (in_array($cmd, array("view", "viewForm", "createForm", "save", "viewTableList", "viewUserDataWithPanel", "applyFilter", "resetFilter", "deleteRecords")))
                 {
                     $this->$cmd();
                 }
+
                 break;
         }
 
@@ -65,7 +66,7 @@ class ilCustomNameGUI
      * View hello world...
      *
      */
-    function view()
+    protected function view()
     {
         global $tpl,$ilTabs;
 
@@ -79,7 +80,7 @@ class ilCustomNameGUI
      * Custom view with template
      *
      */
-    function viewCustom()
+    protected function viewCustom()
     {
         global $tpl;
 
@@ -97,7 +98,7 @@ class ilCustomNameGUI
     /**
      * Custom view with some user data.
      */
-    function viewUserData()
+    protected function viewUserData()
     {
         global $tpl;
 
@@ -125,7 +126,7 @@ class ilCustomNameGUI
     /**
      *  Custom view with some user data USING PANEL COMPONENT
      */
-    function viewUserDataWithPanel()
+    protected function viewUserDataWithPanel()
     {
         global $tpl, $ilCtrl, $ilTabs, $lng;
 
@@ -170,7 +171,7 @@ class ilCustomNameGUI
     /**
      * Build property form
      */
-    public function createForm()
+    protected function createForm()
     {
         global $tpl, $ilTabs;
 
@@ -185,7 +186,7 @@ class ilCustomNameGUI
      * Init property form
      * @return object
      */
-    public function initForm()
+    protected function initForm()
     {
         global $ilCtrl;
 
@@ -207,7 +208,7 @@ class ilCustomNameGUI
     /**
      * Save object data
      */
-    public function save()
+    protected function save()
     {
         global $ilCtrl;
 
@@ -233,9 +234,44 @@ class ilCustomNameGUI
     }
 
     /**
+     * Delete object  FALTA IMPLEMENTAR getCustomFromMultiaction.
+     */
+    protected function deleteRecords()
+    {
+        global $ilCtrl,$lng;
+
+        require_once("Services/CustomName/classes/class.ilCustomName.php");
+        $cname_ids = $this->getCustomNamesFromMultiAction();
+
+        //if $cname_ids is not null, delete record
+        if($cname_ids)
+        {
+            foreach($cname_ids as $cname_id)
+            {
+                $cname = new ilCustomName($cname_id);
+                //$cname->setId((int)$cname_id);
+                $cname->delete();
+            }
+        }
+
+        ilUtil::sendSuccess("Custom Name deleted.");
+        $ilCtrl->redirect($this,"viewTableList");
+    }
+
+    /**
+     * Get custom names from data table multi action
+     */
+    protected function getCustomNamesFromMultiAction()
+    {
+        $cname_ids = $_REQUEST["row_id"];
+
+        return $cname_ids;
+    }
+
+    /**
      * View data table
      */
-    public function viewTableList()
+    protected function viewTableList()
     {
         global $tpl,$ilTabs,$lng,$ilCtrl;
 
@@ -244,7 +280,6 @@ class ilCustomNameGUI
 
         include_once('./Services/CustomName/classes/class.ilCustomNameTableGUI.php');
 
-        //$table_gui = new ilCustomNameTableGUI($this);
         $table_gui = new ilCustomNameTableGUI($this, "viewTableList");
 
         //FILTERS
@@ -257,7 +292,7 @@ class ilCustomNameGUI
     /**
      * Apply filter
      */
-    function applyFilter()
+    protected function applyFilter()
     {
         include_once('./Services/CustomName/classes/class.ilCustomNameTableGUI.php');
         $table_gui = new ilCustomNameTableGUI($this, "viewTableList");
@@ -269,7 +304,7 @@ class ilCustomNameGUI
     /**
      * Reset filter
      */
-    function resetFilter()
+    protected function resetFilter()
     {
         include_once('./Services/CustomName/classes/class.ilCustomNameTableGUI.php');
         $table_gui = new ilCustomNameTableGUI($this, "viewTableList");
@@ -281,7 +316,7 @@ class ilCustomNameGUI
     /**
      * TABS Setup
      */
-    function setTabs()
+    protected function setTabs()
     {
         global $ilTabs, $ilCtrl;
 
@@ -293,4 +328,5 @@ class ilCustomNameGUI
         //$ilTabs->addTab("my_id", "Other Class", $ilCtrl->getLinkTargetByClass("ilCustomSecondClassGUI",""));
 
     }
+
 }

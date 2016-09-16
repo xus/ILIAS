@@ -3,7 +3,15 @@
 class ilCustomName {
 
     private $id = 0;
-    private $name = "";
+    protected $name = "";
+
+    function __construct($id = 0)
+    {
+        if($id)
+        {
+            $this->setId($id);
+        }
+    }
 
     /**
      * Set object id
@@ -62,6 +70,22 @@ class ilCustomName {
     }
 
     /**
+     * Delete object
+     * @return bool
+     */
+    public function delete()
+    {
+        global $ilDB;
+
+        //error control here!
+        $query = 'DELETE FROM srv_cname_data'.
+            " WHERE id =".$ilDB->quote($this->getId(), "integer");
+        $ilDB->manipulate($query);
+
+        return true;
+    }
+
+    /**
      * Get some data for the current user
      * @return array
      */
@@ -85,7 +109,7 @@ class ilCustomName {
      */
     static function getCustomNameList($filter = array())
     {
-//      var_dump($filter); exit;
+
         global $ilDB;
 
         $sql = "SELECT id,name FROM srv_cname_data ORDER BY id";
