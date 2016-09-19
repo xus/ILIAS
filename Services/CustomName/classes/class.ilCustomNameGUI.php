@@ -51,10 +51,10 @@ class ilCustomNameGUI
                 $cmd = $ilCtrl->getCmd("view");
 
                 //Ok I had to add "view" to this array to be able to pass to another method in the same class!  CASE SENSITIVE!
-                if (in_array($cmd, array("view", "viewForm", "createForm", "save", "viewTableList", "viewUserDataWithPanel", "applyFilter", "resetFilter", "deleteRecords")))
-                {
+                //if (in_array($cmd, array("view", "viewForm", "createForm", "save", "viewTableList", "viewUserDataWithPanel", "applyFilter", "resetFilter", "deleteRecords")))
+                //{
                     $this->$cmd();
-                }
+                //}
 
                 break;
         }
@@ -178,15 +178,43 @@ class ilCustomNameGUI
         $this->setTabs();
         $ilTabs->activateTab("id_form");
 
-        $form = $this->initForm();
+        $form = $this->initForm("create");
         $tpl->setContent($form->getHTML());
     }
 
     /**
-     * Init property form
-     * @return object
+     * Edit property form
      */
-    protected function initForm()
+    public function editForm()
+    {
+        global $tpl, $ilTabs;
+
+        $this->setTabs();
+        $ilTabs->activateTab("id_form");
+
+        /**
+         * get $_GET id
+         */
+        $cname_id = $_REQUEST["myid"];
+        if($cname_id > 0)
+        {
+            $form = $this->initForm("edit", $cname_id);
+        }
+        else
+        {
+            ilUtil::sendFailure("Error, could not change the custom name", true);
+            $ilCtrl->redirect($this, 'viewTableList');
+        }
+
+        $tpl->setContent($form->getHTML());
+
+    }
+
+    /**
+     * Init property form
+     * @return object ilPropertyFormGUI
+     */
+    public function initForm($a_mode, $cname_id = 0)
     {
         global $ilCtrl;
 
@@ -195,11 +223,37 @@ class ilCustomNameGUI
         $form_gui = new ilPropertyFormGUI();
         $form_gui->setFormAction($ilCtrl->getFormAction($this));
         $form_gui->setTitle('THE TITLE');
+
         $text_prop = new ilTextInputGUI("Put your Custom Name:", "name");
         $text_prop->setInfo("This is my advice");
+
+        if($a_mode == "create")
+        {
+            $form_gui->addCommandButton('save','Save');
+
+        }
+        else if ($a_mode == "edit")
+        {
+            if($cname_id)
+            {
+                require_once ("./Services/CustomName/classes/class.ilCustomName.php");
+                $cname = new ilCustomName($cname_id);
+                $text_prop->setValue($cname->getName());
+
+                /**
+                 * better way??
+                 */
+                $hidden_prop = new ilHiddenInputGUI("cname_id");
+                $hidden_prop->setValue($cname_id);
+                $form_gui->addItem($hidden_prop);
+
+            }
+
+            $form_gui->addCommandButton('update','Update');
+        }
+
         $form_gui->addItem($text_prop);
 
-        $form_gui->addCommandButton('save','Save');
         $form_gui->addCommandButton('view','Cancel');
 
         return $form_gui;
@@ -214,7 +268,8 @@ class ilCustomNameGUI
 
         include_once('./Services/CustomName/classes/class.ilCustomName.php');
 
-        $form_gui = $this->initForm();
+        $form_gui = $this->initForm("create");
+
         if ($form_gui->checkInput())
         {
             $obj = new ilCustomName();
@@ -230,6 +285,41 @@ class ilCustomNameGUI
 
             ilUtil::sendFailure("Error creating the name.", true);
             $ilCtrl->redirect($this, 'createForm');
+        }
+    }
+
+    /**
+     * FORM: update
+     */
+    protected function update()
+    {
+        global $ilCtrl;
+
+        include_once("./Services/Form/classes/class.ilPropertyFormGUI.php");
+
+        $form_gui = new ilPropertyFormGUI();
+
+        if ($form_gui->checkInput())
+        {
+            require_once ("./Services/CustomName/classes/class.ilCustomName.php");
+
+            $cname_id = (int)$form_gui->getInput("cname_id");
+
+            $cname = new ilCustomName($cname_id);
+
+            $cname->setName($form_gui->getInput("name"));
+
+            if($cname->update())
+            {
+                ilUtil::sendSuccess("Name updated.", true);
+            }
+            else
+            {
+                ilUtil::sendFailure("Error, could not change the custom name", true);
+            }
+
+            $ilCtrl->redirect($this, 'viewTableList');
+
         }
     }
 

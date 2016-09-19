@@ -1,4 +1,15 @@
 <?php
+
+/**
+ * Custom Name TableGUI class
+ *
+ * @author Jesús López Reyes <lopez@leifos.com>
+ *
+ * after making these changes you need to reload the ctrl structure
+ * @ilCtrl_Calls iCustomNameTableGUI: ilCustomNameGUI
+ * @version $Id$
+ */
+
 include_once("Services/Table/classes/class.ilTable2GUI.php");
 
 class ilCustomNameTableGUI extends ilTable2GUI
@@ -17,9 +28,6 @@ class ilCustomNameTableGUI extends ilTable2GUI
         $this->setTitle("LIST OF CUSTOM NAMES");
         $this->setEnableHeader(true);
 
-        /**
-         *  CONTINUE HERE
-         */
         $this->addColumn("", "", "5%", "", true, "");
 
         $this->addColumn("Id", "", "5%");
@@ -71,7 +79,9 @@ class ilCustomNameTableGUI extends ilTable2GUI
         $actions-> setListTitle($lng->txt("actions"));
 
         $ilCtrl->setParameter($this->getParentObject(), "myid", $a_set["id"]);
-        $link = $ilCtrl->getLinkTarget($this->getParentObject(), "editCustomName");
+        $link = $ilCtrl->getLinkTarget($this->getParentObject(), "editForm");
+
+        //$link = $ilCtrl->getLinkTargetByClass(array("ilcustomnamegui"), "editCustomName");
         $actions->addItem($lng->txt("edit"), "", $link);
 
         $this->tpl->setVariable("ACTIONS", $actions->getHTML());

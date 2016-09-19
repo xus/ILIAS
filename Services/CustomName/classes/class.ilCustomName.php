@@ -2,14 +2,14 @@
 
 class ilCustomName {
 
-    private $id = 0;
+    protected $id = 0;
     protected $name = "";
 
     function __construct($id = 0)
     {
         if($id)
         {
-            $this->setId($id);
+            $this->setCustomName($id);
         }
     }
 
@@ -86,6 +86,30 @@ class ilCustomName {
     }
 
     /**
+     * Edit customName
+     *
+     * @return bool
+     */
+     public function update()
+     {
+         global $ilDB;
+
+         if($this->getId())
+         {
+             $sql = "UPDATE srv_cname_data SET".
+                 " name = ". $ilDB->quote($this->getName(), 'text') .
+                 " WHERE id = ". $ilDB->quote($this->getId(), 'integer');
+             if($ilDB->manipulate($sql))
+             {
+                 return true;
+             }
+         }
+
+         return false;
+
+     }
+
+    /**
      * Get some data for the current user
      * @return array
      */
@@ -122,6 +146,29 @@ class ilCustomName {
             $res[] = $row;
         }
         return $res;
+
+    }
+
+    /**
+     * Set full customName object
+     * @param integer $cname_id
+     */
+    protected function setCustomName($cname_id)
+    {
+
+        global $ilDB;
+
+        $sql = "SELECT id,name FROM srv_cname_data ".
+            " WHERE id = ". $ilDB->quote($cname_id, "integer");
+
+        $set = $ilDB->query($sql);
+
+        if($ilDB->numRows($set))
+        {
+            $row = $ilDB->fetchAssoc($set);
+            $this->setId($row['id']);
+            $this->setName($row['name']);
+        }
 
     }
 
