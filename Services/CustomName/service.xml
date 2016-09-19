@@ -3,4 +3,9 @@
     <baseclasses>
         <baseclass name="ilCustomNameGUI" dir="classes" />
     </baseclasses>
+    <events>
+        <event type="listen" id="Services/CustomName" />
+        <event type="raise" id="creation" />
+    </events>
+    <logging />
 </service>

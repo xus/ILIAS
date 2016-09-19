@@ -66,6 +66,17 @@ class ilCustomName {
             ") ";
         $ilDB->manipulate($query);
 
+
+        /**
+         * TESTING EVENTS ... raise event to create one notification ( contact request from root user )
+         */
+        global $ilAppEventHandler;
+        $ilAppEventHandler->raise("Services/CustomName", "creation", array("id" => $this->getId()));
+
+        include_once("./Services/CustomName/classes/class.ilCustomNameAppEventListener.php");
+        ilCustomNameAppEventListener::handleEvent("Services/CustomName","creation", array("id" => $this->getId()));
+
+
         return true;
     }
 
