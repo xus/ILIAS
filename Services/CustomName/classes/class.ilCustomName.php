@@ -55,7 +55,7 @@ class ilCustomName {
      */
     public function save()
     {
-        global $ilDB;
+        global $ilDB, $ilUser;
 
         //error control here!
         $this->setId($ilDB->nextId('srv_cname_data'));
@@ -66,15 +66,26 @@ class ilCustomName {
             ") ";
         $ilDB->manipulate($query);
 
+        if(true)
+        {
+            /**
+             * TESTING EVENTS ... raise event to create one notification ( contact request from root user )
+             */
+            global $ilAppEventHandler;
+            $ilAppEventHandler->raise("Services/CustomName", "creation", array("id" => $this->getId()));
 
-        /**
-         * TESTING EVENTS ... raise event to create one notification ( contact request from root user )
-         */
-        global $ilAppEventHandler;
-        $ilAppEventHandler->raise("Services/CustomName", "creation", array("id" => $this->getId()));
+            //include_once("./Services/CustomName/classes/class.ilCustomNameAppEventListener.php");
+            //ilCustomNameAppEventListener::handleEvent("Services/CustomName","creation", array("id" => $this->getId()));
 
-        include_once("./Services/CustomName/classes/class.ilCustomNameAppEventListener.php");
-        ilCustomNameAppEventListener::handleEvent("Services/CustomName","creation", array("id" => $this->getId()));
+            /**
+             * TESTING  EMAILS ( If we have the "redirect to email" activated in the user settings, we will have 2 equal emails.
+             */
+            include_once "./Services/Notification/classes/class.ilSystemNotification.php";
+            $ntf = new ilSystemNotification();
+            $id = $ilUser->$this->getId();
+            $array_sent = $ntf->sendMail(array($id));
+
+        }
 
 
         return true;
