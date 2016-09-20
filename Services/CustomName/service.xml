@@ -10,5 +10,8 @@
     <mailtemplates>
         <context id="ctx_custom_name_mail_template" class="ilCustomNameMailTemplateContext" />
     </mailtemplates>
+    <crons>
+        <cron id="cron_custom_name_reset" class="ilCustomNameCronReset" />
+    </crons>
     <logging />
 </service>

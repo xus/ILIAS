@@ -177,6 +177,22 @@ class ilCustomName {
     }
 
     /**
+     * Reset list of CustomNames
+     *
+     * @return int number of deleted files.
+     */
+    static function resetCustomNames()
+    {
+        global $ilDB;
+
+        //error control here!
+        $query = 'DELETE FROM srv_cname_data';
+        $affected_rows = $ilDB->manipulate($query);
+
+        return $affected_rows;
+    }
+
+    /**
      * Set full customName object
      * @param integer $cname_id
      */
