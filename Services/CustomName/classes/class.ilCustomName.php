@@ -66,27 +66,32 @@ class ilCustomName {
             ") ";
         $ilDB->manipulate($query);
 
-        if(true)
+        $test_events = true;
+        $test_emails = true;
+        if($test_events)
         {
             /**
-             * TESTING EVENTS ... raise event to create one notification ( contact request from root user )
+             * TESTING EVENTS ... raise event to create one notification ( contact request from current user to himself. )
              */
             global $ilAppEventHandler;
             $ilAppEventHandler->raise("Services/CustomName", "creation", array("id" => $this->getId()));
-
-            //include_once("./Services/CustomName/classes/class.ilCustomNameAppEventListener.php");
-            //ilCustomNameAppEventListener::handleEvent("Services/CustomName","creation", array("id" => $this->getId()));
-
+        }
+        $test = true;
+        if($test_emails) {
             /**
-             * TESTING  EMAILS ( If we have the "redirect to email" activated in the user settings, we will have 2 equal emails.
+             * TESTING  EMAILS
              */
+
             include_once "./Services/Notification/classes/class.ilSystemNotification.php";
             $ntf = new ilSystemNotification();
-            $id = $ilUser->$this->getId();
-            $array_sent = $ntf->sendMail(array($id));
-
+            $ntf->setLangModules(array("customname"));
+            //after create this strings in the language file, we need to refresh languages in Administration->Languages.
+            $ntf->setSubjectLangId('customname_create_notification_subject');
+            $ntf->setIntroductionLangId('customname_create_notification_introduction');
+            $ntf->addAdditionalInfo('custom_name_creation', $this->getName());
+            $ntf->addAdditionalInfo('comment', "I can put here one comment about Custom Name creation.", true);
+            $users_notified = $ntf->sendMail(array($ilUser->getId()));
         }
-
 
         return true;
     }

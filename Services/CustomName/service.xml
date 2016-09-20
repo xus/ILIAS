@@ -7,5 +7,8 @@
         <event type="listen" id="Services/CustomName" />
         <event type="raise" id="creation" />
     </events>
+    <mailtemplates>
+        <context id="ctx_custom_name_mail_template" class="ilCustomNameMailTemplateContext" />
+    </mailtemplates>
     <logging />
 </service>

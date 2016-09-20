@@ -9,7 +9,8 @@ class ilCustomNameAppEventListener
             global $ilUser;
             require_once 'Services/Contact/BuddySystem/classes/class.ilBuddySystemNotification.php';
             $notification = new ilBuddySystemNotification($ilUser);
-            $notification->setRecipientIds(array($ilUser->getUserIdByEmail("lopez@leifos.com")));
+            // current user has a notification/email(it depends of the backend configuration) to add himself as a friend.
+            $notification->setRecipientIds(array($ilUser->getId()));
             $notification->send();
         }
     }

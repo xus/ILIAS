@@ -16214,3 +16214,6 @@ blog#:#blog_show_latest#:#Show latest postings/drafts
 assessment#:#ass_competence_respect_level_ordering#:#Please note that the competence thresholds have to be defined in an ascending order according to the available levels.
 registration#:#reg_mail_body_activation#:#to activate your account and confirm ownership of this email address, click the link below:
 form#:#err_invalid_input#:#An invalid value has been submited. Please check your input.
+customname#:#customname_create_notification_subject#:#A Custom Name has been created.
+customname#:#customname_create_notification_introduction#:#It works! A Custom Name has been created. This is the introduction text so... Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+customname#:#custom_name_creation#:#Name created
