@@ -15526,7 +15526,7 @@ rbac#:#logs_visible#:#Logging settings are visible
 rbac#:#logs_write#:#User can edit Logging settings
 logging#:#logs_settings#:#Logging Settings
 log#:#log_general_settings#:#Logging Settings
-log#:#log_components#:#Komponenten
+log#:#log_components#:#Components
 log#:#log_log_level#:#Log-Level
 log#:#log_level_debug#:#DEBUG
 log#:#log_level_info#:#INFO
@@ -15544,16 +15544,16 @@ log#:#log_browser_users#:#Usernames Using Console Log
 log#:#log_component_col_component#:#Component
 log#:#log_component_col_level#:#Log-Level
 log#:#log_component_btn_reset#:#Reset Settings
-forum#:#frm_search#:#Suche
+forum#:#frm_search#:#Search
 mail#:#mail_enable_crs_admin_notification#:#Notify Course Administrators
 mail#:#mail_enable_grp_admin_notification#:#Notify Group Administrators
 mail#:#mail_enable_crs_admin_notification_info#:#In new courses the setting 'Notification About New Members' will be activated by default. It is set in the 'Member'-tab of courses. Course administrators will receive an e-mail when a member joins the course or leaves it or if the minimally required number of participants is not met the course needs to take place.
 mail#:#mail_enable_grp_admin_notification_info#:#In new groups the setting 'Notification' will be activated by default. It is set in the 'Member'-tab of groups. Course administrators will receive an e-mail when a member joins the group or leaves it or if the minimally required number of participants is not met the group needs to take place.
 mail#:#mail_notification_membership_section#:#Membership
-prg#:#prg_new#:#New Study Programme
-prg#:#prg_add#:#Add Study Programme
-prg#:#prg_edit#:#Edit Study Programme
-prg#:#prg_type#:#Study Programme Type
+prg#:#prg_new#:#New Study Programm
+prg#:#prg_add#:#Add Study Programm
+prg#:#prg_edit#:#Edit Study Programm
+prg#:#prg_type#:#Study Programm Type
 prg#:#prg_view_tree#:#Tree View
 prg#:#prg_assessment#:#Study Programme Assessment
 prg#:#prg_points#:#Points
