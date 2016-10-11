@@ -719,10 +719,16 @@ class ilSurveyEvaluationGUI
 		
 		return $modal->getHTML();			
 	}
-	
+
+	/**
+	 * @param int $details
+	 */
 	function evaluation($details = 0)
 	{
 		global $rbacsystem, $ilToolbar, $tree, $DIC;
+
+		$ui_factory = $DIC->ui()->factory();
+		$ui_renderer = $DIC->ui()->renderer();
 
 		//$this->log->debug("(Forced to 1 in evaluationdetails function)details =".$details);
 
@@ -828,9 +834,13 @@ class ilSurveyEvaluationGUI
 			
 			if($details)
 			{
-				$dtmpl = new ilTemplate("tpl.il_svy_svy_results_details_nUI.html", true, true, "Modules/Survey");
 				//$dtmpl = new ilTemplate("tpl.il_svy_svy_results_details.html", true, true, "Modules/Survey");
-			}			
+				$dtmpl = new ilTemplate("tpl.il_svy_svy_results_details_nUI.html", true, true, "Modules/Survey");
+				$toc_tpl = new ilTemplate("tpl.svy_results_table_contents.html", true, true, "Modules/Survey");
+				$this->lng->loadLanguageModule("content");
+				$sub_header = $this->lng->txt('cont_toc');
+				$toc_tpl->setVariable("TITLE_TOC", $sub_header);
+			}
 			
 			$details_figure = $_POST["cp"]
 				? $_POST["cp"]
@@ -838,9 +848,6 @@ class ilSurveyEvaluationGUI
 			$details_view = $_POST["vw"]
 				? $_POST["vw"]
 				: "tc";
-
-			$this->log->debug("POST values from Figures Select or default 'ap' details_figure = ".$details_figure);
-			$this->log->debug("POST values from View Select or default 'tc' details_view = ".$details_view);
 
 			// parse answer data in evaluation results
 			include_once "./Modules/SurveyQuestionPool/classes/class.SurveyQuestion.php";						
@@ -855,8 +862,26 @@ class ilSurveyEvaluationGUI
 				    //test, using new renderDetailsNewUI
 					//$this->renderDetails($details_view, $details_figure, $dtmpl, $qdata, $q_eval, $q_res);
 					$this->renderDetailsNewUI($details_view, $details_figure, $dtmpl, $qdata, $q_eval, $q_res);
+					// TABLE OF CONTENTS
+					if($qdata["questionblock_id"] &&
+						$qdata["questionblock_id"] != $this->last_questionblock_id)
+					{
+						$qblock = ilObjSurvey::_getQuestionblock($a_qdata["questionblock_id"]);
+						if($qblock["show_blocktitle"])
+						{
+							$toc_tpl->setCurrentBlock("toc_bl");
+							$toc_tpl->setVariable("TOC_ITEM", $qdata["questionblock_title"]);
+							$toc_tpl->parseCurrentBlock();
+						}
+						$this->last_questionblock_id = $qdata["questionblock_id"];
+					}
+					$anchor_id = "svyrdq".$qdata["question_id"];
+					$toc_tpl->setCurrentBlock("toc_bl");
+					$toc_tpl->setVariable("TOC_ITEM", $qdata["title"]);
+					$toc_tpl->setVariable("TOC_ID", $anchor_id);
+					$toc_tpl->parseCurrentBlock();
 				}
-			}				
+			}
 		}		
 		
 		$this->tpl->setVariable('MODAL', $modal);	
@@ -868,6 +893,13 @@ class ilSurveyEvaluationGUI
 		}
 		else
 		{
+			$panel_toc = $ui_factory->panel()->standard("", $ui_factory->legacy($toc_tpl->get()));
+			$render_toc = $ui_renderer->render($panel_toc);
+
+			$dtmpl->setCurrentBlock("panel_toc");
+			$dtmpl->setVariable("PANEL_TOC", $render_toc);
+			$dtmpl->parseCurrentBlock();
+
 			$this->tpl->setVariable('DETAIL', $dtmpl->get());						
 		}
 		unset($dtmpl);
@@ -922,6 +954,9 @@ class ilSurveyEvaluationGUI
 	{
 		global $DIC;
 
+		$ui_factory = $DIC->ui()->factory();
+		$ui_renderer = $DIC->ui()->renderer();
+
 		$question_res = $a_results;
 		$matrix = false;
 		if(is_array($question_res))
@@ -930,33 +965,6 @@ class ilSurveyEvaluationGUI
 			$matrix = true;
 		}
 		$question = $question_res->getQuestion();
-
-		// toc (incl. question blocks)
-		// questionblock title handling
-		if($a_qdata["questionblock_id"] &&
-			$a_qdata["questionblock_id"] != $this->last_questionblock_id)
-		{
-			$qblock = ilObjSurvey::_getQuestionblock($a_qdata["questionblock_id"]);
-
-			if($qblock["show_blocktitle"])
-			{
-				$a_tpl->setCurrentBlock("toc_bl");
-				$a_tpl->setVariable("TOC_ITEM", $a_qdata["questionblock_title"]);
-				$a_tpl->parseCurrentBlock();
-			}
-
-			$this->last_questionblock_id = $a_qdata["questionblock_id"];
-		}
-
-		$anchor_id = "svyrdq".$a_qdata["question_id"];
-
-		$a_tpl->setCurrentBlock("toc_bl");
-		$a_tpl->setVariable("TOC_ITEM", $a_qdata["title"]);
-		$a_tpl->setVariable("TOC_ID", $anchor_id);
-		$a_tpl->parseCurrentBlock();
-
-		$this->lng->loadLanguageModule("content");
-		$a_tpl->setVariable("TOC_TITLE", $this->lng->txt("cont_toc"));
 
 		// question "overview"
 		$kv = array();
@@ -979,11 +987,6 @@ class ilSurveyEvaluationGUI
 				$kv["arithmetic_mean"] = $question_res->getMean();
 			}
 		}
-
-		// START WITH PANELS
-
-		$ui_factory = $DIC->ui()->factory();
-		$ui_renderer = $DIC->ui()->renderer();
 
 		$svy_type_title = SurveyQuestion::_getQuestionTypeName($question->getQuestionType());
 		$qst_title = $question->getTitle();
@@ -1127,6 +1130,8 @@ class ilSurveyEvaluationGUI
 			$panel_text_answers = $ui_factory->panel()->sub($sub_header, $ui_factory->legacy($text_answers_tpl->get()));
 			array_push($array_panels,$panel_text_answers);
 		}
+
+		$anchor_id = "svyrdq".$a_qdata["question_id"];
 
 		$block = $ui_factory->panel()->report($qst_title, $array_panels);
 
