@@ -1089,9 +1089,11 @@ class ilSurveyEvaluationGUI
 		{
 			$text_answers_tpl = new ilTemplate("tpl.svy_results_details_text_answers.html", true, true, "Modules/Survey");
 
+			$sub_header = "";
 			if(array_key_exists("", $texts))
 			{
-				$text_answers_tpl->setVariable("TEXT_HEADING", $this->lng->txt("given_answers"));
+				//$text_answers_tpl->setVariable("TEXT_HEADING", $this->lng->txt("given_answers"));
+				$sub_header = $this->lng->txt("given_answers");
 				foreach($texts[""] as $item)
 				{
 					$text_answers_tpl->setCurrentBlock("text_direct_item_bl");
@@ -1105,7 +1107,8 @@ class ilSurveyEvaluationGUI
 				$acc = new ilAccordionGUI();
 				$acc->setId("svyevaltxt".$question->getId());
 
-				$text_answers_tpl->setVariable("TEXT_HEADING", $this->lng->txt("freetext_answers"));
+				//$text_answers_tpl->setVariable("TEXT_HEADING", $this->lng->txt("freetext_answers"));
+				$sub_header = $this->lng->txt("freetext_answers");
 
 				foreach($texts as $var => $items)
 				{
@@ -1121,7 +1124,7 @@ class ilSurveyEvaluationGUI
 				$text_answers_tpl->setVariable("TEXT_ACC", $acc->getHTML());
 			}
 
-			$panel_text_answers = $ui_factory->panel()->sub("", $ui_factory->legacy($text_answers_tpl->get()));
+			$panel_text_answers = $ui_factory->panel()->sub($sub_header, $ui_factory->legacy($text_answers_tpl->get()));
 			array_push($array_panels,$panel_text_answers);
 		}
 
