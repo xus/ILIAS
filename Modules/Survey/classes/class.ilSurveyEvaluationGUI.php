@@ -999,7 +999,7 @@ class ilSurveyEvaluationGUI
             $card_table_tpl->parseCurrentBlock();
         }
 
-        $panel_qst_card = $ui_factory->panel()->sub($qst_title, $ui_factory->legacy($svy_text))
+        $panel_qst_card = $ui_factory->panel()->embedded($qst_title, $ui_factory->legacy($svy_text))
             ->withCard($ui_factory->card($svy_type_title)->withSections(array($ui_factory->legacy($card_table_tpl->get()))));
 
         $array_panels = array ($panel_qst_card);
@@ -1120,10 +1120,13 @@ class ilSurveyEvaluationGUI
                 }
                 $chart_tpl->setVariable("CHART", $chart);
 
-                $panel_chart = $ui_factory->panel()->sub("", $ui_factory->legacy($chart_tpl->get()));
+                $panel_chart = $ui_factory->panel()->embedded("", $ui_factory->legacy($chart_tpl->get()));
                 array_push($array_panels,$panel_chart);
             }
         }
+
+        //$panel_embedded = $ui_factory->panel()->embedded("Title for embedded panel.", $ui_factory->legacy("this is the content I want to show in Embedded panel."));
+        //array_push($array_panels,$panel_embedded);
 
         $block = $ui_factory->panel()->report($qst_title, $array_panels);
 

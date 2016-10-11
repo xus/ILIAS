@@ -16,8 +16,11 @@ class Renderer extends AbstractComponentRenderer {
 	/**
 	 * @inheritdocs
 	 */
+
 	public function render(Component\Component $component, RendererInterface $default_renderer) {
-		/**
+
+	    \ilLoggerFactory::getLogger("svy")->debug("dentro del render");
+	    /**
 		 * @var Component\Panel\Panel $component
 		 */
 		$this->checkComponent($component);
@@ -32,7 +35,12 @@ class Renderer extends AbstractComponentRenderer {
 			 * @var Component\Panel\Sub $component
 			 */
 			return $this->renderSub($component, $default_renderer);
-		}
+		} else if($component instanceof Component\Panel\Embedded) {
+            /**
+             * @var Component\Panel\Embedded $component
+             */
+            return $this->renderEmbedded($component, $default_renderer);
+        }
 		/**
 		 * @var Component\Panel\Report $component
 		 */
@@ -89,6 +97,32 @@ class Renderer extends AbstractComponentRenderer {
 
 		return $tpl->get();
 	}
+
+    /**
+     * @param Component\Panel\Embedded $component
+     * @param RendererInterface $default_renderer
+     * @return string
+     */
+    protected function renderEmbedded(Component\Panel\Embedded $component, RendererInterface $default_renderer)
+    {
+        \ilLoggerFactory::getLogger("svy")->debug("render embedded");
+        $tpl = $this->getTemplate("tpl.embedded.html", true, true);
+
+        $tpl->setVariable("TITLE",  $component->getTitle());
+
+        if($component->getCard()){
+            $tpl->setCurrentBlock("with_card");
+            $tpl->setVariable("BODY",  $this->getContentAsString($component,$default_renderer));
+            $tpl->setVariable("CARD",  $default_renderer->render($component->getCard()));
+            $tpl->parseCurrentBlock();
+        }else{
+            $tpl->setCurrentBlock("no_card");
+            $tpl->setVariable("BODY",  $this->getContentAsString($component,$default_renderer));
+            $tpl->parseCurrentBlock();
+        }
+
+        return $tpl->get();
+    }
 
 	/**
 	 * @param Component\Panel\Report $component

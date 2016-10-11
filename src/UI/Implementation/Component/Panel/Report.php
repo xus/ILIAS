@@ -19,7 +19,9 @@ class Report extends Panel implements C\Panel\Report {
 	 * @param C\Panel\Sub[] | C\Panel\Sub $content
 	 */
 	public function __construct($title,$content) {
-		$types = [C\Panel\Sub::class];
+	    \ilLoggerFactory::getLogger("svy")->debug("contruct Report panel");
+		$types = [C\Panel\Sub::class, C\Panel\Embedded::class];
+        \ilLoggerFactory::getLogger("svy")->debug("types", $types);
 		$content = $this->toArray($content);
 		$this->checkArgListElements("content", $content, $types);
 

@@ -50,7 +50,7 @@ interface Factory {
 	 *
 	 * rules:
 	 *   usage:
-	 *      1: Sub Panels MUST only be inside Standard Panels
+	 *      1: Sub Panels MUST only be inside Standard Panels  (Is this correct? because only Report panels has sub panels as a parameter.)
 	 *   composition:
 	 *      1: Sub Panels MUST NOT contain Sub Panels or Standard Panels as content.
 	 * ---
@@ -92,4 +92,27 @@ interface Factory {
 	 * @return \ILIAS\UI\Component\Panel\Report
 	 */
 	public function report($title,$sub_panels);
+
+    /**
+     * ---
+     * description:
+     *   purpose: >
+     *       Embedded Panels are used to structure the content of panels without extra styles such paddings or backgrounds.
+     *   composition: >
+     *       Embedded Panels consist of a title and a content section.
+     *   rivals:
+     *      Standard Panel: >
+     *        The Standard Panel might contain a Embedded Panel.
+     *
+     * rules:
+     *   usage:
+     *      1: Embedded Panels should be inside Standard Panels
+     *   composition:
+     *      1: Embedded Panels MUST NOT contain Sub Panels or Standard Panels as content.
+     * ---
+     * @param string $title
+     * @param Component[]|Component
+     * @return \ILIAS\UI\Component\Panel\Embedded
+     */
+    public function embedded($title,$content);
 }
