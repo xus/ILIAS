@@ -839,8 +839,8 @@ class ilSurveyEvaluationGUI
 				? $_POST["vw"]
 				: "tc";
 
-            $this->log->debug("POST values from Figures Select or default 'ap' details_figure = ".$details_figure);
-            $this->log->debug("POST values from View Select or default 'tc' details_view = ".$details_view);
+			$this->log->debug("POST values from Figures Select or default 'ap' details_figure = ".$details_figure);
+			$this->log->debug("POST values from View Select or default 'tc' details_view = ".$details_view);
 
 			// parse answer data in evaluation results
 			include_once "./Modules/SurveyQuestionPool/classes/class.SurveyQuestion.php";						
