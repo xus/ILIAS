@@ -866,7 +866,7 @@ class ilSurveyEvaluationGUI
 					if($qdata["questionblock_id"] &&
 						$qdata["questionblock_id"] != $this->last_questionblock_id)
 					{
-						$qblock = ilObjSurvey::_getQuestionblock($a_qdata["questionblock_id"]);
+						$qblock = ilObjSurvey::_getQuestionblock($qdata["questionblock_id"]);
 						if($qblock["show_blocktitle"])
 						{
 							$toc_tpl->setCurrentBlock("toc_bl");
