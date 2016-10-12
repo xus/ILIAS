@@ -1046,48 +1046,6 @@ class ilSurveyEvaluationGUI
             }
         }
 
-        // text answers
-        $texts = $a_eval->getTextAnswers($a_results);
-        if($texts)
-        {
-            $text_answers_tpl = new ilTemplate("tpl.svy_results_details_text_answers.html", true, true, "Modules/Survey");
-
-            if(array_key_exists("", $texts))
-            {
-                $text_answers_tpl->setVariable("TEXT_HEADING", $this->lng->txt("given_answers"));
-                foreach($texts[""] as $item)
-                {
-                    $text_answers_tpl->setCurrentBlock("text_direct_item_bl");
-                    $text_answers_tpl->setVariable("TEXT_DIRECT", nl2br($item));
-                    $text_answers_tpl->parseCurrentBlock();
-                }
-            }
-            else
-            {
-                include_once "Services/Accordion/classes/class.ilAccordionGUI.php";
-                $acc = new ilAccordionGUI();
-                $acc->setId("svyevaltxt".$question->getId());
-
-                $text_answers_tpl->setVariable("TEXT_HEADING", $this->lng->txt("freetext_answers"));
-
-                foreach($texts as $var => $items)
-                {
-                    $list = array("<ul class=\"small\">");
-                    foreach($items as $item)
-                    {
-                        $list[] = "<li>".nl2br($item)."</li>";
-                    }
-                    $list[] = "</ul>";
-                    $acc->addItem($var, implode("\n", $list));
-                }
-
-                $text_answers_tpl->setVariable("TEXT_ACC", $acc->getHTML());
-            }
-
-            $panel_text_answers = $ui_factory->panel()->sub("", $ui_factory->legacy($text_answers_tpl->get()));
-            array_push($array_panels,$panel_text_answers);
-        }
-
         // chart
         if($a_details_parts == "c" ||
             $a_details_parts == "tc")
@@ -1125,10 +1083,55 @@ class ilSurveyEvaluationGUI
             }
         }
 
-        //$panel_embedded = $ui_factory->panel()->embedded("Title for embedded panel.", $ui_factory->legacy("this is the content I want to show in Embedded panel."));
-        //array_push($array_panels,$panel_embedded);
+		// text answers
+		$texts = $a_eval->getTextAnswers($a_results);
 
-        $block = $ui_factory->panel()->report($qst_title, $array_panels);
+		$sub_header = "";
+		if($texts)
+		{
+			$text_answers_tpl = new ilTemplate("tpl.svy_results_details_text_answers.html", true, true, "Modules/Survey");
+
+			if(array_key_exists("", $texts))
+			{
+				//$text_answers_tpl->setVariable("TEXT_HEADING", $this->lng->txt("given_answers"));
+				$sub_header = $this->lng->txt("given_answers");
+				foreach($texts[""] as $item)
+				{
+					$text_answers_tpl->setCurrentBlock("text_direct_item_bl");
+					$text_answers_tpl->setVariable("TEXT_DIRECT", nl2br($item));
+					$text_answers_tpl->parseCurrentBlock();
+				}
+			}
+			else
+			{
+				include_once "Services/Accordion/classes/class.ilAccordionGUI.php";
+				$acc = new ilAccordionGUI();
+				$acc->setId("svyevaltxt".$question->getId());
+
+				//$text_answers_tpl->setVariable("TEXT_HEADING", $this->lng->txt("freetext_answers"));
+				$sub_header = $this->lng->txt("freetext_answers");
+
+				foreach($texts as $var => $items)
+				{
+					$list = array("<ul class=\"small\">");
+					foreach($items as $item)
+					{
+						$list[] = "<li>".nl2br($item)."</li>";
+					}
+					$list[] = "</ul>";
+					$acc->addItem($var, implode("\n", $list));
+				}
+
+				$text_answers_tpl->setVariable("TEXT_ACC", $acc->getHTML());
+			}
+
+			//$panel_text_answers = $ui_factory->panel()->sub("", $ui_factory->legacy($text_answers_tpl->get()));
+			$panel_text_answers = $ui_factory->panel()->sub($sub_header, $ui_factory->legacy($text_answers_tpl->get()));
+
+			array_push($array_panels,$panel_text_answers);
+		}
+
+        $block = $ui_factory->panel()->report("", $array_panels);
 
         $panels = $ui_renderer->render($block);
 
