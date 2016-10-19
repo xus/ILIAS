@@ -830,6 +830,10 @@ class ilSurveyEvaluationGUI
 			{
 				$dtmpl = new ilTemplate("tpl.il_svy_svy_results_details_nUI.html", true, true, "Modules/Survey");
                 //$dtmpl = new ilTemplate("tpl.il_svy_svy_results_details.html", true, true, "Modules/Survey");
+
+				$dtmpl->setCurrentBlock("report_title");
+				$dtmpl->setVariable("REPORT_TITLE", "SURVEY QUESTIONS");
+				$dtmpl->parseCurrentBlock();
 			}			
 			
 			$details_figure = $_POST["cp"]
