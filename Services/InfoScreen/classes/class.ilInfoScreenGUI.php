@@ -33,6 +33,7 @@ class ilInfoScreenGUI
 	*/
 	var $form_action;
 
+	var $log;
 	/**
 	* Constructor
 	*
@@ -56,6 +57,9 @@ class ilInfoScreenGUI
 		$this->form_action = "";
 		$this->top_formbuttons = array();
 		$this->hiddenelements = array();
+		$this->log = ilLoggerFactory::getRootLogger();
+		$this->log->debug("service ILINFOSCREEN construct");
+
 	}
 
 	/**
@@ -69,6 +73,9 @@ class ilInfoScreenGUI
 		$this->lng->loadLanguageModule("barometer");
 
 		$next_class = $this->ctrl->getNextClass($this);
+
+		$this->log->debug("INFOSCREENGUI execCommand next_class = $next_class");
+
 
 		$cmd = $this->ctrl->getCmd("showSummary");
 		$this->ctrl->setReturn($this, "showSummary");
@@ -310,6 +317,8 @@ class ilInfoScreenGUI
 	{
 		global $lng;
 
+		$this->log->debug("ADD META DATA SECTIONS");
+
 		$lng->loadLanguageModule("meta");
 
 		include_once("./Services/MetaData/classes/class.ilMD.php");
@@ -317,6 +326,7 @@ class ilInfoScreenGUI
 
 		if ($md_gen = $md->getGeneral())
 		{
+			$this->log->debug("if md->getGeneral");
 			// get first descrption
 			// The description is shown on the top of the page.
 			// Thus it is not necessary to show it again.
@@ -347,6 +357,9 @@ class ilInfoScreenGUI
 				$keywords[] = $md_key->getKeyword();
 			}
 			$keywords = implode($keywords, ", ");
+		}
+		else{
+			$this->log->debug("ELSE getGeneral doesn't exists");
 		}
 
 		// authors
@@ -398,6 +411,8 @@ class ilInfoScreenGUI
 		{
 			$this->addSection($lng->txt("description"));
 			$this->addProperty("",  nl2br($description));
+
+			$this->log->debug("Description = ". nl2br($description));
 		}
 
 		// general section
@@ -627,6 +642,8 @@ class ilInfoScreenGUI
 	{
 		global $tpl, $ilAccess;
 
+		$this->log->debug("ILINFOSCREENGUI show summary --");
+
 		$tpl->setContent($this->getCenterColumnHTML());
 		$tpl->setRightContent($this->getRightColumnHTML());
 	}
@@ -645,11 +662,15 @@ class ilInfoScreenGUI
 
 		if (!$ilCtrl->isAsynch())
 		{
+			$this->log->debug("!isAsynch");
+
 			if ($column_gui->getScreenMode() != IL_SCREEN_SIDE)
 			{
+				$this->log->debug("!=IL_SCREEN_SIDE");
 				// right column wants center
 				if ($column_gui->getCmdSide() == IL_COL_RIGHT)
 				{
+					$this->log->debug("column_gui = IL_COL_RIGHT");
 					$column_gui = new ilColumnGUI("info", IL_COL_RIGHT);
 					$this->setColumnSettings($column_gui);
 					$html = $ilCtrl->forwardCommand($column_gui);
@@ -657,6 +678,7 @@ class ilInfoScreenGUI
 				// left column wants center
 				if ($column_gui->getCmdSide() == IL_COL_LEFT)
 				{
+					$this->log->debug("column_gui = IL_COL_LEFT");
 					$column_gui = new ilColumnGUI("info", IL_COL_LEFT);
 					$this->setColumnSettings($column_gui);
 					$html = $ilCtrl->forwardCommand($column_gui);
@@ -664,6 +686,7 @@ class ilInfoScreenGUI
 			}
 			else
 			{
+				$this->log->debug("column_gui == IL_SCREEN_SIDE");
 				$html = $this->getHTML();
 			}
 		}
@@ -686,6 +709,7 @@ class ilInfoScreenGUI
 			$column_gui->getCmdSide() == IL_COL_RIGHT &&
 			$column_gui->getScreenMode() == IL_SCREEN_SIDE)
 		{
+			$this->log->debug("getRightColumnHTML forwardCommand");
 			$html = $ilCtrl->forwardCommand($column_gui);
 		}
 		else
@@ -694,6 +718,7 @@ class ilInfoScreenGUI
 			{
 				if ($this->news_enabled)
 				{
+					$this->log->debug("getRightColumnHTML getHTML");
 					$html = $ilCtrl->getHTML($column_gui);
 				}
 			}
@@ -730,7 +755,9 @@ class ilInfoScreenGUI
 	function getHTML()
 	{
 		global $lng, $ilSetting, $tree, $ilAccess, $ilCtrl, $ilUser;
-		
+
+		$this->log->debug("InfoScreenGUI getHTML");
+
 		$tpl = new ilTemplate("tpl.infoscreen.html" ,true, true, "Services/InfoScreen");
 
 		// other class handles form action (@todo: this is not implemented/tested)
@@ -849,6 +876,7 @@ class ilInfoScreenGUI
 			$this->addObjectSections();
 		}
 
+		//$this->log->debug("SECTIONS = ",$this->section);
         // render all sections
 		for($i = 1; $i <= $this->sec_nr; $i++)
 		{
@@ -859,6 +887,9 @@ class ilInfoScreenGUI
 				{
 					if ($property["name"] != "")
 					{
+
+						$this->log->debug("getHTML foreach. property['name] = ".$property['name']);
+
 						if ($property["link"] == "")
 						{
 							$tpl->setCurrentBlock("pv");
@@ -878,6 +909,7 @@ class ilInfoScreenGUI
 					}
 					else
 					{
+						$this->log->debug("getHTML foreach. NO property['name']");
 						$tpl->setCurrentBlock("property_full_row");
 						$tpl->setVariable("TXT_PROPERTY_FULL_VALUE", $property["value"]);
 						$tpl->parseCurrentBlock();

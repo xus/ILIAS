@@ -63,10 +63,17 @@ class ilADTFactory
 	 */
 	public function initTypeClass($a_type, $a_class = null)
 	{
+
+		$GLOBALS['ilLog']->write("** ilADTFactory initTypeClass");
+
 		if($this->isValidType($a_type))
 		{
 			$class = "ilADT".$a_type.$a_class;
+
 			$file = "Services/ADT/classes/Types/".$a_type."/class.".$class.".php";
+
+			$GLOBALS['ilLog']->write("** ilADTFactory class to create = ".$file);
+
 			if(file_exists($file))
 			{
 				require_once $file;
@@ -137,7 +144,8 @@ class ilADTFactory
 	 */
 	public function getDBBridgeForInstance(ilADT $a_adt)
 	{
-		$class = $this->initTypeClass($a_adt->getType(), "DBBridge");		
+		$class = $this->initTypeClass($a_adt->getType(), "DBBridge");
+		$GLOBALS['ilLog']->write("ilADTFactory class to create".$class);
 		return new $class($a_adt);	
 	}
 	

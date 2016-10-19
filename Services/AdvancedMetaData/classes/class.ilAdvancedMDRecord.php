@@ -24,6 +24,7 @@ class ilAdvancedMDRecord
 	protected $obj_types = array();
 	protected $db = null;
 	protected $parent_obj; // [int]
+	protected $log;
 	
 	/**
 	 * Singleton constructor
@@ -37,12 +38,15 @@ class ilAdvancedMDRecord
 	public function __construct($a_record_id = 0)
 	{
 	 	global $ilDB;
+
+		$this->log = ilLoggerFactory::getRootLogger();
 	 	
 	 	$this->record_id = $a_record_id;
 	 	$this->db = $ilDB;
-	 	
+
 	 	if($this->getRecordId())
 	 	{
+			$this->log->debug("ilAdvancedMDRecord construct BEFORE READ record_id = ".$this->getRecordId());
 	 		$this->read();
 	 	}
 	}
@@ -425,6 +429,8 @@ class ilAdvancedMDRecord
 	public function save()
 	{
 	 	global $ilDB;
+
+		$this->log->debug("* SAVING THE NEW DATA SET in adv_md_record:");
 	 	
 	 	// Save import id if given
 	 	$next_id = $ilDB->nextId('adv_md_record');
@@ -438,6 +444,9 @@ class ilAdvancedMDRecord
 	 		$this->db->quote($this->getDescription() ,'text').", ".
 	 		$this->db->quote($this->getParentObject() ,'integer')." ".
 	 		")";
+
+		$this->log->debug($query);
+
 		$res = $ilDB->manipulate($query);
 	 	$this->record_id = $next_id;
 
@@ -462,6 +471,8 @@ class ilAdvancedMDRecord
 	 			$this->db->quote($type["optional"] ,'integer')." ".
 	 			")";
 			$res = $ilDB->manipulate($query);
+
+			$this->log->debug($query);
 	 	}
 	}
 	

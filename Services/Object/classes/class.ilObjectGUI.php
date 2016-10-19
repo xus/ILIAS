@@ -101,6 +101,7 @@ class ilObjectGUI
 	function __construct($a_data, $a_id = 0, $a_call_by_reference = true, $a_prepare_output = true)
 	{
 		global $ilias, $objDefinition, $tpl, $tree, $ilCtrl, $ilErr, $lng, $ilTabs;
+		ilLoggerFactory::getRootLogger("**** ilObjectGUI construct");
 
 		/**
 		 * @var ilTab

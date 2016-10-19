@@ -23,6 +23,8 @@ class ilAdvancedMDSettingsGUI
 	protected $obj_id; // [int]
 	protected $obj_type; // [string]
 	protected $sub_type; // [string]
+
+	protected $log;
 	
 	/**
 	 * Constructor
@@ -39,7 +41,8 @@ class ilAdvancedMDSettingsGUI
 	 	$this->lng->loadLanguageModule('meta');
 	 	$this->tpl = $tpl;
 	 	$this->tabs_gui = $ilTabs;
-		
+		$this->log = ilLoggerFactory::getRootLogger();
+
 		$this->obj_id = $a_obj_id;
 		$this->obj_type = $a_obj_type;
 		$this->sub_type = $a_sub_type 
@@ -49,9 +52,12 @@ class ilAdvancedMDSettingsGUI
 		if($this->obj_id &&
 			!$this->obj_type)
 		{
+			$this->log->debug("Advanced metadata -> obj_id=".$this->obj_id);
 			$this->obj_type = ilObject::_lookupType($this->obj_id);
 		}
-		
+		else { $this->log->debug("Advanced metadata ->  ELSE no obj_id"); }
+
+
 		$this->permissions = ilAdvancedMDPermissionHelper::getInstance();
 	}
 	
@@ -71,9 +77,11 @@ class ilAdvancedMDSettingsGUI
 	{
 		$next_class = $this->ctrl->getNextClass($this);
 		$cmd = $this->ctrl->getCmd();
-		
+
+		$this->log->debug("next_class=".$next_class." cmd=".$cmd);
 		if(!$this->obj_id)
 		{
+			$this->log->debug("execute command NO obj_id");
 			$this->setSubTabs();
 		}
 		
@@ -97,6 +105,7 @@ class ilAdvancedMDSettingsGUI
 	 */
 	public function showRecords()
 	{
+		$this->log->debug("SHOW RECORDS");
 		global $ilToolbar, $ilAccess;
 		
 		$perm = $this->getPermissions()->hasPermissions(
@@ -105,7 +114,9 @@ class ilAdvancedMDSettingsGUI
 			array(
 				ilAdvancedMDPermissionHelper::ACTION_MD_CREATE_RECORD
 				,ilAdvancedMDPermissionHelper::ACTION_MD_IMPORT_RECORDS
-		));				
+		));
+
+		$this->log->debug("permissions array =",$perm);
 		
 		if($perm[ilAdvancedMDPermissionHelper::ACTION_MD_CREATE_RECORD])
 		{		
@@ -114,10 +125,13 @@ class ilAdvancedMDSettingsGUI
 			$button->setCaption("add");
 			$button->setUrl($this->ctrl->getLinkTarget($this, "createRecord"));		
 			$ilToolbar->addButtonInstance($button);
-			
+
+			$this->log->debug("metadata context, permission to CREATE records");
+
 			if($perm[ilAdvancedMDPermissionHelper::ACTION_MD_IMPORT_RECORDS])
 			{
 				$ilToolbar->addSeparator();
+				$this->log->debug("metadata context, permission to CREATE AND IMPORT records");
 			}
 		}
 		
@@ -127,7 +141,7 @@ class ilAdvancedMDSettingsGUI
 			$button = ilLinkButton::getInstance();
 			$button->setCaption("import");
 			$button->setUrl($this->ctrl->getLinkTarget($this, "importRecords"));		
-			$ilToolbar->addButtonInstance($button);			
+			$ilToolbar->addButtonInstance($button);
 		}
 		
 		$this->tpl->addBlockFile('ADM_CONTENT','adm_content','tpl.show_records.html','Services/AdvancedMetaData');
@@ -135,8 +149,10 @@ class ilAdvancedMDSettingsGUI
 		include_once("./Services/AdvancedMetaData/classes/class.ilAdvancedMDRecordTableGUI.php");
 		$table_gui = new ilAdvancedMDRecordTableGUI($this, "showRecords", $this->getPermissions(), (bool)$this->obj_id);
 		$table_gui->setTitle($this->lng->txt("md_record_list_table"));
-		$table_gui->setData($this->getParsedRecordObjects());		
-		
+		$table_gui->setData($this->getParsedRecordObjects());
+
+		$this->log->debug("this->getParsedRecordObjects = ", $this->getParsedRecordObjects());
+
 		// permissions?		
 		//$table_gui->addCommandButton('createRecord',$this->lng->txt('add'));			
 		$table_gui->addMultiCommand("exportRecords",$this->lng->txt('export'));		
@@ -711,6 +727,8 @@ class ilAdvancedMDSettingsGUI
 		
 		$this->ctrl->saveParameter($this,'record_id');
 	 	$this->initRecordObject();
+
+		//$this->log->debug("EDIT FIELDS, ctrl=",(array)$this->ctrl);
 		
 		$perm = $this->getPermissions()->hasPermissions(
 			ilAdvancedMDPermissionHelper::CONTEXT_RECORD,
@@ -1084,9 +1102,10 @@ class ilAdvancedMDSettingsGUI
 	 */
 	public function createField(ilPropertyFormGUI $a_form = null)
 	{
-		
+		$this->log->debug("CREATE FIELD method");
 		if(!$_REQUEST["record_id"] || !$_REQUEST["ftype"])
 		{
+			$this->log->debug("no request[record_id] or no request[ftype]");
 			return $this->editFields();
 		}
 		
@@ -1094,7 +1113,10 @@ class ilAdvancedMDSettingsGUI
 	 	$this->ctrl->saveParameter($this,'ftype');
 
 		if(!$a_form)
-		{		
+		{
+			$this->log->debug("no a_form, lets init fieldform");
+			$this->log->debug("form type=".$_REQUEST["ftype"]);
+
 			include_once('Services/AdvancedMetaData/classes/class.ilAdvancedMDFieldDefinition.php');
 			$field_definition = ilAdvancedMDFieldDefinition::getInstance(null, $_REQUEST["ftype"]);		
 			$field_definition->setRecordId($_REQUEST["record_id"]);
@@ -1109,7 +1131,9 @@ class ilAdvancedMDSettingsGUI
 	 * @access public
 	 */
 	public function saveField()
-	{	 	
+	{
+		$this->log->debug("SAVE FIELD REQUEST[ftype]=".$_REQUEST["ftype"]);
+
 	 	if(!$_REQUEST["record_id"] || !$_REQUEST["ftype"])
 		{
 			return $this->editFields();
@@ -1125,13 +1149,15 @@ class ilAdvancedMDSettingsGUI
 		
 		if($form->checkInput())
 		{
+			$this->log->debug("saveField checkInput");
+
 			$field_definition->importDefinitionFormPostValues($form, $this->getPermissions());
 			$field_definition->save();
 			
 			ilUtil::sendSuccess($this->lng->txt('save_settings'), true);
 			$this->ctrl->redirect($this, "editFields");			
 		}
-		
+		$this->log->debug("Lets set values by post and createField");
 		$form->setValuesByPost();
 		$this->createField($form);		
 	}
@@ -1145,6 +1171,7 @@ class ilAdvancedMDSettingsGUI
 	{										
 		include_once("./Services/Form/classes/class.ilPropertyFormGUI.php");
 
+		$this->log->debug("INIT FIELD FORM");
 		$form = new ilPropertyFormGUI();
 		$form->setFormAction($this->ctrl->getFormAction($this));
 		
@@ -1248,12 +1275,15 @@ class ilAdvancedMDSettingsGUI
 				0 => $this->lng->txt("meta_obj_type_inactive"),
 				1 => $this->lng->txt("meta_obj_type_mandatory"),
 				2 => $this->lng->txt("meta_obj_type_optional")
-			);		
-			
+			);
 
+			$this->log->debug("-- Assignable objects type and subtypes --");
 			foreach(ilAdvancedMDRecord::_getAssignableObjectTypes(true) as $type)
 			{
 				$t = $type["obj_type"].":".$type["sub_type"];
+
+				$this->log->debug($t);
+
 				$this->lng->loadLanguageModule($type["obj_type"]);
 				
 				$type_options = $options;
@@ -1597,21 +1627,28 @@ class ilAdvancedMDSettingsGUI
 	 */
 	protected function initRecordObject()
 	{
+		$this->log->debug("INIT RECORD OBJECT");
+		$this->log->debug("record=".$this->record);
+
 		if(!is_object($this->record))
 		{
 			$record_id = isset($_GET['record_id']) 
 				? $_GET['record_id'] 
 				: 0; 
 			$this->record = ilAdvancedMDRecord::_getInstanceByRecordId($record_id);
+
+			$this->log->debug("GET record_id=".$record_id);
 			
 			// bind to parent object (aka local adv md)
 			if(!$record_id &&
 				$this->obj_id)
 			{
+				$this->log->debug("NO record_id, Bind to parent object this->obj_id=".$this->obj_id);
 				$this->record->setParentObject($this->obj_id);
 			}			
 		}				
-						
+
+		$this->log->debug("Before save, this->record is an ilAdvancedMDRecord instance");
 		return $this->record;
 	}
 

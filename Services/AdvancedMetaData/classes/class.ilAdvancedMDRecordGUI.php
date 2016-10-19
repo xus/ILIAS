@@ -35,6 +35,8 @@ class ilAdvancedMDRecordGUI
 	
 	protected $editor_form; // [array]
 
+	protected $log;
+
 	/**
 	 * Constructor
 	 *
@@ -53,6 +55,9 @@ class ilAdvancedMDRecordGUI
 	 	$this->obj_id = $a_obj_id;
 	 	$this->sub_type = $a_sub_type;
 	 	$this->sub_id = $a_sub_id;
+
+		$this->log = ilLoggerFactory::getRootLogger();
+		//$this->log->debug("ilAdvancedMDRecordGUI construct");
 	}
 	
 	/**
@@ -109,6 +114,7 @@ class ilAdvancedMDRecordGUI
 	 			return $this->parseSearch();
 	 		
 	 		case self::MODE_INFO:
+	 			$this->log->debug("RecordGUI PARSE METHOD SWITCH MODE INFO");
 	 			return $this->parseInfoPage();
 	 			
 	 		case self::MODE_REC_SELECTION:
@@ -365,14 +371,15 @@ class ilAdvancedMDRecordGUI
 		{					
 			// this correctly binds group and definitions
 			$a_values->read();
-			
 			$this->info->addSection(ilAdvancedMDRecord::_lookupTitle($record_id)); 
 		
 			$defs = $a_values->getDefinitions();									
 			foreach($a_values->getADTGroup()->getElements() as $element_id => $element)				
 			{								
 				if(!$element->isNull())
-				{									
+				{
+					$GLOBALS['ilLog']->write(__METHOD__.': PARSE INFO :'.$defs[$element_id]->getTitle());
+
 					$this->info->addProperty($defs[$element_id]->getTitle(),
 						ilADTFactory::getInstance()->getPresentationBridgeForInstance($element)->getHTML());					
 				}

@@ -292,9 +292,10 @@ class ilObjectMetaDataGUI
 		
 		if(!$a_form)
 		{
+			ilLoggerFactory::getRootLogger("ilObjectMetaDataGUI No a_form, initEditForm to create one.");
 			$a_form = $this->initEditForm();
 		}
-		
+		ilLoggerFactory::getRootLogger("ilObjectMetaDataGUI form get->HTML");
 		$tpl->setContent($a_form->getHTML());		
 	}
 	

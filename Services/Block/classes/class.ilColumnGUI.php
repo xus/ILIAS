@@ -162,6 +162,8 @@ class ilColumnGUI
 	protected $check_nr_limit =
 		array("pdfeed" => true);
 
+	protected $log;
+
 	/**
 	* Constructor
 	*
@@ -169,6 +171,8 @@ class ilColumnGUI
 	*/
 	public function __construct($a_col_type = "", $a_side = "", $use_std_context = false)
 	{
+		$this->log = ilLoggerFactory::getRootLogger();
+		$this->log->debug("IlColumnGUI construct");
 		$this->setColType($a_col_type);
 		$this->setSide($a_side);
 	}

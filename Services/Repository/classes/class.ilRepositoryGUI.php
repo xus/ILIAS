@@ -37,6 +37,7 @@ class ilRepositoryGUI
 	var $cmd;
 	var $mode;
 	var $ctrl;
+	var $log;
 
 	/**
 	* Constructor
@@ -52,6 +53,8 @@ class ilRepositoryGUI
 		$this->tree = $tree;
 		$this->rbacsystem = $rbacsystem;
 		$this->objDefinition = $objDefinition;
+		$this->log = ilLoggerFactory::getRootLogger();
+		//$this->log->debug("ILREPOSITORY construct");
 
 		$this->ctrl = $ilCtrl;
 		
@@ -65,22 +68,27 @@ class ilRepositoryGUI
 		if (!empty($_GET["ref_id"]) || $this->ctrl->getCmd() == "showTree")
 		{
 			$this->cur_ref_id = $_GET["ref_id"];
+			$this->log->debug("GET REF ID ".$this->cur_ref_id);
 		}
 		else
 		{
+			$this->log->debug("11");
 //echo "1-".$_SESSION["il_rep_ref_id"]."-";
 			if (!empty($_SESSION["il_rep_ref_id"]) && !empty($_GET["getlast"]))
 			{
+				$this->log->debug("111");
 				$this->cur_ref_id = $_SESSION["il_rep_ref_id"];
 //echo "2-".$this->cur_ref_id."-";
 			}
 			else
 			{
+				$this->log->debug("11111");
 				$this->cur_ref_id = $this->tree->getRootId();
 
 				if ($_GET["cmd"] != "" && $_GET["cmd"] != "frameset")
 				{
 //echo "hhh";
+					$this->log->debug("2");
 					$get_str = $post_str = "";
 					foreach($_GET as $key => $value)
 					{
@@ -93,6 +101,7 @@ class ilRepositoryGUI
 					$ilLog->write("Repository: command called without ref_id.".
 						"GET:".$get_str."-POST:".$post_str, $ilLog->WARNING);
 				}
+				$this->log->debug("22");
 				// #10033
 				$_GET = array("baseClass"=>"ilRepositoryGUI");
 				$_POST = array();
@@ -102,12 +111,14 @@ class ilRepositoryGUI
 //echo "<br>+".$_GET["ref_id"]."+";
 		if (!$tree->isInTree($this->cur_ref_id) && $this->ctrl->getCmd() != "showTree")
 		{
+			$this->log->debug("222");
 			$this->cur_ref_id = $this->tree->getRootId();
 
 			// check wether command has been called with
 			// item that is not in tree
 			if ($_GET["cmd"] != "" && $_GET["cmd"] != "frameset")
 			{
+				$this->log->debug("22222");
 				$get_str = $post_str = "";
 				foreach($_GET as $key => $value)
 				{
@@ -128,9 +139,11 @@ class ilRepositoryGUI
 		// set current repository view mode
 		if (!empty($_GET["set_mode"]))
 		{
+			$this->log->debug("3");
 			$_SESSION["il_rep_mode"] = $_GET["set_mode"];
 			if ($this->ilias->account->getId() != ANONYMOUS_USER_ID)
 			{
+				$this->log->debug("33");
 				$this->ilias->account->writePref("il_rep_mode", $_GET["set_mode"]);
 			}
 		}
@@ -138,6 +151,7 @@ class ilRepositoryGUI
 		// get user setting
 		if ($_SESSION["il_rep_mode"] == "")
 		{
+			$this->log->debug("333");
 			if ($this->ilias->account->getId() != ANONYMOUS_USER_ID)
 			{
 				$_SESSION["il_rep_mode"] = $this->ilias->account->getPref("il_rep_mode");
@@ -147,6 +161,7 @@ class ilRepositoryGUI
 		// if nothing set, get default view
 		if ($_SESSION["il_rep_mode"] == "")
 		{
+			$this->log->debug("33333");
 			$_SESSION["il_rep_mode"] = $this->ilias->getSetting("default_repository_view");
 		}
 
@@ -162,6 +177,7 @@ class ilRepositoryGUI
 			if ($type == "cat" || $type == "grp" || $type == "crs"
 				|| $type == "root")
 			{
+				$this->log->debug("Store current ref_id in session");
 				$_SESSION["il_rep_ref_id"] = $this->cur_ref_id;
 			}
 		}
@@ -178,6 +194,8 @@ class ilRepositoryGUI
 	{
 		global $rbacsystem, $ilias, $lng, $ilCtrl, $ilHelp;
 
+		$this->log->debug("REPOSITORYGUI exeCommand");
+
 		// check creation mode
 		// determined by "new_type" parameter
 		$new_type = ($_POST["new_type"] != "" && $ilCtrl->getCmd() == "create")
@@ -186,6 +204,7 @@ class ilRepositoryGUI
 
 		if ($new_type != "" && $new_type != "sty")
 		{
+			$this->log->debug("if 1");
 			$this->creation_mode = true;
 			$ilHelp->setScreenIdComponent($new_type);
 			$ilHelp->setDefaultScreenId(ilHelpGUI::ID_PART_SCREEN, "create");
@@ -195,11 +214,13 @@ class ilRepositoryGUI
 		$cmd = $this->ctrl->getCmd();
 		if (($cmd == "frameset" || $_GET["rep_frame"] == 1) && $_SESSION["il_rep_mode"] == "tree")
 		{
+			$this->log->debug("if 2");
 			$next_class = "";
 			$cmd = "frameset";
 		}
 		else if ($cmd == "frameset" && $_SESSION["il_rep_mode"] != "tree")
 		{
+			$this->log->debug("else if 1");
 			$this->ctrl->setCmd("");
 			$cmd = "";
 		}
@@ -207,6 +228,7 @@ class ilRepositoryGUI
 		// determine next class
 		if ($cmd != "frameset")
 		{
+			//$this->log->debug("if 3");
 			if ($this->creation_mode)
 			{
 				$obj_type = $new_type;
@@ -236,8 +258,10 @@ class ilRepositoryGUI
 			else if ((($next_class = $this->ctrl->getNextClass($this)) == "")
 				|| ($next_class == "ilrepositorygui" && $this->ctrl->getCmd() == "return"))
 			{
+				//$this->log->debug("else if 7");
 				if ($cmd != "frameset" && $cmd != "showTree")
 				{
+					//$this->log->debug("if 8");
 					// get GUI of current object
 					$obj_type = ilObject::_lookupType($this->cur_ref_id,true);
 					$class_name = $this->objDefinition->getClassName($obj_type);
@@ -246,6 +270,7 @@ class ilRepositoryGUI
 					$this->ctrl->setCmdClass($next_class);
 					if ($this->ctrl->getCmd() == "return")
 					{
+						$this->log->debug("if 9");
 						$this->ctrl->setCmd("");
 					}
 				}
@@ -266,18 +291,25 @@ class ilRepositoryGUI
 				// forward all other classes to gui commands
 				if ($next_class != "" && $next_class != "ilrepositorygui")
 				{
+					//$this->log->debug("if 101");
 					$class_path = $this->ctrl->lookupClassPath($next_class);
+					$this->log->debug("class path=".$class_path);
 					// get gui class instance
 					require_once($class_path);
 					$class_name = $this->ctrl->getClassForClasspath($class_path);
+					$this->log->debug("class name=".$class_name);
 					if (!$this->creation_mode)
 					{
+						//$this->log->debug("if 102");
 						if(is_subclass_of($class_name, "ilObject2GUI"))
 						{
+							//$this->log->debug("if 103");
 							$this->gui_obj = new $class_name($this->cur_ref_id, ilObject2GUI::REPOSITORY_NODE_ID);
 						}
 						else
 						{
+							//$this->log->debug("if 104");
+							$this->log->debug("new class, name=$class_name and id =".$this->cur_ref_id);
 							$this->gui_obj = new $class_name("", $this->cur_ref_id, true, false);
 						}						
 					}
@@ -300,7 +332,7 @@ class ilRepositoryGUI
 						: false;
 					$this->gui_obj->setCreationMode($this->creation_mode);
 					$this->ctrl->setReturn($this, "return");
-
+					$this->log->debug("show method");
 					$this->show();
 				}
 				else	// 
@@ -349,7 +381,7 @@ class ilRepositoryGUI
 		// normal command processing
 		$ret = $this->ctrl->forwardCommand($this->gui_obj);
 		$this->tpl->setVariable("OBJECTS", $this->gui_obj->getHTML());
-
+		$this->log->debug("SHOW tpl");
 		$this->tpl->show();
 	}
 	

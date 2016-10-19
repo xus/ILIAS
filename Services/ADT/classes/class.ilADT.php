@@ -12,6 +12,8 @@ abstract class ilADT
 {
 	protected $definition; // [ilADTDefinition]
 	protected $validation_errors; // [array]
+
+	protected $log;
 	
 	
 	// :TODO: error codes for ALL types - see self::translateErrorMessage()
@@ -39,6 +41,7 @@ abstract class ilADT
 	 */
 	public function __construct(ilADTDefinition $a_def)
 	{
+		$this->log = ilLoggerFactory::getRootLogger();
 		$this->setDefinition($a_def);
 		$this->reset();
 	}
@@ -50,6 +53,7 @@ abstract class ilADT
 	 */
 	public function getType()
 	{
+		$this->log->debug(" ADT GETTYPE = ".$this->getDefinition()->getType());
 		return $this->getDefinition()->getType();
 	}
 			
@@ -81,6 +85,7 @@ abstract class ilADT
 	 */
 	protected function setDefinition(ilADTDefinition $a_def)
 	{
+		$this->log->debug("ADT SET DEFINITION");
 		if($this->isValidDefinition($a_def))
 		{
 			$this->definition = clone $a_def;			
@@ -108,6 +113,7 @@ abstract class ilADT
 	 */
 	public function getCopyOfDefinition()
 	{
+		$this->log->debug(" ---  ADT GET COPY OF DEFINITION ---");
 		return (clone $this->definition);		
 	}
 			

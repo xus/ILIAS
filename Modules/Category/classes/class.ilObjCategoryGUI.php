@@ -21,6 +21,7 @@ require_once "./Services/Container/classes/class.ilContainerGUI.php";
 class ilObjCategoryGUI extends ilContainerGUI
 {
 	var $ctrl;
+	var $log;
 	
 	const CONTAINER_SETTING_TAXBLOCK = "tax_sblock_";
 
@@ -31,6 +32,9 @@ class ilObjCategoryGUI extends ilContainerGUI
 	function __construct($a_data, $a_id, $a_call_by_reference = true, $a_prepare_output = true)
 	{
 		//global $ilCtrl;
+
+		$this->log = ilLoggerFactory::getRootLogger();
+		$this->log->debug("FIRST POINT, Category module construct");
 
 		// CONTROL OPTIONS
 		//$this->ctrl =& $ilCtrl;
@@ -429,6 +433,8 @@ class ilObjCategoryGUI extends ilContainerGUI
 	{
 		global $ilAccess, $ilCtrl;
 
+		$this->log->debug("CATEGORY MODULE InfoScreen method");
+
 		if (!$ilAccess->checkAccess("visible", "", $this->ref_id))
 		{
 			$this->ilias->raiseError($this->lng->txt("msg_no_perm_read"),$this->ilias->error_obj->MESSAGE);
@@ -456,6 +462,8 @@ class ilObjCategoryGUI extends ilContainerGUI
 		$info->enableNewsEditing(false);
 		if ($ilAccess->checkAccess("write", "", $_GET["ref_id"]))
 		{
+			//$this->log->debug("CATEGORY MODULE InfoScreen method   NEW ilSetting");
+
 			$news_set = new ilSetting("news");
 			$enable_internal_rss = $news_set->get("enable_rss_for_internal");
 			
@@ -465,12 +473,13 @@ class ilObjCategoryGUI extends ilContainerGUI
 				$info->setBlockProperty("news", "public_notifications_option", true);
 			}
 		}
-		
+
+		//$this->log->debug("CATEGORY MODULE InfoScreen method  NEW ilAdvancedMDRecordGUI");
+
 		include_once('Services/AdvancedMetaData/classes/class.ilAdvancedMDRecordGUI.php');
 		$record_gui = new ilAdvancedMDRecordGUI(ilAdvancedMDRecordGUI::MODE_INFO,'cat',$this->object->getId());
 		$record_gui->setInfoObject($info);
 		$record_gui->parse();
-		
 
 		// standard meta data
 		$info->addMetaDataSections($this->object->getId(),0, $this->object->getType());
@@ -478,10 +487,15 @@ class ilObjCategoryGUI extends ilContainerGUI
 		// forward the command
 		if ($ilCtrl->getNextClass() == "ilinfoscreengui")
 		{
+			$this->log->debug("CATEGORY MODULE InfoScreen method forwardCommand");
+
+			$this->log->debug("CATEGORY MODULE InfoScreen NextClass=".$ilCtrl->getNextClass());
 			$ilCtrl->forwardCommand($info);
+
 		}
 		else
 		{
+			$this->log->debug("CATEGORY MODULE InfoScreen method getHTML");
 			return $ilCtrl->getHTML($info);
 		}
 	}

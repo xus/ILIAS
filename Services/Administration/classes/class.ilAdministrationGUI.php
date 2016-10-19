@@ -63,6 +63,7 @@ class ilAdministrationGUI
 		global $lng, $ilias, $tpl, $tree, $rbacsystem, $objDefinition,
 			$_GET, $ilCtrl, $ilLog, $ilMainMenu;
 
+		$ilLog->write("IlADministrationGUI.php");
 		$this->lng = $lng;
 		$this->lng->loadLanguageModule('administration');
 		$this->ilias = $ilias;
@@ -369,7 +370,7 @@ class ilAdministrationGUI
 	 */
 	function getDropDown()
 	{
-		global $tree, $rbacsystem, $lng, $ilSetting, $objDefinition;
+		global $tree, $rbacsystem, $lng, $ilSetting, $objDefinition, $ilLog;
 
 		$tpl = new ilTemplate("tpl.admin_drop_down.html", true, true, "Services/Administration");
 
@@ -521,6 +522,8 @@ class ilAdministrationGUI
 			{
 				if (count($entries) > 0)
 				{
+					$ilLog->write("header = ".$lng->txt("adm_".$group));
+
 					$gl->addGroupHeader($lng->txt("adm_".$group));
 						
 					foreach ($entries as $e)

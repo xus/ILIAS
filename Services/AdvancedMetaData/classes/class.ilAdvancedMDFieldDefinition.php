@@ -23,6 +23,7 @@ abstract class ilAdvancedMDFieldDefinition
 	protected $required; // [bool]
 	protected $adt_def; // [ilADTDefinition]
 	protected $adt; // [ilADT]
+	protected $log;
 	
 	const TYPE_SELECT = 1;
 	const TYPE_TEXT = 2;
@@ -41,8 +42,11 @@ abstract class ilAdvancedMDFieldDefinition
 	 */
 	public function __construct($a_field_id = null)
 	{
-		$this->init();		
-		$this->read($a_field_id);		
+		$this->log = ilLoggerFactory::getRootLogger();
+		$this->init();
+		$this->read($a_field_id);
+
+		$this->log->debug("ilAdvancedMDFieldDefinition construct");
 	}
 		
 	/**
@@ -83,6 +87,8 @@ abstract class ilAdvancedMDFieldDefinition
 	 */
 	public static function getInstanceByTypeString($a_type)
 	{
+		ilLoggerFactory::getRootLogger("ilAdvancedMDFieldDefinition getInstanceByTypeString");
+
 		// see self::getTypeString()
 		$map = array(
 			self::TYPE_TEXT => "Text",
@@ -110,6 +116,7 @@ abstract class ilAdvancedMDFieldDefinition
 	 */
 	public static function getInstancesByRecordId($a_record_id, $a_only_searchable = false)
 	{
+
 		global $ilDB;
 		
 		$defs = array();
@@ -133,7 +140,9 @@ abstract class ilAdvancedMDFieldDefinition
 	}		
 	
 	public static function getInstancesByObjType($a_obj_type, $a_active_only = true)
-	{		
+	{
+		ilLoggerFactory::getRootLogger("ilAdvancedMDFieldDefinition getInstanceByObjectType");
+
 		global $ilDB;
 		
 		$defs = array();
@@ -207,7 +216,7 @@ abstract class ilAdvancedMDFieldDefinition
 	 * @return ilADTGroup
 	 */
 	public static function getADTGroupForDefinitions(array $a_defs)
-	{		
+	{
 		$factory = ilADTFactory::getInstance();
 		$group_def = $factory->getDefinitionInstanceByType("Group");
 		foreach($a_defs as $def)
@@ -246,6 +255,8 @@ abstract class ilAdvancedMDFieldDefinition
 	 */
 	public static function getValidTypes()
 	{
+		ilLoggerFactory::getRootLogger("ilAdvancedMDFieldDefinition getValidTypes");
+
 		return array(self::TYPE_TEXT, self::TYPE_DATE, self::TYPE_DATETIME,
 			self::TYPE_SELECT, self::TYPE_INTEGER, self::TYPE_FLOAT,
 			self::TYPE_LOCATION, self::TYPE_SELECT_MULTI);
@@ -324,6 +335,8 @@ abstract class ilAdvancedMDFieldDefinition
 	 */
 	public function getADTDefinition()
 	{
+		ilLoggerFactory::getRootLogger("ilAdvancedMDFieldDefinition ADT getADTDefinition");
+
 		if(!$this->adt_def instanceof ilADTDefinition)
 		{
 			$this->adt_def = $this->initADTDefinition();
@@ -337,7 +350,9 @@ abstract class ilAdvancedMDFieldDefinition
 	 * @return ilADT
 	 */
 	public function getADT()
-	{	
+	{
+		ilLoggerFactory::getRootLogger("ilAdvancedMDFieldDefinition ADT getADT");
+
 		if(!$this->adt instanceof ilADT)	
 		{
 			$this->adt = ilADTFactory::getInstance()->getInstanceByDefinition($this->getADTDefinition());
@@ -352,7 +367,9 @@ abstract class ilAdvancedMDFieldDefinition
 	 * @param ilADT $a_adt
 	 */
 	protected function setADT(ilADT $a_adt)
-	{	
+	{
+
+		$this->log->debug("FieldDefinition SETTING UP ilADT");
 		if(!$this->adt instanceof ilADT)	
 		{
 			$this->adt = $a_adt;
@@ -839,6 +856,7 @@ abstract class ilAdvancedMDFieldDefinition
 	 */
 	protected function read($a_field_id)
 	{
+		$this->log->debug("Read data from field id= ".$a_field_id);
 		global $ilDB;
 		
 		if(!(int)$a_field_id)
@@ -862,7 +880,6 @@ abstract class ilAdvancedMDFieldDefinition
 	public function save($a_keep_pos = false)
 	{
 		global $ilDB;
-		
 		if($this->getFieldId())
 		{
 			return $this->update();
@@ -884,7 +901,9 @@ abstract class ilAdvancedMDFieldDefinition
 		
 		$fields = $this->getDBProperties();		
 		$fields["field_id"] = array("integer", $next_id);
-		
+
+		$this->log->debug("INSERT adv_md_definition with values= ". $fields);
+
 		$ilDB->insert("adv_mdf_definition", $fields);
 		
 		$this->setFieldId($next_id);

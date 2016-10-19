@@ -52,7 +52,7 @@ class ilAdvancedMDValues
 	 * @return array
 	 */
 	public static function getInstancesForObjectId($a_obj_id, $a_obj_type = null, $a_sub_type = "-", $a_sub_id = 0)
-	{		
+	{
 		$res = array();
 		
 		if(!$a_obj_type)
@@ -66,7 +66,6 @@ class ilAdvancedMDValues
 			$id = $record->getRecordId();
 			$res[$id] = new self($id, $a_obj_id, $a_sub_type, $a_sub_id);
 		}
-	
 		return $res;
 	}
 	
@@ -98,6 +97,7 @@ class ilAdvancedMDValues
 		{			
 			$this->defs = ilAdvancedMDFieldDefinition::getInstancesByRecordId($this->record_id);						
 		}
+		ilLoggerFactory::getRootLogger("record_id = ".$this->record_id);
 		return $this->defs;
 	}
 	
@@ -107,7 +107,8 @@ class ilAdvancedMDValues
 	 * @return ilADTGroup
 	 */
 	public function getADTGroup()
-	{		
+	{
+
 		if(!$this->adt_group instanceof ilADTGroup)
 		{							
 			$this->adt_group = ilAdvancedMDFieldDefinition::getADTGroupForDefinitions($this->getDefinitions());			
@@ -122,11 +123,15 @@ class ilAdvancedMDValues
 	 */
 	protected function getActiveRecord()
 	{
+		$GLOBALS['ilLog']->write(__METHOD__.': GET ACTIVE RECORD ilADTFactory');
 		if(!$this->active_record instanceof ilADTActiveRecordByType)
 		{
+			$GLOBALS['ilLog']->write(__METHOD__.': this->active_record IS NOT an instanceof ilADTActiveRecordByType');
+
 			include_once "Services/ADT/classes/class.ilADTFactory.php";
 			$factory = ilADTFactory::getInstance();
-			
+
+			//$GLOBALS['ilLog']->write("-adt group type-".$this->getADTGroup()->getType());
 			$adt_group_db = $factory->getDBBridgeForInstance($this->getADTGroup());
 							 
 			$primary = array(
@@ -140,12 +145,13 @@ class ilAdvancedMDValues
 			// multi-enum fakes single in adv md
 			foreach($adt_group_db->getElements() as $element)
 			{
+				$GLOBALS['ilLog']->write("elements");
 				if($element->getADT()->getType() == "MultiEnum")
 				{
 					$element->setFakeSingle(true);
 				}
 			}		
-
+			$GLOBALS['ilLog']->write("factory->getActiveRecordByTypeInstance");
 			$this->active_record = $factory->getActiveRecordByTypeInstance($adt_group_db);
 			$this->active_record->setElementIdColumn("field_id", "integer");
 		}
