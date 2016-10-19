@@ -836,6 +836,11 @@ class ilSurveyEvaluationGUI
 			{
 				//$dtmpl = new ilTemplate("tpl.il_svy_svy_results_details.html", true, true, "Modules/Survey");
 				$dtmpl = new ilTemplate("tpl.il_svy_svy_results_details_nUI.html", true, true, "Modules/Survey");
+
+				$dtmpl->setCurrentBlock("report_title");
+				$dtmpl->setVariable("REPORT_TITLE", "REPORT");
+				$dtmpl->parseCurrentBlock();
+
 				$toc_tpl = new ilTemplate("tpl.svy_results_table_contents.html", true, true, "Modules/Survey");
 				$this->lng->loadLanguageModule("content");
 				$sub_header = $this->lng->txt('cont_toc');
@@ -1002,7 +1007,7 @@ class ilSurveyEvaluationGUI
 			$card_table_tpl->parseCurrentBlock();
 		}
 
-		$panel_qst_card = $ui_factory->panel()->sub("", $ui_factory->legacy($svy_text))
+		$panel_qst_card = $ui_factory->panel()->sub($qst_title, $ui_factory->legacy($svy_text))
 			->withCard($ui_factory->card($svy_type_title)->withSections(array($ui_factory->legacy($card_table_tpl->get()))));
 
 		$array_panels = array ($panel_qst_card);
@@ -1133,7 +1138,9 @@ class ilSurveyEvaluationGUI
 
 		$anchor_id = "svyrdq".$a_qdata["question_id"];
 
-		$block = $ui_factory->panel()->report($qst_title, $array_panels);
+		//$block = $ui_factory->panel()->report($qst_title, $array_panels);
+		$block = $ui_factory->panel()->report("", $array_panels);
+
 
 		$panels = $ui_renderer->render($block);
 

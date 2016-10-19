@@ -1,11 +1,15 @@
-<div class="panel panel-default">
-	<div class="panel-heading ilBlockHeader">
-		<h3 class="ilBlockHeader">{TITLE}</h3>
-	</div>
-	<div class="panel-body">
+<div class="panel panel-default" style="background-color:white;">
+	<div class="panel-body" style="padding:0">
 		<!-- BEGIN with_card -->
 		<div class="row">
-			<div class="col-sm-8">{BODY}</div>
+			<div class="col-sm-8">
+				<div class="panel-heading ilHeader" style="background-color:white;padding:0;">
+					<h3 class="ilHeader">
+						{TITLE}
+					</h3>
+				</div>
+				{BODY}
+			</div>
 			<div class="col-sm-4">{CARD}</div>
 		</div>
 		<!-- END with_card -->
