@@ -837,14 +837,11 @@ class ilSurveyEvaluationGUI
 				//$dtmpl = new ilTemplate("tpl.il_svy_svy_results_details.html", true, true, "Modules/Survey");
 				$dtmpl = new ilTemplate("tpl.il_svy_svy_results_details_nUI.html", true, true, "Modules/Survey");
 
-				$dtmpl->setCurrentBlock("report_title");
 				$dtmpl->setVariable("REPORT_TITLE", "Question results");
-				$dtmpl->parseCurrentBlock();
 
 				$toc_tpl = new ilTemplate("tpl.svy_results_table_contents.html", true, true, "Modules/Survey");
 				$this->lng->loadLanguageModule("content");
-				$sub_header = $this->lng->txt('cont_toc');
-				$toc_tpl->setVariable("TITLE_TOC", $sub_header);
+				$toc_tpl->setVariable("TITLE_TOC", $this->lng->txt('cont_toc'));
 			}
 			
 			$details_figure = $_POST["cp"]
@@ -901,9 +898,7 @@ class ilSurveyEvaluationGUI
 			$panel_toc = $ui_factory->panel()->standard("", $ui_factory->legacy($toc_tpl->get()));
 			$render_toc = $ui_renderer->render($panel_toc);
 
-			$dtmpl->setCurrentBlock("panel_toc");
 			$dtmpl->setVariable("PANEL_TOC", $render_toc);
-			$dtmpl->parseCurrentBlock();
 
 			$this->tpl->setVariable('DETAIL', $dtmpl->get());						
 		}
