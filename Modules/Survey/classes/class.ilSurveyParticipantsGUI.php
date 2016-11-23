@@ -1256,6 +1256,11 @@ class ilSurveyParticipantsGUI
 				$cgui->addItem("appr_id[]", $id, ilUserUtil::getNamePresentation($id));							
 				$count++;
 			}
+			/*elseif(isset($data[$id]) && $data[$id]["closed"])
+			{
+				ilUtil::sendFailure($this->lng->txt("cant_delete_apprise_svy_closed"), true);
+				$this->ctrl->redirect($this, "listAppraisees");
+			}*/
 		}
 		
 		if(!$count)
