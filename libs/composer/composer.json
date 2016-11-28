@@ -20,8 +20,11 @@
 	},
 	"require-dev": {
 		"mikey179/vfsStream": "^1.6",
-		"phpunit/phpunit": "^4.8",
-		"phpunit/php-code-coverage": "^2.2"
+		"phpunit/phpunit": "^5.0",
+		"phpunit/php-code-coverage": "^4.0.1",
+		"facebook/webdriver": "dev-master",
+		"phpunit/phpunit-selenium": "^3.0.2",
+		"fzaninotto/faker": "^1.6"
 	},
 	"autoload": {
 		"psr-4" : { "ILIAS\\" : "../../src" }

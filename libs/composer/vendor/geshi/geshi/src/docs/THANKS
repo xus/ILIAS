@@ -82,6 +82,7 @@ PEOPE WHO MADE LANGUAGE FILES
 - CADDCL                 Roberto Rossi
 - CadLisp                Roberto Rossi
 - CDFG                   John Horigan
+- Ceylon                 Lucas Werkmeister
 - ChaiScript             Jason Turner, Jonathan Turner
 - Chapel                 Richard Molitor
 - CIL                    Marcus Griep
@@ -90,7 +91,7 @@ PEOPE WHO MADE LANGUAGE FILES
 - COBOL                  Benny Baumann, Edward Hart
 - CoffeeScript           Trevor Burnham
 - ColdFusion             Diego
-- CSS                    Nigel McNie, Zéfling
+- CSS                    Nigel McNie, Zéfling, peterdd
 - Cuesheet               Benny Baumann
 - D                      Thomas Kuehne
 - Dart                   Edward Hart
