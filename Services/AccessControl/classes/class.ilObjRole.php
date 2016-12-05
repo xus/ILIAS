@@ -35,6 +35,9 @@ class ilObjRole extends ilObject
 	var $disk_quota;
 	var $wsp_disk_quota;
 
+	/* role starting point */
+	protected $starting_point;
+
 	/**
 	* Constructor
 	* @access	public
@@ -190,6 +193,9 @@ class ilObjRole extends ilObject
 		$this->toggleAssignUsersStatus($a_data['assign_users']);
 		$this->setDiskQuota($a_data['disk_quota']);
 		$this->setPersonalWorkspaceDiskQuota($a_data['wsp_disk_quota']);
+		$this->setPersonalWorkspaceDiskQuota($a_data['wsp_disk_quota']);
+		$this->setStartingPoint($a_data['starting_point']);
+
 	}
 
 	/**
@@ -204,7 +210,8 @@ class ilObjRole extends ilObject
 			"allow_register= ".$ilDB->quote($this->allow_register,'integer').", ".
 			"assign_users = ".$ilDB->quote($this->getAssignUsersStatus(),'integer').", ".
 			"disk_quota = ".$ilDB->quote($this->getDiskQuota(),'integer').", ".
-			"wsp_disk_quota = ".$ilDB->quote($this->getPersonalWorkspaceDiskQuota(),'integer')." ".
+			"wsp_disk_quota = ".$ilDB->quote($this->getPersonalWorkspaceDiskQuota(),'integer').", ".
+			"starting_point = ".$ilDB->quote($this->getStartingPoint(),'integer')." ".
 			"WHERE role_id= ".$ilDB->quote($this->id,'integer')." ";
 		$res = $ilDB->manipulate($query);
 
@@ -1049,6 +1056,70 @@ class ilObjRole extends ilObject
 				$rbacadmin->assignRoleToFolder($this->getId(),$a_id,"n");	
 			}
 			return true;
+	}
+
+	/**
+	 * Sets the starting point imposed by this role.
+	 *
+	 * @access	public
+	 * @param	int
+	 */
+	function setStartingPoint($a_starting_point)
+	{
+		$this->starting_point = $a_starting_point;
+	}
+
+	/**
+	 * Gets the starting point imposed by this role.
+	 *
+	 * @access	public
+	 * @return	int
+	 */
+	public function getStartingPoint()
+	{
+		return $this->starting_point;
+	}
+
+	public static function getRolesWithStartingPoint()
+	{
+		global $ilDB;
+
+		$query = "SELECT * FROM role_data WHERE starting_point > 0";
+		$res = $ilDB->query($query);
+		$roles = array();
+		while($role = $ilDB->fetchAssoc($res))
+		{
+			$roles[] = array("role_id" => $role["role_id"],
+				"starting_point" => $role['starting_point']);
+		}
+
+		return $roles;
+	}
+
+	/**
+	 * We can improve this, just need to know which rbac tables for this roles are used
+	 * can we pass this to rbacreview object?
+	 */
+	public static function getGlobalRolesWithoutStartingPoint()
+	{
+		global $rbacreview, $ilDB;
+
+		$roles = $rbacreview->getGlobalRoles();
+		$query_roles = implode(",",$roles);
+
+		$query  = "SELECT * FROM role_data WHERE role_id IN ($query_roles) AND starting_point = 0";
+		$res = $ilDB->query($query);
+		$roles = array();
+		while($role = $ilDB->fetchAssoc($res))
+		{
+			$role_obj = new ilObjRole($role['role_id']);
+			$roles[] = array (
+				"id" => $role['role_id'],
+				"title" => $role_obj->getTitle(),
+			);
+		}
+
+		return $roles;
 	}
 	
 } // END class.ilObjRole
