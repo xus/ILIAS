@@ -20,6 +20,8 @@ class ilObjUserFolderGUI extends ilObjectGUI
 {
 	var $ctrl;
 
+	protected $log;
+
 	/**
 	* Constructor
 	* @access public
@@ -38,6 +40,8 @@ class ilObjUserFolderGUI extends ilObjectGUI
 		$this->lng->loadLanguageModule("user");
 
 		$ilCtrl->saveParameter($this, "letter");
+
+		$this->log = ilLoggerFactory::getLogger("user");
 	}
 
 	function setUserOwnerId($a_id)
@@ -2851,7 +2855,7 @@ class ilObjUserFolderGUI extends ilObjectGUI
 												 $this->ctrl->getLinkTarget($this,'newAccountMail'),
 												 "newAccountMail",get_class($this));
 
-				$this->tabs_gui->addSubTabTarget("user_starting_points",
+				$this->tabs_gui->addSubTabTarget("starting_points",
 												$this->ctrl->getLinkTarget($this,'startingPoints'),
 												"startingPoints",get_class($this));
 
@@ -3288,10 +3292,14 @@ class ilObjUserFolderGUI extends ilObjectGUI
 		return $form;
 	}
 
+	/**
+	 * @return ilPropertyFormGUI
+	 */
 	protected function getRoleStartingPointForm()
 	{
-		require_once ("Services/Form/classes/class.ilPropertyFormGUI.php");
+		require_once "Services/Form/classes/class.ilPropertyFormGUI.php";
 		require_once "./Services/AccessControl/classes/class.ilObjRole.php";
+		include_once "Services/User/classes/class.ilUserUtil.php";
 
 		$this->setSubTabs('settings');
 		$this->tabs_gui->setTabActive('settings');
@@ -3301,14 +3309,17 @@ class ilObjUserFolderGUI extends ilObjectGUI
 
 		$rolid = $_REQUEST['rolid'];
 
+		//edit no default
 		if($rolid > 0 && $rolid != 'default')
 		{
 			$role = new ilObjRole($rolid);
 			$options[$rolid] = $role->getTitle();
 			$si_roles = new ilSelectInputGUI($this->lng->txt("editing_this_role"), 'role');
+			$starting_point = $role->getStartingPoint();
 			$si_roles->setOptions($options);
 			$form->addItem($si_roles);
 		}
+		//create
 		elseif(!$rolid || $rolid !='default')
 		{
 			$roles = ilObjRole::getGlobalRolesWithoutStartingPoint();
@@ -3320,9 +3331,13 @@ class ilObjUserFolderGUI extends ilObjectGUI
 			$si_roles->setOptions($options);
 			$form->addItem($si_roles);
 		}
+		else
+		{
+			$starting_point = ilUserUtil::getStartingPoint();
+		}
 
 		// starting point
-		include_once "Services/User/classes/class.ilUserUtil.php";
+
 		$si = new ilRadioGroupInputGUI($this->lng->txt("adm_user_starting_point"), "start_point");
 		$si->setRequired(true);
 		$si->setInfo($this->lng->txt("adm_user_starting_point_info"));
@@ -3337,17 +3352,26 @@ class ilObjUserFolderGUI extends ilObjectGUI
 				$opt->setInfo($this->lng->txt("adm_user_starting_point_invalid_info"));
 			}
 		}
-		$si->setValue(ilUserUtil::getStartingPoint());
+		$si->setValue($starting_point);
 		$form->addItem($si);
 
 		// starting point: repository object
 		$repobj = new ilRadioOption($this->lng->txt("adm_user_starting_point_object"), ilUserUtil::START_REPOSITORY_OBJ);
-		$repobj_id = new ilTextInputGUI($this->lng->txt("adm_user_starting_point_ref_id"), "usr_start_ref_id");
+		$repobj_id = new ilTextInputGUI($this->lng->txt("adm_user_starting_point_ref_id"), "start_object");
 		$repobj_id->setRequired(true);
 		$repobj_id->setSize(5);
+		//$i has the starting_point value, so we are here only when edit one role or setting the default role.
 		if($si->getValue() == ilUserUtil::START_REPOSITORY_OBJ)
 		{
-			$start_ref_id = ilUserUtil::getStartingObject();
+			if($role)
+			{
+				$start_ref_id  = $role->getStartingObject();
+			}
+			else
+			{
+				$start_ref_id = ilUserUtil::getStartingObject();
+			}
+
 			$repobj_id->setValue($start_ref_id);
 			if($start_ref_id)
 			{
@@ -3375,6 +3399,8 @@ class ilObjUserFolderGUI extends ilObjectGUI
 	{
 		global $ilCtrl;
 
+		$this->checkPermission("write");
+
 		include_once "Services/User/classes/class.ilUserUtil.php";
 
 		$form = $this->getUserStartingPointForm();
@@ -3394,19 +3420,20 @@ class ilObjUserFolderGUI extends ilObjectGUI
 	 */
 	protected function saveStartingPointObject()
 	{
-		global $ilCtrl;
-
-		require_once "./Services/AccessControl/classes/class.ilObjRole.php";
+		global $ilCtrl, $tree;
 
 		$this->checkPermission("write");
+
+		require_once "./Services/AccessControl/classes/class.ilObjRole.php";
 
 		//remove if role_id
 		$rolid = $_REQUEST['rolid'];
 
-		if($rolid)
+		if($rolid > 0)
 		{
 			$role = new ilObjRole($rolid);
 			$role->setStartingPoint(0);
+			$role->setStartingObject(0);
 			$role->update();
 			ilUtil::sendSuccess($this->lng->txt("msg_obj_modified"), true);
 			$ilCtrl->redirect($this, "startingPoints");
@@ -3419,16 +3446,32 @@ class ilObjUserFolderGUI extends ilObjectGUI
 			//if role
 			if($form->getInput('role'))
 			{
-				$GLOBALS['ilLog']->write("if role");
+				$this->log->debug("role =" .$form->getInput('role'));
+
 				$role = new ilObjRole($form->getInput('role'));
 				$role->setStartingPoint($form->getInput('start_point'));
+
+				$obj_id = $form->getInput('start_object');
+				if($obj_id)
+				{
+					if(ilObject::_lookupObjId($obj_id) && !$tree->isDeleted($obj_id))
+					{
+						$role->setStartingObject($obj_id);
+						ilUtil::sendSuccess($this->lng->txt("msg_obj_modified"), true);
+					}
+					else
+					{
+						ilUtil::sendFailure($this->lng->txt("obj_ref_id_not_exist"), true);
+					}
+				}
 				$role->update();
 			}
 			else  //default
 			{
-				ilUserUtil::setStartingPoint($form->getInput('start_point'), $form->getInput('usr_start_ref_id'));
+				ilUserUtil::setStartingPoint($form->getInput('start_point'), $form->getInput('start_object'));
+				ilUtil::sendSuccess($this->lng->txt("msg_obj_modified"), true);
 			}
-			ilUtil::sendSuccess($this->lng->txt("msg_obj_modified"), true);
+
 			$ilCtrl->redirect($this, "startingPoints");
 		}
 		ilUtil::sendFailure($this->lng->txt("msg_error"), true);

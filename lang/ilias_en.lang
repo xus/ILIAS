@@ -16226,3 +16226,5 @@ usr#:#criteria#:#Criteria
 usr#:#starting_point#:#Start Page
 usr#:#user_role_starting_point#:#User - Role starting point
 usr#:#roles_without_starting_point#:#Roles without defined starting point:
+usr#:#obj_ref_id_not_exist#:#The object reference id provided doesn't exist
+common#:#ref_id#:#ref-id:

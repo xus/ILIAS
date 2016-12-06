@@ -13,11 +13,13 @@ include_once("Services/Table/classes/class.ilTable2GUI.php");
  */
 class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 {
-	var $log;
+	protected $log;
 
 	function __construct($a_parent_obj, $a_parent_cmd, $a_template_context)
 	{
 		global $ilCtrl, $lng;
+
+		$this->log = ilLoggerFactory::getLogger("user");
 
 		$this->setId("usrrolesp");
 
@@ -32,6 +34,7 @@ class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 		$this->addColumn($lng->txt("actions"));
 		$this->setFormAction($ilCtrl->getFormAction($a_parent_obj));
 		$this->setRowTemplate("tpl.user_role_starting_point_row.html", "Services/User");
+		$this->addCommandButton("saveOrder", $lng->txt("role_save_order"));
 
 		$this->getItems();
 
@@ -45,6 +48,10 @@ class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 		global $lng;
 
 		include_once "Services/User/classes/class.ilUserUtil.php";
+		require_once "Services/Object/classes/class.ilObjectDataCache.php";
+		require_once "Services/AccessControl/classes/class.ilObjRole.php";
+
+		$dc = new ilObjectDataCache();
 
 		$valid_points = ilUserUtil::getPossibleStartingPoints();
 
@@ -57,28 +64,47 @@ class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 			"starting_page" => $status
 		);
 
-		require_once ("Services/AccessControl/classes/class.ilObjRole.php");
-
 		$roles = ilObjRole::getRolesWithStartingPoint();
 
 		foreach ($roles as $g_role)
 		{
 			$role = new ilObjRole($g_role['role_id']);
+			$starting_point = $role->getStartingPoint();
+			$sp_text = $valid_points[$starting_point];
 
+			if($starting_point == ilUserUtil::START_REPOSITORY_OBJ)
+			{
+				$reference_id = $role->getStartingObject();
 
+				$object_id = ilObject::_lookupObjId($reference_id);
+				$type = $dc->lookupType($object_id);
+				$title = $dc->lookupTitle($object_id);
+				$sp_text = $this->lng->txt("type").": ".$type." ".$this->lng->txt("ref_id").": ".$reference_id." ".$this->lng->txt("title")."<i>\"".$title."\"</i>";
+			}
 
 			$result[] = array (
 				"id" => $role->getId(),
 				"criteria" => $role->getTitle(),
-				"starting_page" => $valid_points[$role->getStartingPoint()]
+				"starting_page" => $sp_text
 			);
 		}
 
 		$default_sp = ilUserUtil::getStartingPoint();
+		$starting_point = $valid_points[$default_sp];
+		if($default_sp == ilUserUtil::START_REPOSITORY_OBJ)
+		{
+			$reference_id = ilUserUtil::getStartingObject();
+
+			$object_id = ilObject::_lookupObjId($reference_id);
+			$type = $dc->lookupType($object_id);
+			$title = $dc->lookupTitle($object_id);
+			$starting_point = $this->lng->txt("type").": ".$type." ".$this->lng->txt("ref_id").": ".$reference_id." ".$this->lng->txt("title")."<i>\"".$title."\"</i>";
+		}
+
 		$result[] = array (
 			"id" => "default",
 			"criteria" => $lng->txt("default"),
-			"starting_page" => $valid_points[$default_sp]
+			"starting_page" => $starting_point
 		);
 
 		$this->setData($result);
@@ -125,7 +151,7 @@ class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 
 			$list->addItem($lng->txt("edit"), "", $edit_url);
 
-			
+			$this->tpl->setVariable("HIDDEN", "hidden");
 			$this->tpl->setVariable("TXT_TITLE", $a_set["criteria"]);
 		}
 

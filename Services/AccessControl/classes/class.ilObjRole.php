@@ -37,6 +37,7 @@ class ilObjRole extends ilObject
 
 	/* role starting point */
 	protected $starting_point;
+	protected $starting_object;
 
 	/**
 	* Constructor
@@ -195,6 +196,7 @@ class ilObjRole extends ilObject
 		$this->setPersonalWorkspaceDiskQuota($a_data['wsp_disk_quota']);
 		$this->setPersonalWorkspaceDiskQuota($a_data['wsp_disk_quota']);
 		$this->setStartingPoint($a_data['starting_point']);
+		$this->setStartingObject($a_data['starting_object']);
 
 	}
 
@@ -211,7 +213,8 @@ class ilObjRole extends ilObject
 			"assign_users = ".$ilDB->quote($this->getAssignUsersStatus(),'integer').", ".
 			"disk_quota = ".$ilDB->quote($this->getDiskQuota(),'integer').", ".
 			"wsp_disk_quota = ".$ilDB->quote($this->getPersonalWorkspaceDiskQuota(),'integer').", ".
-			"starting_point = ".$ilDB->quote($this->getStartingPoint(),'integer')." ".
+			"starting_point = ".$ilDB->quote($this->getStartingPoint(),'integer').", ".
+			"starting_object = ".$ilDB->quote($this->getStartingObject(),'integer')." ".
 			"WHERE role_id= ".$ilDB->quote($this->id,'integer')." ";
 		$res = $ilDB->manipulate($query);
 
@@ -1064,7 +1067,7 @@ class ilObjRole extends ilObject
 	 * @access	public
 	 * @param	int
 	 */
-	function setStartingPoint($a_starting_point)
+	public function setStartingPoint($a_starting_point)
 	{
 		$this->starting_point = $a_starting_point;
 	}
@@ -1120,6 +1123,28 @@ class ilObjRole extends ilObject
 		}
 
 		return $roles;
+	}
+
+	/**
+	 * Sets the starting point imposed by this role.
+	 *
+	 * @access	public
+	 * @param	int
+	 */
+	public function setStartingObject($a_starting_object)
+	{
+		$this->starting_object = $a_starting_object;
+	}
+
+	/**
+	 * Gets the starting point imposed by this role.
+	 *
+	 * @access	public
+	 * @return	int
+	 */
+	public function getStartingObject()
+	{
+		return $this->starting_object;
 	}
 	
 } // END class.ilObjRole

@@ -1152,8 +1152,8 @@ class ilObjSystemFolderGUI extends ilObjectGUI
 		$ti->setSize(40);
 		$ti->setInfo($this->lng->txt("adm_locale_info"));
 		$ti->setValue($ilSetting->get("locale"));
-		$this->form->addItem($ti);				
-	
+		$this->form->addItem($ti);
+/*
 		// starting point
 		include_once "Services/User/classes/class.ilUserUtil.php";
 		$si = new ilRadioGroupInputGUI($this->lng->txt("adm_user_starting_point"), "usr_start");
@@ -1164,15 +1164,15 @@ class ilObjSystemFolderGUI extends ilObjectGUI
 		{
 			$opt = new ilRadioOption($caption, $value);
 			$si->addOption($opt);
-			
+
 			if(!in_array($value, $valid))
 			{
 				$opt->setInfo($this->lng->txt("adm_user_starting_point_invalid_info"));
-			}			
+			}
 		}
-		$si->setValue(ilUserUtil::getStartingPoint());		
+		$si->setValue(ilUserUtil::getStartingPoint());
 		$this->form->addItem($si);
-		
+
 		// starting point: repository object
 		$repobj = new ilRadioOption($lng->txt("adm_user_starting_point_object"), ilUserUtil::START_REPOSITORY_OBJ);
 		$repobj_id = new ilTextInputGUI($lng->txt("adm_user_starting_point_ref_id"), "usr_start_ref_id");
@@ -1191,16 +1191,16 @@ class ilObjSystemFolderGUI extends ilObjectGUI
 						": ".ilObject::_lookupTitle($start_obj_id));
 				}
 			}
-		}		
+		}
 		$repobj->addSubItem($repobj_id);
 		$si->addOption($repobj);
-		
-		// starting point: personal		
+
+		// starting point: personal
 		$startp = new ilCheckboxInputGUI($lng->txt("adm_user_starting_point_personal"), "usr_start_pers");
 		$startp->setInfo($lng->txt("adm_user_starting_point_personal_info"));
 		$startp->setChecked(ilUserUtil::hasPersonalStartingPoint());
 		$si->addSubItem($startp);
-				
+*/
 		
 		// save and cancel commands
 		$this->form->addCommandButton("saveBasicSettings", $lng->txt("save"));
@@ -1236,11 +1236,11 @@ class ilObjSystemFolderGUI extends ilObjectGUI
 								
 			$ilSetting->set("open_google", $_POST["open_google"]);			
 			$ilSetting->set("locale", $_POST["locale"]);
-						
+/*
 			include_once "Services/User/classes/class.ilUserUtil.php";
 			ilUserUtil::setStartingPoint($this->form->getInput('usr_start'), $this->form->getInput('usr_start_ref_id'));
 			ilUserUtil::togglePersonalStartingPoint($this->form->getInput('usr_start_pers'));
-
+*/
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
 			$ilCtrl->redirect($this, "showBasicSettings");
 		}

@@ -17,6 +17,7 @@ class ilSkillCatTableGUI extends ilTable2GUI
 	const MODE_SCAT = 0;
 	const MODE_SCTP = 1;
 	protected $tref_id = 0;
+	protected $log;
 	
 	/**
 	 * Constructor
@@ -25,6 +26,8 @@ class ilSkillCatTableGUI extends ilTable2GUI
 		$a_mode = self::MODE_SCAT, $a_tref_id = 0)
 	{
 		global $ilCtrl, $lng, $ilAccess, $lng;
+
+		$this->log	= ilLoggerFactory::getLogger("user");
 		
 		$this->tref_id = $a_tref_id;
 		$ilCtrl->setParameter($a_parent_obj, "tmpmode", $a_mode);
