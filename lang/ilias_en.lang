@@ -16221,10 +16221,3 @@ copg#:#copg_confirm_el_deletion#:#Do you really want to delete the selected elem
 survey#:#msg_input_only_positive_numbers#:#Please enter positive numbers in scale values.
 crs#:#crs_loc_err_stat_tst_offline#:#Not all tests are online.
 itgr#:#itgr_desc_info#:#The description will not be a part of the item group's presentation in its container.
-usr#:#has_role#:#Has role
-usr#:#criteria#:#Criteria
-usr#:#starting_point#:#Start Page
-usr#:#user_role_starting_point#:#User - Role starting point
-usr#:#roles_without_starting_point#:#Roles without defined starting point:
-usr#:#obj_ref_id_not_exist#:#The object reference id provided doesn't exist
-common#:#ref_id#:#ref-id:

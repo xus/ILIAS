@@ -1,9 +1,10 @@
 <tr class="{CSS_ROW}">
-	<!-- BEGIN position -->
 	<td class="std" valign="top">
-		<input type="text" class="form-control {HIDDEN}" name="{VAR_POS}" value="{VAL_POS}" size="3" maxlength="3" />
+		<!-- BEGIN position -->
+		<!-- <input type="text" class="form-control {HIDDEN}" name="{VAL_ID}" value="{VAL_POS}" size="3" maxlength="3" /> -->
+		<input type="number" class="form-control {HIDDEN}" name="{VAL_ID}" value="{VAL_POS}" min="1" max="9998" maxlength="3" size="3" />
+		<!-- END position-->
 	</td>
-	<!-- END position-->
 	<td class="std">
 		{TXT_TITLE}
 	</td>
