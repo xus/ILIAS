@@ -37,11 +37,11 @@ class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 		$this->addColumn($lng->txt("criteria"));
 		$this->addColumn($lng->txt("starting_page"));
 		$this->addColumn($lng->txt("actions"));
-		$this->setDefaultOrderField("starting_position");
-		$this->setDefaultOrderDirection("asc");
 		$this->setFormAction($ilCtrl->getFormAction($a_parent_obj));
 		$this->setRowTemplate("tpl.user_role_starting_point_row.html", "Services/User");
 		$this->addCommandButton("saveorder", $lng->txt("role_save_order"));
+
+		$this->setExternalSorting(true);
 
 		require_once "./Services/AccessControl/classes/class.ilObjRole.php";
 		$roles_without_point = ilObjRole::getGlobalRolesWithoutStartingPoint();

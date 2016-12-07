@@ -128,7 +128,7 @@ class ilObjUserFolderGUI extends ilObjectGUI
 				}
 				elseif($cmd == "confirmdeletestartingpoint")
 				{
-					$cmd == "confirmDeleteStartingPoint";
+					$cmd = "confirmDeleteStartingPoint";
 				}
 				else
 				{
@@ -3419,7 +3419,7 @@ class ilObjUserFolderGUI extends ilObjectGUI
 		global $ilCtrl, $tree;
 
 		$this->checkPermission("write");
-		
+
 		//add from form
 		$form = $this->getRoleStartingPointForm();
 		if ($form->checkInput())
@@ -3469,7 +3469,7 @@ class ilObjUserFolderGUI extends ilObjectGUI
 
 		foreach($_POST['position'] as $id => $position)
 		{
-			if($position > self::ORDER_POSITION_MIN && $postion < self::ORDER_POSITION_MAX )
+			if($position > self::ORDER_POSITION_MIN && $position < self::ORDER_POSITION_MAX )
 			{
 				$sql = "UPDATE role_data".
 					" SET starting_position = ".$ilDB->quote($position, 'integer').
@@ -3510,14 +3510,16 @@ class ilObjUserFolderGUI extends ilObjectGUI
 	}
 
 	/**
-	 * Set to 0 the starting point
+	 * Set to 0 the starting point values
 	 */
 	protected function deleteStartingPointObject()
 	{
 		global $ilCtrl;
+
+		$this->checkPermission("write");
+
 		require_once "./Services/AccessControl/classes/class.ilObjRole.php";
 
-		//remove if role_id
 		$rolid = $_REQUEST['rolid'];
 
 		$role = new ilObjRole($rolid);
