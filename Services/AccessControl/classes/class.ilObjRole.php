@@ -1100,11 +1100,7 @@ class ilObjRole extends ilObject
 
 		return $roles;
 	}
-
-	/**
-	 * We can improve this, just need to know which rbac tables for this roles are used
-	 * can we pass this to rbacreview object?
-	 */
+	
 	public static function getGlobalRolesWithoutStartingPoint()
 	{
 		global $rbacreview, $ilDB;
