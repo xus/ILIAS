@@ -127,7 +127,7 @@ class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 			"starting_position" => self::TABLE_POSITION_DEFAULT
 		);
 
-		$result = ilUtil::sortArray($result, "starting_position", "asc", false);
+		$result = ilUtil::sortArray($result, "starting_position", "asc", true);
 
 		$this->setData($result);
 
