@@ -341,7 +341,6 @@ class ilUserUtil
 			{
 				if($rbacreview->isAssigned($ilUser->getId(),$role_id))
 				{
-					$GLOBALS['ilLog']->write("**** asigned role = $role_id");
 					$role = new ilObjRole($role_id);
 					$gr[$role->getStartingPosition()]= array(
 							'point' => $role->getStartingPoint(),
@@ -349,14 +348,17 @@ class ilUserUtil
 					);
 				}
 			}
-			$main_role = $gr[min(array_keys($gr))];
-			// configuration by role
-			if ($main_role['point'] > 0)
+			if(!empty($gr))
 			{
-				$current = $main_role['point'];
-				if($current == self::START_REPOSITORY_OBJ)
-				{
-					$ref_id = $main_role['object'];
+				$current = -1;
+				krsort($gr);
+				while ($current < 0) {
+					foreach ($gr as $arole) {
+						if ($arole['point'] > 0) {
+							$current = $arole['point'];
+							$ref_id = $arole['object'];
+						}
+					}
 				}
 			}
 			// configuration by default
@@ -372,7 +374,7 @@ class ilUserUtil
 
 		}
 		switch($current)
-		{			
+		{
 			case self::START_REPOSITORY:
 			case self::START_REPOSITORY_OBJ:
 				if($ref_id &&

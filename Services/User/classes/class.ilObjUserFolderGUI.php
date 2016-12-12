@@ -3412,7 +3412,7 @@ class ilObjUserFolderGUI extends ilObjectGUI
 	}
 
 	/**
-	 * store starting point from the form or remove starting point if GET $rolid
+	 * store starting point from the form
 	 */
 	protected function saveStartingPointObject()
 	{
@@ -3433,7 +3433,7 @@ class ilObjUserFolderGUI extends ilObjectGUI
 				$role->setStartingPoint($form->getInput('start_point'));
 
 				$obj_id = $form->getInput('start_object');
-				if($obj_id)
+				if($obj_id && ($role->getStartingPoint() == ilUserUtil::START_REPOSITORY_OBJ))
 				{
 					if(ilObject::_lookupObjId($obj_id) && !$tree->isDeleted($obj_id))
 					{
@@ -3444,6 +3444,10 @@ class ilObjUserFolderGUI extends ilObjectGUI
 					{
 						ilUtil::sendFailure($this->lng->txt("obj_ref_id_not_exist"), true);
 					}
+				}
+				else
+				{
+					$role->setStartingObject(0);
 				}
 				$role->update();
 			}
