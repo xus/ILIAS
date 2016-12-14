@@ -14,19 +14,22 @@ include_once("Services/Table/classes/class.ilTable2GUI.php");
 class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 {
 	protected $log;
+	protected $parent_obj;
 
 	const TABLE_POSITION_USER_CHOOSES = -1;
 	const TABLE_POSITION_DEFAULT = 9999;
 
-	function __construct($a_parent_obj, $a_parent_cmd, $a_template_context)
+	function __construct($a_parent_obj)
 	{
-		global $ilCtrl, $lng;
+		global $ilCtrl, $lng, $rbacsystem;
 
 		$this->log = ilLoggerFactory::getLogger("user");
 
+		$this->parent_obj = $a_parent_obj;
+
 		$this->setId("usrrolesp");
 
-		parent::__construct($a_parent_obj, $a_parent_cmd, $a_template_context);
+		parent::__construct($a_parent_obj);
 
 		$this->getItems();
 
@@ -39,7 +42,7 @@ class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 		$this->addColumn($lng->txt("actions"));
 		$this->setFormAction($ilCtrl->getFormAction($a_parent_obj));
 		$this->setRowTemplate("tpl.user_role_starting_point_row.html", "Services/User");
-		$this->addCommandButton("saveorder", $lng->txt("role_save_order"));
+		$this->addCommandButton("saveOrder", $lng->txt("role_save_order"));
 
 		$this->setExternalSorting(true);
 
@@ -47,7 +50,7 @@ class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 		$roles_without_point = ilObjRole::getGlobalRolesWithoutStartingPoint();
 		if(!empty($roles_without_point))
 		{
-			$this->addCommandButton("rolestartingpointform", $this->lng->txt('create_role_starting_point'));
+			$this->addCommandButton("roleStartingPointform", $this->lng->txt('create_role_starting_point'));
 		}
 		else
 		{
@@ -151,9 +154,9 @@ class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 
 			$list->setId($a_set["id"]);
 
-			$edit_url = $ilCtrl->getLinkTarget($this->getParentObject(), "rolestartingpointform");
+			$edit_url = $ilCtrl->getLinkTarget($this->getParentObject(), "initRoleStartingPointForm");
 			$list->addItem($lng->txt("edit"), "", $edit_url);
-			$delete_url = $ilCtrl->getLinkTarget($this->getParentObject(), "confirmdeletestartingpoint");
+			$delete_url = $ilCtrl->getLinkTarget($this->getParentObject(), "confirmDeleteStartingPoint");
 			$list->addItem($lng->txt("delete"), "", $delete_url);
 			$this->tpl->setVariable("VAL_ID", "position[".$a_set['id']."]");
 			$this->tpl->setVariable("VAL_POS", $a_set["starting_position"]);
@@ -165,12 +168,12 @@ class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 			if($a_set['id'] == "default")
 			{
 				$ilCtrl->setParameter($this->getParentObject(), "rolid", "default");
-				$edit_url = $ilCtrl->getLinkTarget($this->getParentObject(), "rolestartingpointform");
+				$edit_url = $ilCtrl->getLinkTarget($this->getParentObject(), "initRoleStartingPointForm");
 			}
 			else
 			{
 				$ilCtrl->setParameter($this->getParentObject(), "rolid", "user");
-				$edit_url = $ilCtrl->getLinkTarget($this->getParentObject(), "userstartingpointform");
+				$edit_url = $ilCtrl->getLinkTarget($this->getParentObject(), "initUserStartingPointForm");
 			}
 
 			$list->addItem($lng->txt("edit"), "", $edit_url);

@@ -12,7 +12,7 @@ require_once "./Services/Object/classes/class.ilObjectGUI.php";
 * @version $Id$
 * 
 * @ilCtrl_Calls ilObjUserFolderGUI: ilPermissionGUI, ilUserTableGUI
-* @ilCtrl_Calls ilObjUserFolderGUI: ilAccountCodesGUI, ilCustomUserFieldsGUI, ilRepositorySearchGUI
+* @ilCtrl_Calls ilObjUserFolderGUI: ilAccountCodesGUI, ilCustomUserFieldsGUI, ilRepositorySearchGUI, ilStartingPointGUI
 *
 * @ingroup ServicesUser
 */
@@ -21,8 +21,6 @@ class ilObjUserFolderGUI extends ilObjectGUI
 	var $ctrl;
 
 	protected $log;
-	const ORDER_POSITION_MIN = 0;
-	const ORDER_POSITION_MAX = 9999;
 
 	/**
 	* Constructor
@@ -113,31 +111,21 @@ class ilObjUserFolderGUI extends ilObjectGUI
 				$this->ctrl->forwardCommand($cf);
 				break;
 
+			case 'ilstartingpointgui':
+				$this->tabs_gui->setTabActive('settings');
+				$this->setSubTabs("settings");
+				$ilTabs->activateSubTab("starting_point");
+				include_once("./Services/User/classes/class.ilUserStartingPointGUI.php");
+				$cf = new ilStartingPointGUI($this->ref_id);
+				$this->ctrl->forwardCommand($cf);
+				break;
+
 			default:
-				if($cmd == "rolestartingpointform")
+				if(!$cmd)
 				{
-					$cmd = "initRoleStartingPointForm";
+					$cmd = "view";
 				}
-				elseif($cmd == "userstartingpointform")
-				{
-					$cmd = "initUserStartingPointForm";
-				}
-				elseif($cmd == "saveorder")
-				{
-					$cmd = "saveOrder";
-				}
-				elseif($cmd == "confirmdeletestartingpoint")
-				{
-					$cmd = "confirmDeleteStartingPoint";
-				}
-				else
-				{
-					if(!$cmd)
-					{
-						$cmd = "view";
-					}
-					$cmd .= "Object";
-				}
+				$cmd .= "Object";
 				$this->$cmd();
 
 				break;
@@ -2866,7 +2854,7 @@ class ilObjUserFolderGUI extends ilObjectGUI
 												 "newAccountMail",get_class($this));
 
 				$this->tabs_gui->addSubTabTarget("starting_points",
-												$this->ctrl->getLinkTarget($this,'startingPoints'),
+												$this->ctrl->getLinkTargetByClass("ilstartingpointgui", "startingPoints"),
 												"startingPoints",get_class($this));
 
 				#$this->tabs_gui->addSubTab("account_codes", $this->lng->txt("user_account_codes"),
@@ -3227,313 +3215,5 @@ class ilObjUserFolderGUI extends ilObjectGUI
 				return array(array("generalSettings", $fields));	
 		}		
 	}
-
-	/**
-	 * table form to set up starting points depends of user roles
-	 */
-	public function startingPointsObject()
-	{
-		global $ilAccess;
-
-		$this->setSubTabs('settings');
-		$this->tabs_gui->setTabActive('settings');
-		$this->tabs_gui->setSubTabActive('starting_points');
-
-		include_once "Services/User/classes/class.ilUserRoleStartingPointTableGUI.php";
-		$tbl = new ilUserRoleStartingPointTableGUI($this, "listRoles",
-			$ilAccess->checkAccess("write", "", $this->object->getRefId()));
-		$this->tpl->setContent($tbl->getHTML());
-
-	}
-
-	public function initUserStartingPointForm(ilPropertyFormGUI $form = null)
-	{
-		if(!($form instanceof ilPropertyFormGUI))
-		{
-			$form = $this->getUserStartingPointForm();
-		}
-		$this->tpl->setContent($form->getHTML());
-	}
-
-	public function initRoleStartingPointForm(ilPropertyFormGUI $form = null)
-	{
-		if(!($form instanceof ilPropertyFormGUI))
-		{
-			$form = $this->getRoleStartingPointForm();
-		}
-		$this->tpl->setContent($form->getHTML());
-	}
-
-	protected function getUserStartingPointForm()
-	{
-		require_once ("Services/Form/classes/class.ilPropertyFormGUI.php");
-		require_once "Services/User/classes/class.ilUserUtil.php";
-
-		$this->setSubTabs('settings');
-		$this->tabs_gui->setTabActive('settings');
-		$this->tabs_gui->setSubTabActive('starting_points');
-
-		$form = new ilPropertyFormGUI();
-
-		// starting point: personal
-		$startp = new ilCheckboxInputGUI($this->lng->txt("adm_user_starting_point_personal"), "usr_start_pers");
-		$startp->setInfo($this->lng->txt("adm_user_starting_point_personal_info"));
-		$startp->setChecked(ilUserUtil::hasPersonalStartingPoint());
-
-		$form->addItem($startp);
-
-		$form->addCommandButton("saveUserStartingPoint", $this->lng->txt("save"));
-		$form->setFormAction($this->ctrl->getFormAction($this));
-
-		return $form;
-	}
-
-	/**
-	 * @return ilPropertyFormGUI
-	 */
-	protected function getRoleStartingPointForm()
-	{
-		require_once "Services/Form/classes/class.ilPropertyFormGUI.php";
-		require_once "./Services/AccessControl/classes/class.ilObjRole.php";
-		include_once "Services/User/classes/class.ilUserUtil.php";
-
-		$this->setSubTabs('settings');
-		$this->tabs_gui->setTabActive('settings');
-		$this->tabs_gui->setSubTabActive('starting_points');
-
-		$form = new ilPropertyFormGUI();
-
-		$rolid = $_REQUEST['rolid'];
-
-		//edit no default
-		if($rolid > 0 && $rolid != 'default')
-		{
-			$role = new ilObjRole($rolid);
-			$options[$rolid] = $role->getTitle();
-			$si_roles = new ilSelectInputGUI($this->lng->txt("editing_this_role"), 'role');
-			$starting_point = $role->getStartingPoint();
-			$si_roles->setOptions($options);
-			$form->addItem($si_roles);
-		}
-		//create
-		elseif(!$rolid || $rolid !='default')
-		{
-			$roles = ilObjRole::getGlobalRolesWithoutStartingPoint();
-			foreach($roles as $role)
-			{
-				$options[$role['id']] = $role['title'];
-			}
-			$si_roles = new ilSelectInputGUI($this->lng->txt("roles_without_starting_point"), 'role');
-			$si_roles->setOptions($options);
-			$form->addItem($si_roles);
-		}
-		else
-		{
-			$starting_point = ilUserUtil::getStartingPoint();
-		}
-
-		// starting point
-
-		$si = new ilRadioGroupInputGUI($this->lng->txt("adm_user_starting_point"), "start_point");
-		$si->setRequired(true);
-		$si->setInfo($this->lng->txt("adm_user_starting_point_info"));
-		$valid = array_keys(ilUserUtil::getPossibleStartingPoints());
-		foreach(ilUserUtil::getPossibleStartingPoints(true) as $value => $caption)
-		{
-			$opt = new ilRadioOption($caption, $value);
-			$si->addOption($opt);
-
-			if(!in_array($value, $valid))
-			{
-				$opt->setInfo($this->lng->txt("adm_user_starting_point_invalid_info"));
-			}
-		}
-		$si->setValue($starting_point);
-		$form->addItem($si);
-
-		// starting point: repository object
-		$repobj = new ilRadioOption($this->lng->txt("adm_user_starting_point_object"), ilUserUtil::START_REPOSITORY_OBJ);
-		$repobj_id = new ilTextInputGUI($this->lng->txt("adm_user_starting_point_ref_id"), "start_object");
-		$repobj_id->setRequired(true);
-		$repobj_id->setSize(5);
-		//$i has the starting_point value, so we are here only when edit one role or setting the default role.
-		if($si->getValue() == ilUserUtil::START_REPOSITORY_OBJ)
-		{
-			if($role)
-			{
-				$start_ref_id  = $role->getStartingObject();
-			}
-			else
-			{
-				$start_ref_id = ilUserUtil::getStartingObject();
-			}
-
-			$repobj_id->setValue($start_ref_id);
-			if($start_ref_id)
-			{
-				$start_obj_id = ilObject::_lookupObjId($start_ref_id);
-				if($start_obj_id)
-				{
-					$repobj_id->setInfo($this->lng->txt("obj_".ilObject::_lookupType($start_obj_id)).
-						": ".ilObject::_lookupTitle($start_obj_id));
-				}
-			}
-		}
-		$repobj->addSubItem($repobj_id);
-		$si->addOption($repobj);
-
-		// save and cancel commands
-		$form->addCommandButton("saveStartingPoint", $this->lng->txt("save"));
-
-		$form->setTitle($this->lng->txt("starting_point_settings"));
-		$form->setFormAction($this->ctrl->getFormAction($this));
-
-		return $form;
-	}
-
-	protected function saveUserStartingPointObject()
-	{
-		global $ilCtrl;
-
-		$this->checkPermission("write");
-
-		include_once "Services/User/classes/class.ilUserUtil.php";
-
-		$form = $this->getUserStartingPointForm();
-
-		if ($form->checkInput())
-		{
-			ilUserUtil::togglePersonalStartingPoint($form->getInput('usr_start_pers'));
-			ilUtil::sendSuccess($this->lng->txt("msg_obj_modified"), true);
-			$ilCtrl->redirect($this, "startingPoints");
-		}
-		ilUtil::sendFailure($this->lng->txt("msg_error"), true);
-		$ilCtrl->redirect($this, "startingPoints");
-	}
-
-	/**
-	 * store starting point from the form
-	 */
-	protected function saveStartingPointObject()
-	{
-		global $ilCtrl, $tree;
-
-		$this->checkPermission("write");
-
-		//add from form
-		$form = $this->getRoleStartingPointForm();
-		if ($form->checkInput())
-		{
-			//if role
-			if($form->getInput('role'))
-			{
-				$this->log->debug("role =" .$form->getInput('role'));
-
-				$role = new ilObjRole($form->getInput('role'));
-				$role->setStartingPoint($form->getInput('start_point'));
-
-				$obj_id = $form->getInput('start_object');
-				if($obj_id && ($role->getStartingPoint() == ilUserUtil::START_REPOSITORY_OBJ))
-				{
-					if(ilObject::_lookupObjId($obj_id) && !$tree->isDeleted($obj_id))
-					{
-						$role->setStartingObject($obj_id);
-						ilUtil::sendSuccess($this->lng->txt("msg_obj_modified"), true);
-					}
-					else
-					{
-						ilUtil::sendFailure($this->lng->txt("obj_ref_id_not_exist"), true);
-					}
-				}
-				else
-				{
-					$role->setStartingObject(0);
-				}
-				$role->update();
-			}
-			else  //default
-			{
-				ilUserUtil::setStartingPoint($form->getInput('start_point'), $form->getInput('start_object'));
-				ilUtil::sendSuccess($this->lng->txt("msg_obj_modified"), true);
-			}
-
-			$ilCtrl->redirect($this, "startingPoints");
-		}
-		ilUtil::sendFailure($this->lng->txt("msg_error"), true);
-		$ilCtrl->redirect($this, "startingPoints");
-	}
-
-	protected function saveOrder()
-	{
-		global $ilCtrl, $ilDB;
-
-		$this->checkPermission("write");
-
-		require_once "./Services/AccessControl/classes/class.ilObjRole.php";
-
-		foreach($_POST['position'] as $id => $position)
-		{
-			if($position > self::ORDER_POSITION_MIN && $position < self::ORDER_POSITION_MAX )
-			{
-				$sql = "UPDATE role_data".
-					" SET starting_position = ".$ilDB->quote($position, 'integer').
-					" WHERE role_id = ".$ilDB->quote($id, 'integer');
-				$ilDB->query($sql);
-			}
-		}
-		ilUtil::sendSuccess($this->lng->txt("msg_obj_modified"),true);
-		$ilCtrl->redirect($this, "startingPoints");
-	}
-	/**
-	 * Confirm delete starting point
-	 */
-	function confirmDeleteStartingPoint()
-	{
-		global $ilCtrl, $lng, $tpl, $ilTabs;
-
-		$this->checkPermission("write");
-
-		$ilTabs->clearTargets();
-		$ilTabs->setBackTarget($lng->txt('back_to_list'), $ilCtrl->getLinkTarget($this, 'startingPointsObject'));
-
-		include_once 'Services/Utilities/classes/class.ilConfirmationGUI.php';
-		$conf = new ilConfirmationGUI();
-		$conf->setFormAction($ilCtrl->getFormAction($this));
-		$conf->setHeaderText($lng->txt('confirm_delete'));
-
-		include_once "./Services/AccessControl/classes/class.ilObjRole.php";
-
-		$rolid = (int)$_REQUEST['rolid'];
-		$role = new ilObjRole($rolid);
-
-		$conf->addItem('rolid', $rolid, $role->getTitle());
-		$conf->setConfirm($lng->txt('delete'), 'deleteStartingPoint');
-		$conf->setCancel($lng->txt('cancel'), 'startingPointsObject');
-
-		$tpl->setContent($conf->getHTML());
-	}
-
-	/**
-	 * Set to 0 the starting point values
-	 */
-	protected function deleteStartingPointObject()
-	{
-		global $ilCtrl;
-
-		$this->checkPermission("write");
-
-		require_once "./Services/AccessControl/classes/class.ilObjRole.php";
-
-		$rolid = $_REQUEST['rolid'];
-
-		$role = new ilObjRole($rolid);
-		$role->setStartingPoint(0);
-		$role->setStartingObject(0);
-		$role->setStartingPosition(0);
-		$role->update();
-		ilUtil::sendSuccess($this->lng->txt("msg_obj_modified"), true);
-		$ilCtrl->redirect($this, "startingPoints");
-	}
-	
 } // END class.ilObjUserFolderGUI
 ?>
