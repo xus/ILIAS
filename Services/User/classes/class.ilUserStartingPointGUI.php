@@ -2,15 +2,15 @@
 /* Copyright (c) 1998-2016 ILIAS open source, Extended GPL, see docs/LICENSE */
 
 /**
- * Class iStartingPointGUI
+ * Class ilUserStartingPointGUI
  *
  * @author Jesús López <lopez@leifos.com>
  * @version $Id$
- *
+ * @ilCtrl_Calls ilUserStartingPointGUI:
  * @ingroup ServicesUser
  */
 
-class ilStartingPointGUI
+class ilUserStartingPointGUI
 {
 	const ORDER_POSITION_MIN = 0;
 	const ORDER_POSITION_MAX = 9999;

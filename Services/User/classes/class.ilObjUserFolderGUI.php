@@ -12,7 +12,7 @@ require_once "./Services/Object/classes/class.ilObjectGUI.php";
 * @version $Id$
 * 
 * @ilCtrl_Calls ilObjUserFolderGUI: ilPermissionGUI, ilUserTableGUI
-* @ilCtrl_Calls ilObjUserFolderGUI: ilAccountCodesGUI, ilCustomUserFieldsGUI, ilRepositorySearchGUI, ilStartingPointGUI
+* @ilCtrl_Calls ilObjUserFolderGUI: ilAccountCodesGUI, ilCustomUserFieldsGUI, ilRepositorySearchGUI, ilUserStartingPointGUI
 *
 * @ingroup ServicesUser
 */
@@ -111,12 +111,12 @@ class ilObjUserFolderGUI extends ilObjectGUI
 				$this->ctrl->forwardCommand($cf);
 				break;
 
-			case 'ilstartingpointgui':
+			case 'iluserstartingpointgui':
 				$this->tabs_gui->setTabActive('settings');
 				$this->setSubTabs("settings");
 				$ilTabs->activateSubTab("starting_point");
 				include_once("./Services/User/classes/class.ilUserStartingPointGUI.php");
-				$cf = new ilStartingPointGUI($this->ref_id);
+				$cf = new ilUserStartingPointGUI($this->ref_id);
 				$this->ctrl->forwardCommand($cf);
 				break;
 
@@ -2853,9 +2853,14 @@ class ilObjUserFolderGUI extends ilObjectGUI
 												 $this->ctrl->getLinkTarget($this,'newAccountMail'),
 												 "newAccountMail",get_class($this));
 
-				$this->tabs_gui->addSubTabTarget("starting_points",
-												$this->ctrl->getLinkTargetByClass("ilstartingpointgui", "startingPoints"),
-												"startingPoints",get_class($this));
+				$this->tabs_gui->addSubTabTarget("starting points",
+												$this->ctrl->getLinkTargetByClass("iluserstartingpointgui", "startingPoints"),
+												"startingPoints",getClass($this));
+
+
+				//$this->tabs_gui->addSubTabTarget("starting_points",
+				//								$this->ctrl->getLinkTargetByClass("iluserstartingpointgui", "startingPoints"),
+				//								"startingPoints",get_class($this));
 
 				#$this->tabs_gui->addSubTab("account_codes", $this->lng->txt("user_account_codes"),
 				#							 $this->ctrl->getLinkTargetByClass("ilaccountcodesgui"));												 
