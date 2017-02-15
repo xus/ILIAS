@@ -335,8 +335,6 @@ class ilUserUtil
 		}
 		else
 		{
-			//TODO: Working here (loop login)
-			/*
 			include_once './Services/AccessControl/classes/class.ilObjRole.php';
 			$gr = array();
 			foreach($rbacreview->getGlobalRoles() as $role_id)
@@ -344,12 +342,15 @@ class ilUserUtil
 				if($rbacreview->isAssigned($ilUser->getId(),$role_id))
 				{
 					$role = new ilObjRole($role_id);
-					$gr[$role->getStartingPosition()]= array(
+					if($role->getStartingPosition())
+					{
+						$gr[$role->getStartingPosition()]= array(
 							'point' => $role->getStartingPoint(),
 							'object' => $role->getStartingObject()
-					);
+						);
+					}
 				}
-			}*/
+			}
 			if(!empty($gr))
 			{
 				$current = -1;
