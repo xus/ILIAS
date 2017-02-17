@@ -42,15 +42,18 @@ class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 		$this->addColumn($lng->txt("actions"));
 		$this->setFormAction($ilCtrl->getFormAction($a_parent_obj));
 		$this->setRowTemplate("tpl.user_role_starting_point_row.html", "Services/User");
-		$this->addCommandButton("saveOrder", $lng->txt("role_save_order"));
+		$this->addCommandButton("saveOrder", $lng->txt("save_order"));
 
 		$this->setExternalSorting(true);
 
-		require_once "./Services/AccessControl/classes/class.ilObjRole.php";
-		$roles_without_point = ilObjRole::getGlobalRolesWithoutStartingPoint();
+		//require_once "./Services/AccessControl/classes/class.ilObjRole.php";
+		//$roles_without_point = ilObjRole::getGlobalRolesWithoutStartingPoint();
+		require_once "./Services/AccessControl/classes/class.ilStartingPoint.php";
+		$roles_without_point = ilStartingPoint::getGlobalRolesWithoutStartingPoint();
+
 		if(!empty($roles_without_point))
 		{
-			$this->addCommandButton("roleStartingPointform", $this->lng->txt('create_role_starting_point'));
+			$this->addCommandButton("roleStartingPointform", $this->lng->txt('create_starting_point'));
 		}
 		else
 		{
@@ -69,7 +72,7 @@ class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 		include_once "Services/User/classes/class.ilUserUtil.php";
 		require_once "Services/Object/classes/class.ilObjectDataCache.php";
 		require_once "Services/AccessControl/classes/class.ilObjRole.php";
-
+		require_once "Services/AccessControl/classes/class.ilStartingPoint.php";
 		$dc = new ilObjectDataCache();
 
 		$valid_points = ilUserUtil::getPossibleStartingPoints();
@@ -84,31 +87,36 @@ class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 			"starting_position" => self::TABLE_POSITION_USER_CHOOSES
 		);
 
-		$roles = ilObjRole::getRolesWithStartingPoint();
+		$points = ilStartingPoint::getStartingPoints();
 
-		foreach ($roles as $g_role)
+		foreach ($points as $point)
 		{
-			$role = new ilObjRole($g_role['role_id']);
-			$starting_point = $role->getStartingPoint();
-			$position = $role->getStartingPosition();
+			$starting_point = $point['starting_point'];
+			$position = $point['position'];
 			$sp_text = $valid_points[$starting_point];
 
 			if($starting_point == ilUserUtil::START_REPOSITORY_OBJ)
 			{
-				$reference_id = $role->getStartingObject();
-
-				$object_id = ilObject::_lookupObjId($reference_id);
+				$object_id = ilObject::_lookupObjId($point['starting_object']);
 				$type = $dc->lookupType($object_id);
 				$title = $dc->lookupTitle($object_id);
-				$sp_text = $this->lng->txt("type").": ".$type." ".$this->lng->txt("ref_id")." ".$reference_id." ".$this->lng->txt("title")."<i>\"".$title."\"</i>";
+				$sp_text = $this->lng->txt("type").": ".$type." ".$this->lng->txt("ref_id")." ".$point['starting_object']." ".$this->lng->txt("title")."<i>\"".$title."\"</i>";
 			}
 
-			$result[] = array (
-				"id" => $role->getId(),
-				"criteria" => $role->getTitle(),
-				"starting_page" => $sp_text,
-				"starting_position" => (int)$position
-			);
+			if($point['rule_type'] == ilStartingPoint::ROLE_BASED)
+			{
+				$options = unserialize($point['rule_options']);
+
+				$role_obj = new ilObjRole($options['role_id']);
+
+				$result[] = array (
+					"id" => $point['id'],
+					"criteria" => $role_obj->getTitle(),
+					"starting_page" => $sp_text,
+					"starting_position" => (int)$position,
+					"role_id" => $role_obj->getId()
+				);
+			}
 		}
 
 		$default_sp = ilUserUtil::getStartingPoint();
@@ -132,6 +140,8 @@ class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 
 		$result = ilUtil::sortArray($result, "starting_position", "asc", true);
 
+		$result = ilStartingPoint::reArrangePositions($result);
+
 		$this->setData($result);
 
 	}
@@ -150,7 +160,12 @@ class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 
 		if($a_set['id'] > 0 && $a_set['id'] != 'default' && $a_set['id'] != 'user')
 		{
-			$ilCtrl->setParameter($this->getParentObject(), "rolid", $a_set["id"]);
+			if(ilStartingPoint::ROLE_BASED)
+			{
+				$ilCtrl->setParameter($this->getParentObject(), "rolid", $a_set["role_id"]);
+			}
+
+			$ilCtrl->setParameter($this->getParentObject(), "spid", $a_set['id']);
 
 			$list->setId($a_set["id"]);
 

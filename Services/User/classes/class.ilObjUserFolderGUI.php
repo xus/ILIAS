@@ -2853,14 +2853,9 @@ class ilObjUserFolderGUI extends ilObjectGUI
 												 $this->ctrl->getLinkTarget($this,'newAccountMail'),
 												 "newAccountMail",get_class($this));
 
-				$this->tabs_gui->addSubTabTarget("starting points",
+				$this->tabs_gui->addSubTabTarget("starting_points",
 												$this->ctrl->getLinkTargetByClass("iluserstartingpointgui", "startingPoints"),
-												"startingPoints",getClass($this));
-
-
-				//$this->tabs_gui->addSubTabTarget("starting_points",
-				//								$this->ctrl->getLinkTargetByClass("iluserstartingpointgui", "startingPoints"),
-				//								"startingPoints",get_class($this));
+												"startingPoints", get_class($this));
 
 				#$this->tabs_gui->addSubTab("account_codes", $this->lng->txt("user_account_codes"),
 				#							 $this->ctrl->getLinkTargetByClass("ilaccountcodesgui"));												 

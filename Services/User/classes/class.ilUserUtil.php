@@ -324,6 +324,8 @@ class ilUserUtil
 		global $tree, $ilUser, $rbacreview;
 		
 		$ref_id = 1;
+		$by_default = true;
+
 		//configuration by user preference
 		if(self::hasPersonalStartingPoint())
 		{
@@ -335,37 +337,43 @@ class ilUserUtil
 		}
 		else
 		{
-			include_once './Services/AccessControl/classes/class.ilObjRole.php';
-			$gr = array();
-			foreach($rbacreview->getGlobalRoles() as $role_id)
+			include_once './Services/AccessControl/classes/class.ilStartingPoint.php';
+
+			if(ilStartingPoint::ROLE_BASED)
 			{
-				if($rbacreview->isAssigned($ilUser->getId(),$role_id))
+				//getting all roles with starting points and store them in array
+				$roles = ilStartingPoint::getRolesWithStartingPoint();
+
+				$roles_ids = array_keys($roles);
+
+				$gr = array();
+				foreach($rbacreview->getGlobalRoles() as $role_id)
 				{
-					$role = new ilObjRole($role_id);
-					if($role->getStartingPosition())
+					if($rbacreview->isAssigned($ilUser->getId(),$role_id))
 					{
-						$gr[$role->getStartingPosition()]= array(
-							'point' => $role->getStartingPoint(),
-							'object' => $role->getStartingObject()
-						);
-					}
-				}
-			}
-			if(!empty($gr))
-			{
-				$current = -1;
-				krsort($gr);
-				while ($current < 0) {
-					foreach ($gr as $arole) {
-						if ($arole['point'] > 0) {
-							$current = $arole['point'];
-							$ref_id = $arole['object'];
+						ilLoggerFactory::getRootLogger()->debug("Check role_id = ".$role_id);
+
+						if(in_array($role_id,$roles_ids))
+						{
+							$gr[$roles[$role_id]['position']] = array(
+								"point" => $roles[$role_id]['starting_point'],
+								"object" => $roles[$role_id]['starting_object']
+							);
 						}
 					}
 				}
+
+				if(!empty($gr))
+				{
+					ksort($gr);
+					$role_point = array_pop($gr);
+					$current = $role_point['point'];
+					$ref_id = $role_point['object'];
+
+					$by_default = false;
+				}
 			}
-			// configuration by default
-			else
+			if($by_default)
 			{
 				$current = self::getStartingPoint();
 
