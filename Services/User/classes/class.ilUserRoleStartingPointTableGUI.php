@@ -158,14 +158,15 @@ class ilUserRoleStartingPointTableGUI extends ilTable2GUI
 		$list = new ilAdvancedSelectionListGUI();
 		$list->setListTitle($lng->txt("actions"));
 
+		$ilCtrl->setParameter($this->getParentObject(), "spid", $a_set['id']);
+
+
 		if($a_set['id'] > 0 && $a_set['id'] != 'default' && $a_set['id'] != 'user')
 		{
 			if(ilStartingPoint::ROLE_BASED)
 			{
 				$ilCtrl->setParameter($this->getParentObject(), "rolid", $a_set["role_id"]);
 			}
-
-			$ilCtrl->setParameter($this->getParentObject(), "spid", $a_set['id']);
 
 			$list->setId($a_set["id"]);
 

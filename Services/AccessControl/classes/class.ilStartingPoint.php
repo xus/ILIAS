@@ -19,13 +19,13 @@ class ilStartingPoint
 	//rule options.
 	const FALLBACK_RULE = 1;
 	const ROLE_BASED = 2;
-    const USER_SELECTION_RULE = 3;
+	const USER_SELECTION_RULE = 3;
 
 	protected $starting_point;
 	protected $starting_object;
 	protected $starting_position;
 	protected $rule_type;
-	protected $rule_options;
+	protected $rule_options; // array serialized in db
 	protected $id;
 
 	/**
@@ -42,6 +42,11 @@ class ilStartingPoint
 		}
 	}
 
+	/**
+	 * Set data for the starting point
+	 * @param $a_id integer starting point id
+	 *
+	 */
 	private function setData($a_id)
 	{
 		global $ilDB;
@@ -171,7 +176,10 @@ class ilStartingPoint
 		return $this->rule_options;
 	}
 
-
+	/**
+	 * Get all the starting points in database
+	 * @return array
+	 */
 	public static function getStartingPoints()
 	{
 		global $ilDB;
@@ -194,6 +202,10 @@ class ilStartingPoint
 		return $points;
 	}
 
+	/**
+	 * get array with all roles which have starting point defined.
+	 * @return array
+	 */
 	public static function getRolesWithStartingPoint()
 	{
 		global $ilDB;
@@ -218,6 +230,10 @@ class ilStartingPoint
 		return $roles;
 	}
 
+	/**
+	 * Get id and title of the roles without starting points
+	 * @return array
+	 */
 	public static function getGlobalRolesWithoutStartingPoint()
 	{
 		global $rbacreview;
@@ -249,7 +265,9 @@ class ilStartingPoint
 		return $roles;
 	}
 
-
+	/**
+	 * insert starting point into database
+	 */
 	function save()
 	{
 		global $ilDB;
@@ -275,6 +293,9 @@ class ilStartingPoint
 
 	}
 
+	/**
+	 * update starting point
+	 */
 	function update()
 	{
 		global $ilDB;
@@ -291,6 +312,9 @@ class ilStartingPoint
 					$this->getRuleType(), $this->getRuleOptions(), $this->id));
 	}
 
+	/**
+	 * delete starting point
+	 */
 	function delete()
 	{
 		global $ilDB;
@@ -339,6 +363,10 @@ class ilStartingPoint
 		return $a_items;
 	}
 
+	/**
+	 * Save all starting point positions. Ordering values with increment +10
+	 * @param $a_items
+	 */
 	function saveOrder($a_items)
 	{
 		global $ilDB;

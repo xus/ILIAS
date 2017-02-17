@@ -351,8 +351,6 @@ class ilUserUtil
 				{
 					if($rbacreview->isAssigned($ilUser->getId(),$role_id))
 					{
-						ilLoggerFactory::getRootLogger()->debug("Check role_id = ".$role_id);
-
 						if(in_array($role_id,$roles_ids))
 						{
 							$gr[$roles[$role_id]['position']] = array(
