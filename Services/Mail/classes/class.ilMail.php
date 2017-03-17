@@ -1612,6 +1612,9 @@ class ilMail
 		global $ilClientIniFile;
 
 		$signature = "\n\n* * * * *\n";
+		$signature .= "\nTechnische Hilfestellung gewünscht? Wir helfen Ihnen weiter: 0228/5406-5827\n";
+		$signature .= "\nMit freundlichen Grüßen\n";
+		$signature .= "\nIhr Seminarteam\n\n";
 
 		$signature .= $ilClientIniFile->readVariable('client', 'name') . "\n";
 		if(strlen($desc = $ilClientIniFile->readVariable('client', 'description')))
