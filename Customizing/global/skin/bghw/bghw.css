@@ -13187,3 +13187,7 @@ div.ilCalSelTitle {
 .jstree a.jstree-loading .jstree-icon {
   background: url("images/throbber.gif") no-repeat center !important;
 }
+
+a.ilTreeView {
+  display:none;
+}
