@@ -16136,7 +16136,7 @@ $in_fields = array("expires");
 $ilDB->addIndex("dav_lock", $in_fields, "i3", false);
 
 $in_fields = array("token");
-$ilDB->addUniqueConstraint("dav_lock", $in_fields, "c1");
+#$ilDB->addUniqueConstraint("dav_lock", $in_fields, "c1");
 
 
 //
