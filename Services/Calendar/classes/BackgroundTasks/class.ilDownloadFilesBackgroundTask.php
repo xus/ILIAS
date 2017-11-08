@@ -107,7 +107,10 @@ class ilDownloadFilesBackgroundTask
 	public function run()
 	{
 		$definition = new ilCalendarCopyDefinition();
-		$normalized_name = $this->normalizeFileName($this->getBucketTitle());
+		//$normalized_name = $this->normalizeFileName($this->getBucketTitle());
+		//$normalized_name = ilUtil::getASCIIFilename($this->getBucketTitle());
+		$normalized_name = $this->normalizeTranslitNames($this->getBucketTitle());
+
 		$definition->setTempDir($normalized_name);
 
 		$this->collectFiles($definition);
@@ -149,7 +152,9 @@ class ilDownloadFilesBackgroundTask
 		foreach($this->getEvents() as $event)
 		{
 			$folder_date = $event['event']->getStart()->get(IL_CAL_FKT_DATE,'Y-m-d');
-			$folder_app = $this->normalizeFileName($event['event']->getPresentationTitle());   //title formalized
+			//$folder_app = $this->normalizeFileName($event['event']->getPresentationTitle());   //title formalized
+			//$folder_app = ilUtil::getASCIIFilename($event['event']->getPresentationTitle());   //title formalized
+			$folder_app = $this->normalizeTranslitNames($event['event']->getPresentationTitle());   //title formalized
 
 			$this->logger->debug("collecting files...event title = ".$folder_app);
 
@@ -160,7 +165,10 @@ class ilDownloadFilesBackgroundTask
 			}
 			foreach($files as $file_with_absolut_path)
 			{
-				$basename = $this->normalizeFileName(basename($file_with_absolut_path));
+				//$basename = $this->normalizeFileName(basename($file_with_absolut_path));
+				//$basename = ilUtil::getASCIIFilename(basename($file_with_absolut_path));
+				$basename = $this->normalizeTranslitNames(basename($file_with_absolut_path));
+
 				$def->addCopyDefinition(
 					$file_with_absolut_path,
 					$folder_date.'/'.$folder_app.'/'.$basename
@@ -169,6 +177,23 @@ class ilDownloadFilesBackgroundTask
 			}
 			
 		}
+	}
+
+	/**
+	 * because ilUtil::getASCIIFilename returns ugly names. like "ö" to "o__"
+	 * iconv can't convine TRANSLIT and IGNORE that's why we need to remove all non-ASCii characters or
+	 * the iconv will return an empty string.
+	 * returns the original string with transliteration keeping the white spaces.
+	 * @param string
+	 * @return string
+	 */
+	protected function normalizeTranslitNames($s)
+	{
+		$s = preg_replace( '@[^\0-\x80]@u', "", $s);
+		$s = preg_replace("/[^a-zA-Z0-9\s\_\.\-]/", "", $s);
+		$s = iconv("utf-8", "ASCII//TRANSLIT", ($s));
+
+		return $s;
 	}
 
 	//Is this method really needed? do we have something centralized for this stuff?
@@ -212,7 +237,7 @@ class ilDownloadFilesBackgroundTask
 		$s    = preg_replace( '@\x{00f0}@u'    , "d",    $s );    // ð => d
 		// remove all non-ASCii characters
 		$s    = preg_replace( '@[^\0-\x80]@u'    , "",    $s );
-		$s = preg_replace('/\s+/', '_', $s);
+		//$s = preg_replace('/\s+/', '_', $s);
 		$s = preg_replace("/[^a-zA-Z0-9\_\.\-]/", "", $s);
 		// possible errors in UTF8-regular-expressions
 		if (empty($s)) {
