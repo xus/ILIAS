@@ -183,16 +183,20 @@ class Renderer extends AbstractComponentRenderer {
 		);
 		$is_async = $modal->getAsyncContentUrl();
 		if ($is_async) {
+$log->debug("RENDER IS ASYNCR.");
 			$options['type'] = 'async';
 			$options['url'] = $modal->getAsyncContentUrl();
+		} else
+		{
+$log->debug("ELSE: RENDER IS NOT ASYNCR.");
 		}
 
 		$show = $modal->getShowSignal();
 		$close = $modal->getCloseSignal();
 		$replace = $modal->getReplaceContentSignal();
 
-		$ar = $replace->getAsyncRenderUrl();
-		$log->debug("Async render URL => ".$ar);
+$ar = $replace->getAsyncRenderUrl();
+$log->debug("Async render URL => ".$ar);
 
 		$modal = $modal->withAdditionalOnLoadCode(function($id) use ($show, $close, $options, $replace, $is_async) {
 			if (!$is_async) {
@@ -206,9 +210,8 @@ class Renderer extends AbstractComponentRenderer {
 				"$(document).on('{$replace}', function(event, signalData) { il.UI.modal.replaceContentFromSignal('{$show}', signalData);});";
 		});
 
+		//should we send it via param to the renderer?
 		$id = $this->bindJavaScript($modal);
-		//este metodo existe?
-
 
 		if ($modal->getAsyncContentUrl()) {
 			$log->debug("RETURN WITHOUT CONTENT");

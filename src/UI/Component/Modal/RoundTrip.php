@@ -57,4 +57,25 @@ interface RoundTrip extends Modal {
 	 * @return RoundTrip
 	 */
 	public function withCancelButtonLabel($label);
+
+	/**
+	 * Get the signal to replace the content of this modal.
+	 *
+	 * @return ReplaceContentSignal
+	 */
+	public function getReplaceContentSignal();
+
+	/**
+	 * Get the url returning the rendered content, if the popovers content is rendered via ajax.
+	 *
+	 * @return string
+	 */
+	public function getAsyncContentUrl();
+
+	public function withAsyncContentUrl($url);
+
+	/**
+	 * Init the default signals plus extra signals like replaceContent
+	 */
+	public function initSignals();
 }
