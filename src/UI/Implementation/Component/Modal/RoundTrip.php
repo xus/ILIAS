@@ -145,7 +145,7 @@ class RoundTrip extends Modal implements Component\Modal\RoundTrip {
 	/**
 	 * Set the show/close/replace signals for this modal
 	 */
-	protected function initSignals() {
+	public function initSignals() {
 		parent::initSignals();
 		//signal generator from parent class
 		$this->replace_content_signal = $this->signal_generator->create("ILIAS\\UI\\Implementation\\Component\\Modal\\ReplaceContentSignal");
