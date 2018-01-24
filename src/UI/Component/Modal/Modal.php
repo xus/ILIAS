@@ -65,4 +65,18 @@ interface Modal extends Component, JavaScriptBindable, Triggerable, Onloadable {
 	 */
 	public function getCloseSignal();
 
+	/**
+	 * Get the signal to replace the content of this modal.
+	 *
+	 * @return ReplaceContentSignal
+	 */
+	public function getReplaceContentSignal();
+
+	/**
+	 * Get the url returning the rendered content, if the popovers content is rendered via ajax.
+	 *
+	 * @return string
+	 */
+	public function getAsyncContentUrl();
+
 }
