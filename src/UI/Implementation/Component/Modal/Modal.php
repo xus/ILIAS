@@ -34,6 +34,9 @@ abstract class Modal implements Component\Modal\Modal {
 	 */
 	protected $close_signal;
 
+	protected $ajax_content_url;
+	protected $replace_content_signal;
+
 	/**
 	 * @var string
 	 */
@@ -130,6 +133,32 @@ abstract class Modal implements Component\Modal\Modal {
 	protected function initSignals() {
 		$this->show_signal = $this->signal_generator->create();
 		$this->close_signal = $this->signal_generator->create();
+		$this->replace_content_signal = $this->signal_generator->create("ILIAS\\UI\\Implementation\\Component\\Modal\\ReplaceContentSignal");
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function getReplaceContentSignal() {
+		return $this->replace_content_signal;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function withAsyncContentUrl($url) {
+		$this->checkStringArg('url', $url);
+		$clone = clone $this;
+		$clone->ajax_content_url = $url;
+
+		return $clone;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function getAsyncContentUrl() {
+		return $this->ajax_content_url;
 	}
 
 }

@@ -99,4 +99,36 @@ class RoundTrip extends Modal implements Component\Modal\RoundTrip {
 		$clone->cancel_button_label = $label;
 		return $clone;
 	}
+
+
+	/**
+	 *
+	 *
+	 *
+	 *
+	 *
+	 * WORKING HERE
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	/**
+	 * @inheritdoc
+	 */
+	public function withAsyncContentUrl($url) {
+		$this->checkStringArg('url', $url);
+		$clone = clone $this;
+		$clone->ajax_content_url = $url;
+
+		return $clone;
+	}
+
+	public function getAsyncContentUrl()
+	{
+		//remove this dummy line
+		return $this->ajax_content_url;
+	}
 }
