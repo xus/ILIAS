@@ -103,21 +103,6 @@ class RoundTrip extends Modal implements Component\Modal\RoundTrip {
 		return $clone;
 	}
 
-
-	/**
-	 *
-	 *
-	 *
-	 *
-	 *
-	 * WORKING HERE
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 */
 	/**
 	 * @inheritdoc
 	 */

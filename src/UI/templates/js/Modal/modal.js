@@ -82,7 +82,7 @@ il.UI = il.UI || {};
          * @param url The URL where the ajax GET request is sent to load the new content
          */
         var replaceContent = function($triggerer, url) {
-            var $content = $('#' + $triggerer.attr('data-target')).find('.il-modal-content');
+            var $content = $('#' + $triggerer.attr('data-target')).find('.modal-content');
             if (!$content.length) return;
             $content.html('<i class="icon-refresh"></i><p>&nbsp;</p>');
             $content.load(url, function() {
@@ -94,7 +94,8 @@ il.UI = il.UI || {};
             showModal: showModal,
             closeModal: closeModal,
             showFromSignal: showFromSignal,
-            replaceContentFromSignal: replaceContentFromSignal
+            replaceContentFromSignal: replaceContentFromSignal,
+            replaceContent: replaceContent
         };
 
     })($);
