@@ -135,4 +135,15 @@ class RoundTrip extends Modal implements Component\Modal\RoundTrip {
 		//signal generator from parent class
 		$this->replace_content_signal = $this->signal_generator->create("ILIAS\\UI\\Implementation\\Component\\Modal\\ReplaceContentSignal");
 	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function withContent($content) {
+		$clone = clone $this;
+		$clone->content = $content;
+
+		return $clone;
+	}
+
 }

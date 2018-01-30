@@ -101,7 +101,7 @@ class Renderer extends AbstractComponentRenderer {
 			}
 			$options = json_encode($options);
 			return
-				"$(document).on('{$show}', function() { il.UI.modal.showModal('{$id}', {$options}); return false; });".
+				"$(document).on('{$show}', function(event, signalData) { il.UI.modal.showModal('{$id}', {$options}, signalData); return false; });".
 				"$(document).on('{$close}', function() { il.UI.modal.closeModal('{$id}'); return false; });".
 				"$(document).on('{$replace}', function(event, signalData) { il.UI.modal.replaceContentFromSignal('{$show}', signalData);});";
 		});
