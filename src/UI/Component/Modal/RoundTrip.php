@@ -23,6 +23,14 @@ interface RoundTrip extends Modal {
 	 */
 	public function getContent();
 
+	/**
+	 * Get Modal likee this with the provided components representing the content of the modal
+	 *
+	 * @param \ILIAS\UI\Component\Component[] $a_content
+	 * @return RoundTrip
+	 */
+	public function withContent($a_content);
+
 
 	/**
 	 * Get all action buttons in the footer of the modal

@@ -15,7 +15,7 @@ il.UI = il.UI || {};
         var initializedModalboxes = {};
 
 
-        var showModal = function (id, options) {
+        var showModal = function (id, options, signalData) {
             options = $.extend(defaultShowOptions, options);
             if (options.ajaxRenderUrl) {
                 var $container = $('#' + id);
@@ -29,31 +29,11 @@ il.UI = il.UI || {};
                 var $modal = $('#' + id);
                 $modal.modal(options);
             }
-        };
+			initializedModalboxes[signalData.id] = id;
+		};
 
         var closeModal = function (id) {
             $('#' + id).modal('close');
-        };
-
-        /**
-         * Show a modal for a triggerer element (the element triggering the show signal) with the given options.
-         *
-         * @param signalData Object containing all data from the signal
-         * @param options Object with modalbox options
-         */
-        var showFromSignal = function (signalData, options) {
-            var $triggerer = signalData.triggerer;
-            if (!$triggerer.length) {
-                return;
-            }
-            var triggererId = $triggerer.attr('id');
-            if (signalData.event === 'mouseenter') {
-                options.trigger = 'hover';
-            }
-            var initialized = show($triggerer, options);
-            if (initialized === false) {
-                initializedModalboxes[signalData.id] = triggererId;
-            }
         };
 
         /**
@@ -64,14 +44,27 @@ il.UI = il.UI || {};
          * @param signalData Object containing all data from the replace signal
          */
         var replaceContentFromSignal = function (showSignal, signalData) {
-            console.log(signalData);
+
             // Find the ID of the triggerer where this modalbox belongs to
             var triggererId = (showSignal in initializedModalboxes) ? initializedModalboxes[showSignal] : 0;
             if (!triggererId) return;
+
             // Find the content of the modalbox
-            var $triggerer = $('#' + triggererId);
+            var $modal = $('#' + triggererId + " .modal");
             var url = signalData.options.url;
-            replaceContent($triggerer, url);
+
+            // get new stuff via ajax
+			$.ajax({
+				url: url,
+				dataType: 'html'
+			}).done(function(html) {
+				var $new_modal = $("<div>" + html + "<div>");
+
+				// of the new modal, we want the inner html of the modal (without the new top modal node, since
+                // we want to keep our id. Additionally we want the script tag with its content.
+                // Since html() gives us the inner html of the script tag only, we clone, wrap and get the inner from the wrapper...
+				$modal.html($new_modal.find(".modal").first().html() + $new_modal.find("script").first().clone().wrap('<p/>').parent().html());
+			});
         };
 
         /**
@@ -93,7 +86,6 @@ il.UI = il.UI || {};
         return {
             showModal: showModal,
             closeModal: closeModal,
-            showFromSignal: showFromSignal,
             replaceContentFromSignal: replaceContentFromSignal,
             replaceContent: replaceContent
         };
