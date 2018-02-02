@@ -34,7 +34,7 @@ class ilPCPluggedGUI extends ilPageContentGUI
 	* Constructor
 	* @access	public
 	*/
-	function __construct(&$a_pg_obj, &$a_content_obj, $a_hier_id, $a_plugin_name = "", $a_pc_id = "")
+	function __construct($a_pg_obj, $a_content_obj, $a_hier_id, $a_plugin_name = "", $a_pc_id = "")
 	{
 		global $DIC;
 
