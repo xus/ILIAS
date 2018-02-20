@@ -63,7 +63,11 @@ il.UI = il.UI || {};
 				// of the new modal, we want the inner html of the modal (without the new top modal node, since
                 // we want to keep our id. Additionally we want the script tag with its content.
                 // Since html() gives us the inner html of the script tag only, we clone, wrap and get the inner from the wrapper...
-				$modal.html($new_modal.find(".modal").first().html() + $new_modal.find("script").first().clone().wrap('<p/>').parent().html());
+				// console.log($new_modal.html());
+				// console.log($new_modal.children("script").first().clone().wrap('<p/>').parent().html());
+				// console.log($new_modal.find("script").first().clone().wrap('<p/>').parent().html());
+
+				$modal.html($new_modal.find(".modal").first().html() + $new_modal.children("script").first().clone().wrap('<p/>').parent().html());
 			});
         };
 
