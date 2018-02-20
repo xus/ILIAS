@@ -58,7 +58,7 @@ il.UI = il.UI || {};
 				url: url,
 				dataType: 'html'
 			}).done(function(html) {
-				var $new_modal = $("<div>" + html + "<div>");
+				var $new_modal = $("<div>" + html + "</div>");
 
 				// of the new modal, we want the inner html of the modal (without the new top modal node, since
                 // we want to keep our id. Additionally we want the script tag with its content.
