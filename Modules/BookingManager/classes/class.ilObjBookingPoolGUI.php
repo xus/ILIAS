@@ -12,6 +12,7 @@ require_once "./Services/Object/classes/class.ilObjectGUI.php";
 * @ilCtrl_Calls ilObjBookingPoolGUI: ilPermissionGUI, ilBookingObjectGUI
 * @ilCtrl_Calls ilObjBookingPoolGUI: ilBookingScheduleGUI, ilInfoScreenGUI, ilPublicUserProfileGUI
 * @ilCtrl_Calls ilObjBookingPoolGUI: ilCommonActionDispatcherGUI, ilObjectCopyGUI, ilObjectMetaDataGUI
+* @ilCtrl_Calls ilObjBookingPoolGUI: ilBookingParticipantGUI
 * @ilCtrl_IsCalledBy ilObjBookingPoolGUI: ilRepositoryGUI, ilAdministrationGUI
 */
 class ilObjBookingPoolGUI extends ilObjectGUI
@@ -148,6 +149,13 @@ class ilObjBookingPoolGUI extends ilObjectGUI
 				include_once 'Services/Object/classes/class.ilObjectMetaDataGUI.php';
 				$md_gui = new ilObjectMetaDataGUI($this->object, 'bobj');	
 				$this->ctrl->forwardCommand($md_gui);
+				break;
+
+			case 'ilbookingparticipantgui':
+				$this->tabs_gui->setTabActive('participants');
+				include_once("Modules/BookingManager/classes/class.ilBookingParticipantGUI.php");
+				$object_gui = new ilBookingParticipantGUI($this->object);
+				$this->ctrl->forwardCommand($object_gui);
 				break;
 			
 			default:
@@ -353,6 +361,10 @@ class ilObjBookingPoolGUI extends ilObjectGUI
 
 		if($this->checkPermissionBool('edit_permission'))
 		{
+			$this->tabs_gui->addTab("participants",
+				$this->lng->txt("participants"),
+				$this->ctrl->getLinkTargetByClass("ilbookingparticipantgui", "render"));
+
 			$this->tabs_gui->addTab("perm_settings",
 				$this->lng->txt("perm_settings"),
 				$this->ctrl->getLinkTargetByClass("ilpermissiongui", "perm"));
