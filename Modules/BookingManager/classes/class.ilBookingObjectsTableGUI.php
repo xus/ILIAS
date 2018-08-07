@@ -27,6 +27,7 @@ class ilBookingObjectsTableGUI extends ilTable2GUI
 	protected $pool_id;	// [int]
 	protected $has_schedule;	// [bool]
 	protected $may_edit;	// [bool]
+	protected $may_assign; // [bool]
 	protected $overall_limit;	// [int]
 	protected $reservations = array();	// [array]
 	protected $current_bookings; // [int]
@@ -59,6 +60,7 @@ class ilBookingObjectsTableGUI extends ilTable2GUI
 		$this->has_schedule = $a_pool_has_schedule;
 		$this->overall_limit = $a_pool_overall_limit;
 		$this->may_edit = $ilAccess->checkAccess('write', '', $this->ref_id);
+		$this->may_assign = $ilAccess->checkAccess('edit_permission', '', $this->ref_id);
 		
 		$this->advmd = ilObjBookingPool::getAdvancedMDFields($this->ref_id);
 		
@@ -388,6 +390,18 @@ class ilBookingObjectsTableGUI extends ilTable2GUI
 			$ilCtrl->setParameterByClass('ilObjBookingPoolGUI', 'object_id', '');
 		}
 
+		if($this->may_assign && $booking_possible)
+		{
+			if(is_object($this->filter['period']['from']))
+			{
+				$ilCtrl->setParameter($this->parent_obj, 'sseed', $this->filter['period']['from']->get(IL_CAL_DATE));
+			}
+
+			$items['assign'] = array($lng->txt('book_assign'), $ilCtrl->getLinkTarget($this->parent_obj, 'assign'));
+
+			$ilCtrl->setParameter($this->parent_obj, 'sseed', '');
+		}
+
 		if($a_set['info_file'])
 		{
 			$items['info'] = array($lng->txt('book_download_info'), $ilCtrl->getLinkTarget($this->parent_obj, 'deliverInfo'));
@@ -396,7 +410,7 @@ class ilBookingObjectsTableGUI extends ilTable2GUI
 		if ($this->may_edit)
 		{			
 			$items['edit'] = array($lng->txt('edit'), $ilCtrl->getLinkTarget($this->parent_obj, 'edit'));
-			
+
 			// #10890
 			if(!$has_reservations)
 			{
