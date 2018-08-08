@@ -154,7 +154,7 @@ class ilObjBookingPoolGUI extends ilObjectGUI
 			case 'ilbookingparticipantgui':
 				$this->tabs_gui->setTabActive('participants');
 				include_once("Modules/BookingManager/classes/class.ilBookingParticipantGUI.php");
-				$object_gui = new ilBookingParticipantGUI($this->object);
+				$object_gui = new ilBookingParticipantGUI($this);
 				$this->ctrl->forwardCommand($object_gui);
 				break;
 			

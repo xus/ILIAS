@@ -1,7 +1,5 @@
 <?php
-/* Copyright (c) 1998-2010 ILIAS open source, Extended GPL, see docs/LICENSE */
-
-//include_once("./Services/Table/classes/class.ilTable2GUI.php");
+/* Copyright (c) 1998-2018 ILIAS open source, Extended GPL, see docs/LICENSE */
 
 /**
  * List booking participants
@@ -31,57 +29,129 @@ class ilBookingParticipantsTableGUI extends ilTable2GUI
 	protected $overall_limit;	// [int]
 	protected $reservations = array();	// [array]
 	protected $current_bookings; // [int]
-	protected $advmd; // [array]
 	protected $filter; // [array]
+	protected $objects; // array
 
 	/**
 	 * Constructor
-	 * @param	object	$a_parent_obj
+	 * @param	ilBookingParticipantGUI 	$a_parent_obj
 	 * @param	string	$a_parent_cmd
 	 * @param	int		$a_ref_id
 	 * @param	int		$a_pool_id
-	 * @param	bool	$a_pool_has_schedule
-	 * @param	int		$a_pool_overall_limit
 	 */
-	//function __construct($a_parent_obj, $a_parent_cmd, $a_ref_id, $a_pool_id, $a_pool_has_schedule, $a_pool_overall_limit)
-	function __construct($a_parent_obj, $a_parent_cmd)
+	function __construct(ilBookingParticipantGUI $a_parent_obj, $a_parent_cmd, $a_ref_id, $a_pool_id)
 	{
+		global $DIC;
 
-	}
+		$this->ctrl = $DIC->ctrl();
+		$this->lng = $DIC->language();
+		$this->user = $DIC->user();
+		$this->access = $DIC->access();
+		$this->ref_id = $a_ref_id;
+		$this->pool_id = $a_pool_id;
 
-	/**
-	 * needed for advmd filter handling
-	 *
-	 * @return ilAdvancedMDRecordGUI
-	 */
-	protected function getAdvMDRecordGUI()
-	{
-		// #16827
+		$this->setId("bkprt".$a_ref_id);
 
+		parent::__construct($a_parent_obj, $a_parent_cmd);
+
+		$this->setTitle($this->lng->txt("book_participants_list"));
+
+		$this->addColumn($this->lng->txt("name"), "name");
+		$this->addColumn($this->lng->txt("bk_object"));
+		$this->addColumn($this->lng->txt("action"));
+
+		$this->setDefaultOrderField("name");
+		$this->setDefaultOrderDirection("asc");
+
+		$this->setEnableHeader(true);
+		$this->setFormAction($this->ctrl->getFormAction($a_parent_obj, $a_parent_cmd));
+		$this->setRowTemplate("tpl.booking_participant_row.html", "Modules/BookingManager");
+		$this->setResetCommand("resetParticipantsFilter");
+		$this->setFilterCommand("applyParticipantsFilter");
+		$this->setDisableFilterHiding(true);
+
+		$this->initFilter();
+
+		$this->getItems($this->getCurrentFilter());
 	}
 
 	function initFilter()
 	{
+		//object
+		$this->objects = array();
+		foreach(ilBookingObject::getList($this->pool_id) as $item)
+		{
+			$this->objects[$item["booking_object_id"]] = $item["title"];
+		}
+		$item = $this->addFilterItemByMetaType("object", ilTable2GUI::FILTER_SELECT);
+		$item->setOptions(array(""=>$this->lng->txt('book_all'))+$this->objects);
+		$this->filter["object"] = $item->getValue();
 
+		$title = $this->addFilterItemByMetaType(
+			"title",
+			ilTable2GUI::FILTER_TEXT,
+			false,
+			$this->lng->txt("object")." ".$this->lng->txt("title")."/".$this->lng->txt("description")
+		);
+		$this->filter["title"] = $title->getValue();
+
+		//user
+		require_once("./Modules/BookingManager/classes/class.ilBookingParticipant.php");
+		$options = array(""=>$this->lng->txt('book_all'))+
+			ilBookingParticipant::getUserFilter($this->pool_id);
+		$item = $this->addFilterItemByMetaType("user", ilTable2GUI::FILTER_SELECT);
+		$item->setOptions($options);
+		$this->filter["user_id"] = $item->getValue();
+	}
+
+	/**
+	 * Get current filter settings
+	 * @return	array
+	 */
+	function getCurrentFilter()
+	{
+		$filter = array();
+		if($this->filter["object"])
+		{
+			$filter["object"] = $this->filter["object"];
+		}
+		if($this->filter["title"])
+		{
+			$filter["title"] = $this->filter["title"];
+		}
+		if($this->filter["user_id"])
+		{
+			$filter["user_id"] = $this->filter["user_id"];
+		}
+
+		return $filter;
 	}
 
 	/**
 	 * Gather data and build rows
 	 */
-	function getItems()
+	function getItems(array $filter)
 	{
-		//$this->setMaxCount(sizeof($data));
-		//$this->setData($data);
-	}
+		if(!$filter["object"])
+		{
+			$ids = array_keys($this->objects);
+		}
+		else
+		{
+			$ids = array($filter["object"]);
+		}
 
-	function numericOrdering($a_field)
-	{
+		// TODO DEFINE THE SHOW ALL
+		//if(!$this->show_all)
+		//{
+		//	$filter["user_id"] = $this->user->getId();
+		//}
 
-	}
+		include_once "Modules/BookingManager/classes/class.ilBookingParticipant.php";
+		$data = ilBookingParticipant::getList($this->pool_id, $ids, $filter);
 
-	function getSelectableColumns()
-	{
-
+		$this->setMaxCount(sizeof($data));
+		$this->setData($data);
 	}
 
 	/**
@@ -90,7 +160,10 @@ class ilBookingParticipantsTableGUI extends ilTable2GUI
 	 */
 	protected function fillRow($a_set)
 	{
-
+		//$selected = $this->getSelectedColumns();
+		$this->tpl->setVariable("TXT_NAME", $a_set['name']);
+		$this->tpl->setVariable("TXT_OBJECT", $a_set['object_id']);
+		$this->tpl->setVariable("TXT_ACTION", $a_set['actions']);
 	}
 }
 

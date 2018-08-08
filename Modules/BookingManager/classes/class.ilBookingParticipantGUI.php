@@ -42,11 +42,14 @@ class ilBookingParticipantGUI
 	 */
 	protected $toolbar;
 
+	const FILTER_ACTION_APPLY = 1;
+	const FILTER_ACTION_RESET = 2;
+
 	/**
 	 * Constructor
 	 * @param	object	$a_parent_obj
 	 */
-	function __construct($a_parent_obj)
+	function __construct(ilObjBookingPoolGUI $a_parent_obj)
 	{
 		global $DIC;
 
@@ -58,6 +61,7 @@ class ilBookingParticipantGUI
 		$this->toolbar = $DIC->toolbar();
 
 		$this->ref_id = $a_parent_obj->ref_id;
+		$this->pool_id = $a_parent_obj->object->getId();
 	}
 
 	/**
@@ -119,15 +123,10 @@ class ilBookingParticipantGUI
 			);
 
 			include_once 'Modules/BookingManager/classes/class.ilBookingParticipantsTableGUI.php';
-			$table = new ilBookingParticipantsTableGUI($this, 'render');
+			$table = new ilBookingParticipantsTableGUI($this, 'render', $this->ref_id, $this->pool_id);
 
+			$this->tpl->setContent($table->getHTML());
 		}
-
-		//$html = $bar.table->getHTML();
-		//$html = $table->getHTML();
-
-		$this->tpl->setContent("Dummy content - Change me");
-
 	}
 
 	/**
@@ -173,7 +172,7 @@ class ilBookingParticipantGUI
 			{
 				require_once("./Modules/BookingManager/classes/class.ilBookingParticipant.php");
 
-				$participant_obj = new ilBookingParticipant($user_id, $this->ref_id);
+				$participant_obj = new ilBookingParticipant($user_id, $this->pool_id);
 				if($participant_obj->getIsNew()) {
 					ilUtil::sendSuccess($this->lng->txt("qp_participant_assigned"),true);
 				} else {
@@ -190,6 +189,36 @@ class ilBookingParticipantGUI
 
 		$this->ctrl->redirect($this, "render");
 		return true;
+	}
+
+	/**
+	 * Apply filter from participants table gui
+	 */
+	function applyParticipantsFilter()
+	{
+		$this->applyFilterAction(self::FILTER_ACTION_APPLY);
+	}
+
+	/**
+	 * Reset filter in participants table gui
+	 */
+	function resetParticipantsFilter()
+	{
+		$this->applyFilterAction(self::FILTER_ACTION_RESET);
+	}
+
+	protected function applyFilterAction($a_filter_action)
+	{
+		include_once 'Modules/BookingManager/classes/class.ilBookingParticipantsTableGUI.php';
+		$table = new ilBookingParticipantsTableGUI($this, 'render', $this->ref_id, $this->pool_id);
+		$table->resetOffset();
+		if($a_filter_action === self::FILTER_ACTION_RESET) {
+			$table->resetFilter();
+		} else {
+			$table->writeFilterToSession();
+		}
+
+		$this->render();
 	}
 
 }
