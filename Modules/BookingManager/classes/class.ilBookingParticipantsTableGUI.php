@@ -160,9 +160,13 @@ class ilBookingParticipantsTableGUI extends ilTable2GUI
 	 */
 	protected function fillRow($a_set)
 	{
-		//$selected = $this->getSelectedColumns();
 		$this->tpl->setVariable("TXT_NAME", $a_set['name']);
-		$this->tpl->setVariable("TXT_OBJECT", $a_set['object_id']);
+		foreach($a_set['object_title'] as $obj_title)
+		{
+			$this->tpl->setCurrentBlock('object_titles');
+			$this->tpl->setVariable("TXT_OBJECT", $obj_title);
+			$this->tpl->parseCurrentBlock();
+		}
 		$this->tpl->setVariable("TXT_ACTION", $a_set['actions']);
 	}
 }

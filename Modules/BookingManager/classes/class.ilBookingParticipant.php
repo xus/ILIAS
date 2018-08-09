@@ -98,10 +98,9 @@ class ilBookingParticipant
 		$query .= ' WHERE '.implode(' AND ', $where);
 
 		$set = $ilDB->query($query);
-		//TODO change the dummy obj_id
 		while($row = $ilDB->fetchAssoc($set))
 		{
-			$obj_id = "DUMMY OBJECT NAME";
+			$obj_title = $row['title'];
 			$pool_id = $row['booking_pool_id'];
 			$usr_id = $row['usr_id'];
 			$index = $pool_id."_".$usr_id;
@@ -113,10 +112,14 @@ class ilBookingParticipant
 
 				//TODO add the action
 				$res[$index] = array(
-					"object_id" => $obj_id,
+					"object_title" => array($obj_title),
 					"name" => $name,
 					"actions" => "DUMMY ACTION TITLE"
 				);
+			}
+			else
+			{
+				array_push($res[$index]['object_title'], $obj_title);
 			}
 
 		}
