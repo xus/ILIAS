@@ -93,7 +93,7 @@ class ilBookingParticipant
 				' OR '.$ilDB->like('description', 'text', '%'.$a_filter['title'].'%').')';
 		}
 
-		$where[] = " AND ".$ilDB->in("br.object_id", $a_object_ids, "", "integer");
+		$where[] = $ilDB->in("br.object_id", $a_object_ids, "", "integer");
 
 		$query .= ' WHERE '.implode(' AND ', $where);
 
