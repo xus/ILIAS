@@ -397,7 +397,7 @@ class ilBookingObjectsTableGUI extends ilTable2GUI
 				$ilCtrl->setParameter($this->parent_obj, 'sseed', $this->filter['period']['from']->get(IL_CAL_DATE));
 			}
 
-			$items['assign'] = array($lng->txt('book_assign'), $ilCtrl->getLinkTarget($this->parent_obj, 'assign'));
+			$items['assign'] = array($lng->txt('book_assign'), $ilCtrl->getLinkTarget($this->parent_obj, 'assignParticipants'));
 
 			$ilCtrl->setParameter($this->parent_obj, 'sseed', '');
 		}

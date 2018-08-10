@@ -21,16 +21,34 @@ class ilBookingParticipantsTableGUI extends ilTable2GUI
 	 */
 	protected $user;
 
+	/**
+	 * @var int
+	 */
 	protected $ref_id; // [int]
+
+	/**
+	 * @var int
+	 */
 	protected $pool_id;	// [int]
+
+	/**
+	 * @var
+	 */
+	protected $filter; // [array]
+
+	/**
+	 * @var
+	 */
+	protected $objects; // array
+
+	// todo we can get rid of this vars
 	protected $has_schedule;	// [bool]
 	protected $may_edit;	// [bool]
 	protected $may_assign; // [bool]
 	protected $overall_limit;	// [int]
 	protected $reservations = array();	// [array]
 	protected $current_bookings; // [int]
-	protected $filter; // [array]
-	protected $objects; // array
+
 
 	/**
 	 * Constructor
@@ -129,26 +147,17 @@ class ilBookingParticipantsTableGUI extends ilTable2GUI
 
 	/**
 	 * Gather data and build rows
+	 * @param array $filter
 	 */
 	function getItems(array $filter)
 	{
-		if(!$filter["object"])
-		{
-			$ids = array_keys($this->objects);
-		}
-		else
-		{
-			$ids = array($filter["object"]);
-		}
-
-		// TODO DEFINE THE SHOW ALL
-		//if(!$this->show_all)
-		//{
-		//	$filter["user_id"] = $this->user->getId();
-		//}
-
 		include_once "Modules/BookingManager/classes/class.ilBookingParticipant.php";
-		$data = ilBookingParticipant::getList($this->pool_id, $ids, $filter);
+
+		if($filter["object"]) {
+			$data = ilBookingParticipant::getList($this->pool_id, $filter, $filter["object"]);
+		} else {
+			$data = ilBookingParticipant::getList($this->pool_id, $filter);
+		}
 
 		$this->setMaxCount(sizeof($data));
 		$this->setData($data);
@@ -167,7 +176,13 @@ class ilBookingParticipantsTableGUI extends ilTable2GUI
 			$this->tpl->setVariable("TXT_OBJECT", $obj_title);
 			$this->tpl->parseCurrentBlock();
 		}
-		$this->tpl->setVariable("TXT_ACTION", $a_set['actions']);
+		foreach($a_set['actions'] as $key => $action)
+		{
+			$this->tpl->setCurrentBlock('actions');
+			$this->tpl->setVariable("TXT_ACTION", $action['text']);
+			$this->tpl->setVariable("URL_ACTION", $action['url']);
+			$this->tpl->parseCurrentBlock();
+		}
 	}
 }
 

@@ -696,6 +696,15 @@ class ilBookingObjectGUI
 			ilUtil::deliverFile($file, $obj->getPostFile());						
 		}
 	}
+
+	//Table to assing participants to an object.
+	function assignParticipants()
+	{
+		include_once("./Modules/BookingManager/classes/class.ilBookingAssignParticipantsTableGUI.php");
+		$table = new ilBookingAssignParticipantsTableGUI($this, 'assignParticipants', $this->ref_id, $this->pool_id, $this->object_id);
+
+		$this->tpl->setContent($table->getHTML());
+	}
 }
 
 ?>

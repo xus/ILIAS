@@ -35,7 +35,7 @@ class ilBookingParticipant
 	protected function read()
 	{
 		$query = 'SELECT participant_id FROM il_booking_member'.
-			' WHERE usr_id = '.$this->db->quote($this->participant_id, 'integer').
+			' WHERE user_id = '.$this->db->quote($this->participant_id, 'integer').
 			' AND booking_pool_id = '.$this->db->quote($this->booking_pool_id, 'integer');
 
 		$set = $this->db->query($query);
@@ -54,7 +54,7 @@ class ilBookingParticipant
 		$next_id = $this->db->nextId('il_booking_member');
 
 		$query = 'INSERT INTO il_booking_member'.
-			' (participant_id, usr_id, booking_pool_id, assigner_user_id)'.
+			' (participant_id, user_id, booking_pool_id, assigner_user_id)'.
 			' VALUES ('.$this->db->quote($next_id, 'integer').
 			','.$this->db->quote($this->participant_id, 'integer').
 			','.$this->db->quote($this->booking_pool_id, 'integer').
@@ -68,60 +68,91 @@ class ilBookingParticipant
 		return $this->is_new;
 	}
 
-	static function getList($a_booking_pool_id, array $a_object_ids = null, array $a_filter = null)
+	static function getList($a_booking_pool, array $a_filter = null, $a_object_id = null)
 	{
 		global $DIC;
+
 		$ilDB = $DIC->database();
+		$lng = $DIC->language();
 
 		$res = array();
-		$where = array();
 
-		$query = 'SELECT bm.*, bo.title FROM il_booking_member bm'.
-			' JOIN booking_reservation br ON (bm.usr_id = br.user_id)'.
-			' JOIN booking_object bo ON (br.object_id = bo.booking_object_id)';
+		$query = 'SELECT bm.user_id, bm.booking_pool_id, br.object_id'.
+			' FROM il_booking_member bm'.
+			' LEFT JOIN booking_reservation br ON (bm.user_id = br.user_id)';
 
-		$where[] = 'booking_pool_id ='.$ilDB->quote($a_booking_pool_id, 'integer');
-
+		$where = array('bm.booking_pool_id ='.$ilDB->quote($a_booking_pool, 'integer'));
+		if($a_object_id)
+		{
+			$where[] = 'br.object_id = '.$ilDB->quote($a_object_id, 'integer');
+		}
+		//deal with filter later.
+		/*if($filter['title'])
+		{
+			$where[] = '('.$ilDB->like('title', 'text', '%'.$filter['title'].'%').
+				' OR '.$ilDB->like('description', 'text', '%'.$filter['title'].'%').')';
+		}*/
 		if($a_filter['user_id'])
 		{
-			$where[] = 'usr_id ='.$ilDB->quote($a_filter['user_id']);
+			$where[] = 'bm.user_id = '.$ilDB->quote($a_filter['user_id'], 'integer');
 		}
-
-		if($a_filter['title'])
-		{
-			$where[] = '('.$ilDB->like('title', 'text', '%'.$a_filter['title'].'%').
-				' OR '.$ilDB->like('description', 'text', '%'.$a_filter['title'].'%').')';
-		}
-
-		$where[] = $ilDB->in("br.object_id", $a_object_ids, "", "integer");
 
 		$query .= ' WHERE '.implode(' AND ', $where);
 
 		$set = $ilDB->query($query);
+
 		while($row = $ilDB->fetchAssoc($set))
 		{
-			$obj_title = $row['title'];
-			$pool_id = $row['booking_pool_id'];
-			$usr_id = $row['usr_id'];
-			$index = $pool_id."_".$usr_id;
+			$user_name = ilObjUser::_lookupName($row['user_id']);
+			$name = $user_name['lastname'].", ".$user_name['firstname'];
+			$index = $a_booking_pool."_".$row['user_id'];
+			$actions = array();
+			$booking_object = new ilBookingObject($row['object_id']);
 
 			if(!isset($res[$index]))
 			{
-				$user_name = ilObjUser::_lookupName($row['usr_id']);
-				$name = $user_name['lastname'].", ".$user_name['firstname'];
-
-				//TODO add the action
-				$res[$index] = array(
-					"object_title" => array($obj_title),
-					"name" => $name,
-					"actions" => "DUMMY ACTION TITLE"
+				//TODO change the URL and move to a method.
+				if($a_object_id){
+					$actions[] = array(
+						'text' => $lng->txt("bp_deassign_object"),
+						'url' => "ilias.de"
+					);
+				}
+				$actions[] = array(
+					'text' => $lng->txt("bp_assign_object"),
+					'url' => "ilias.de"
 				);
-			}
-			else
-			{
-				array_push($res[$index]['object_title'], $obj_title);
-			}
 
+				$res[$index] = array(
+					"object_title" => array($booking_object->getTitle()),
+					"name" => $name,
+					"actions" => $actions
+				);
+			} else {
+				if(!in_array($booking_object->getTitle(), $res[$index]['object_title'])) {
+					array_push($res[$index]['object_title'], $booking_object->getTitle());
+				}
+			}
+		}
+		return $res;
+	}
+
+	/**
+	 * @param $a_booking_pool_id
+	 * @return array
+	 */
+	static function getBookingPoolParticipants(integer $a_booking_pool_id) : array
+	{
+		global $DIC;
+		$ilDB = $DIC->database();
+		$sql = 'SELECT * FROM il_booking_member WHERE booking_pool_id = '.$ilDB->quote($a_booking_pool_id, 'integer');
+
+		$set = $ilDB->query($sql);
+
+		$res = array();
+		while($row = $ilDB->fetchAssoc($set))
+		{
+			$res[] = $row['user_id'];
 		}
 
 		return $res;
@@ -143,7 +174,7 @@ class ilBookingParticipant
 
 		$sql = "SELECT ud.usr_id,ud.lastname,ud.firstname,ud.login".
 			" FROM usr_data ud ".
-			" RIGHT JOIN il_booking_member m ON (ud.usr_id = m.usr_id)".
+			" RIGHT JOIN il_booking_member m ON (ud.usr_id = m.user_id)".
 			" WHERE ud.usr_id <> ".$ilDB->quote(ANONYMOUS_USER_ID, "integer").
 			" AND m.booking_pool_id = ".$ilDB->quote($a_pool_id, "integer").
 			" ORDER BY ud.lastname,ud.firstname";
@@ -156,5 +187,14 @@ class ilBookingParticipant
 		}
 
 		return $res;
+	}
+
+	protected function isParticipantAssigned($a_booking_object_id, $a_participant_id)
+	{
+		if(!empty(ilBookingReservation::getObjectReservationForUser($a_booking_object_id, $a_participant_id))){
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

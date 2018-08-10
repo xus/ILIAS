@@ -9,7 +9,7 @@ if (!$ilDB->tableExists('il_booking_member'))
 			'notnull' => true,
 			'default' => 0
 		),
-		'usr_id' => array(
+		'user_id' => array(
 			'type' => 'integer',
 			'length' => 4,
 			'notnull' => true,
@@ -27,7 +27,7 @@ if (!$ilDB->tableExists('il_booking_member'))
 			'default' => 0
 		)
 	));
-	$ilDB->addPrimaryKey('il_booking_member', array('participant_id', 'usr_id', 'booking_pool_id'));
+	$ilDB->addPrimaryKey('il_booking_member', array('participant_id', 'user_id', 'booking_pool_id'));
 	$ilDB->createSequence('il_booking_member');
 }
 ?>
