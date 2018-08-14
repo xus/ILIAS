@@ -701,6 +701,9 @@ class ilBookingObjectGUI
 	//Todo move to a complete GUI class
 	function assignParticipants()
 	{
+		$this->tabs->clearTargets();
+		$this->tabs->setBackTarget($this->lng->txt('book_back_to_list'), $this->ctrl->getLinkTarget($this, 'render'));
+
 		include_once("./Modules/BookingManager/classes/class.ilBookingAssignParticipantsTableGUI.php");
 		$table = new ilBookingAssignParticipantsTableGUI($this, 'assignParticipants', $this->ref_id, $this->pool_id, $this->object_id);
 
