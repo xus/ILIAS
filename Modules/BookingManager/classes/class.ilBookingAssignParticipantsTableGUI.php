@@ -140,8 +140,7 @@ class ilBookingAssignParticipantsTableGUI extends ilTable2GUI
 	function getItems(array $filter = null)
 	{
 		include_once "Modules/BookingManager/classes/class.ilBookingParticipant.php";
-		$data = ilBookingParticipant::getList($this->pool_id, $filter);
-
+		$data = ilBookingParticipant::getAssignableParticipants($this->bp_object_id);
 		$this->setMaxCount(sizeof($data));
 		$this->setData($data);
 	}

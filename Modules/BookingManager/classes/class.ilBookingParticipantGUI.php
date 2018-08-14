@@ -62,6 +62,8 @@ class ilBookingParticipantGUI
 
 		$this->ref_id = $a_parent_obj->ref_id;
 		$this->pool_id = $a_parent_obj->object->getId();
+
+		$this->lng->loadLanguageModule("book");
 	}
 
 	/**
@@ -174,9 +176,9 @@ class ilBookingParticipantGUI
 
 				$participant_obj = new ilBookingParticipant($user_id, $this->pool_id);
 				if($participant_obj->getIsNew()) {
-					ilUtil::sendSuccess($this->lng->txt("qp_participant_assigned"),true);
+					ilUtil::sendSuccess($this->lng->txt("book_participant_assigned"),true);
 				} else {
-					ilUtil::sendFailure($this->lng->txt("qp_participant_already_assigned"));
+					ilUtil::sendFailure($this->lng->txt("book_participant_already_assigned"));
 					return false;
 				}
 			}

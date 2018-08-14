@@ -698,6 +698,7 @@ class ilBookingObjectGUI
 	}
 
 	//Table to assing participants to an object.
+	//Todo move to a complete GUI class
 	function assignParticipants()
 	{
 		include_once("./Modules/BookingManager/classes/class.ilBookingAssignParticipantsTableGUI.php");

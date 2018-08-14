@@ -67,6 +67,48 @@ class ilBookingParticipant
 	{
 		return $this->is_new;
 	}
+	static function getAssignableParticipants($a_bp_object_id)
+	{
+		global $DIC;
+
+		$lng = $DIC->language();
+		$ilDB = $DIC->database();
+
+		$res = array();
+
+		$query = 'SELECT DISTINCT bm.user_id, br.object_id'.
+			' FROM il_booking_member bm'.
+			' LEFT JOIN booking_reservation br ON (bm.user_id = br.user_id)'.
+			' WHERE bm.user_id NOT IN('.
+			' SELECT br.user_id FROM booking_reservation br WHERE br.object_id = '.$ilDB->quote($a_bp_object_id, 'integer').')';
+
+		$set = $ilDB->query($query);
+
+		while($row = $ilDB->fetchAssoc($set))
+		{
+			$user_name = ilObjUser::_lookupName($row['user_id']);
+			$name = $user_name['lastname'] . ", " . $user_name['firstname'];
+			$index = $a_bp_object_id."_".$row['user_id'];
+
+			$booking_object = new ilBookingObject($row['object_id']);
+
+			if(!isset($res[$index])) {
+				$res[$index] = array(
+					"object_title" => array($booking_object->getTitle()),
+					"name" => $name,
+					"txt_action" => $lng->txt("book_assign_object"),
+					"url_action" => "ilias.de"
+				);
+			}
+			else {
+				if(!in_array($booking_object->getTitle(), $res[$index]['object_title'])) {
+					array_push($res[$index]['object_title'], $booking_object->getTitle());
+				}
+			}
+		}
+
+		return $res;
+	}
 
 	static function getList($a_booking_pool, array $a_filter = null, $a_object_id = null)
 	{
@@ -114,12 +156,12 @@ class ilBookingParticipant
 				//TODO change the URL and move to a method.
 				if($a_object_id){
 					$actions[] = array(
-						'text' => $lng->txt("bp_deassign_object"),
+						'text' => $lng->txt("book_deassign_object"),
 						'url' => "ilias.de"
 					);
 				}
 				$actions[] = array(
-					'text' => $lng->txt("bp_assign_object"),
+					'text' => $lng->txt("book_assign_object"),
 					'url' => "ilias.de"
 				);
 

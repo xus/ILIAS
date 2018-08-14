@@ -75,7 +75,7 @@ class ilBookingParticipantsTableGUI extends ilTable2GUI
 		$this->setTitle($this->lng->txt("book_participants_list"));
 
 		$this->addColumn($this->lng->txt("name"), "name");
-		$this->addColumn($this->lng->txt("bk_object"));
+		$this->addColumn($this->lng->txt("book_bobj"));
 		$this->addColumn($this->lng->txt("action"));
 
 		$this->setDefaultOrderField("name");
