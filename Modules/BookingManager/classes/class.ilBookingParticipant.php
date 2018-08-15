@@ -94,6 +94,7 @@ class ilBookingParticipant
 
 			if(!isset($res[$index])) {
 				$res[$index] = array(
+					"user_id" => $row['user_id'],
 					"object_title" => array($booking_object->getTitle()),
 					"name" => $name,
 					"txt_action" => $lng->txt("book_assign_object"),

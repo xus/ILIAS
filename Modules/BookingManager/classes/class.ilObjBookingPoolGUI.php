@@ -33,6 +33,16 @@ class ilObjBookingPoolGUI extends ilObjectGUI
 	protected $help;
 
 	/**
+	 * @var int
+	 */
+	protected $user_id_to_book;  // user who is getting the reservation
+
+	/**
+	 * @var int
+	 */
+	protected $user_id_assigner; // user who performs the reservation.(self/another)
+
+	/**
 	* Constructor
 	*
 	*/
@@ -56,6 +66,13 @@ class ilObjBookingPoolGUI extends ilObjectGUI
 		$this->sseed = ilUtil::stripSlashes($_GET['sseed']);
 		$this->reservation_id = (int) $_GET["reservation_id"];
 		$this->profile_user_id = (int) $_GET['user_id'];
+
+		$this->user_id_assigner = $this->user->getId();
+		if($_GET['bkusr']) {
+			$this->user_id_to_book = (int)$_GET['bkusr'];
+		} else {
+			$this->user_id_to_book = $this->user_id_assigner; // by default user books his own booking objects.
+		}
 	}
 
 	/**
@@ -401,7 +418,11 @@ class ilObjBookingPoolGUI extends ilObjectGUI
 				
 		$this->lng->loadLanguageModule("dateplaner");
 		$this->ctrl->setParameter($this, 'object_id', $obj->getId());
-		
+
+		if($this->user_id_to_book != $this->user_id_assigner) {
+			$this->ctrl->setParameter($this, 'bkusr', $this->user_id_to_book);
+		}
+
 		if($this->object->getScheduleType() == ilObjBookingPool::TYPE_FIX_SCHEDULE)
 		{
 			include_once 'Modules/BookingManager/classes/class.ilBookingSchedule.php';		
@@ -797,9 +818,9 @@ class ilObjBookingPoolGUI extends ilObjectGUI
 				if($object_id)
 				{
 					if(ilBookingReservation::isObjectAvailableNoSchedule($object_id) &&
-						!ilBookingReservation::getObjectReservationForUser($object_id, $ilUser->getId())) // #18304				
+						!ilBookingReservation::getObjectReservationForUser($object_id, $this->user_id_to_book)) // #18304
 					{
-						$rsv_ids[] = $this->processBooking($object_id);						
+						$rsv_ids[] = $this->processBooking($object_id);
 						$success = $object_id;	
 					}
 					else
@@ -973,7 +994,14 @@ class ilObjBookingPoolGUI extends ilObjectGUI
 			$grp->setValue($a_group_id);
 			$form->addItem($grp);		
 		}
-				
+
+		if($this->user_id_assigner != $this->user_id_to_book)
+		{
+			$usr = new ilHiddenInputGUI("bkusr");
+			$usr->setValue($this->user_id_to_book);
+			$form->addItem($usr);
+		}
+
 		$form->addCommandButton("confirmedBookingNumbers", $this->lng->txt("confirm"));
 		$form->addCommandButton("render", $this->lng->txt("cancel"));
 		
@@ -1013,7 +1041,13 @@ class ilObjBookingPoolGUI extends ilObjectGUI
 	{
 		include_once 'Modules/BookingManager/classes/class.ilBookingReservation.php';								
 		include_once 'Modules/BookingManager/classes/class.ilBookingObject.php';
-		
+
+		//get the user who will get the booking.
+		if($_POST['bkusr'])
+		{
+			$this->user_id_to_book = (int)$_POST['bkusr'];
+		}
+
 		// convert post data to initial form config
 		$counter = array();
 		$current_first = $obj_id = null;
@@ -1156,15 +1190,14 @@ class ilObjBookingPoolGUI extends ilObjectGUI
 	 */
 	function processBooking($a_object_id, $a_from = null, $a_to = null, $a_group_id = null)
 	{
-		$ilUser = $this->user;
-		
 		// #11995
 		$this->checkPermission('read');		
 		
 		include_once 'Modules/BookingManager/classes/class.ilBookingReservation.php';
 		$reservation = new ilBookingReservation();
 		$reservation->setObjectId($a_object_id);
-		$reservation->setUserId($ilUser->getID());
+		$reservation->setUserId($this->user_id_to_book);
+		$reservation->setAssignerId($this->user_id_assigner);
 		$reservation->setFrom($a_from);
 		$reservation->setTo($a_to);
 		$reservation->setGroupId($a_group_id);
@@ -1175,7 +1208,7 @@ class ilObjBookingPoolGUI extends ilObjectGUI
 			$this->lng->loadLanguageModule('dateplaner');
 			include_once 'Services/Calendar/classes/class.ilCalendarUtil.php';
 			include_once 'Services/Calendar/classes/class.ilCalendarCategory.php';
-			$def_cat = ilCalendarUtil::initDefaultCalendarByType(ilCalendarCategory::TYPE_BOOK,$ilUser->getId(),$this->lng->txt('cal_ch_personal_book'),true);
+			$def_cat = ilCalendarUtil::initDefaultCalendarByType(ilCalendarCategory::TYPE_BOOK,$this->user_id_to_book,$this->lng->txt('cal_ch_personal_book'),true);
 
 			include_once 'Modules/BookingManager/classes/class.ilBookingObject.php';
 			$object = new ilBookingObject($a_object_id);
