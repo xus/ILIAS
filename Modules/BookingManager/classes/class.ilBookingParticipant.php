@@ -92,6 +92,7 @@ class ilBookingParticipant
 
 			$booking_object = new ilBookingObject($row['object_id']);
 
+//TODO fix this URL action
 			if(!isset($res[$index])) {
 				$res[$index] = array(
 					"user_id" => $row['user_id'],
@@ -117,6 +118,7 @@ class ilBookingParticipant
 
 		$ilDB = $DIC->database();
 		$lng = $DIC->language();
+		$ctrl = $DIC->ctrl();
 
 		$res = array();
 
@@ -154,17 +156,20 @@ class ilBookingParticipant
 
 			if(!isset($res[$index]))
 			{
-				//TODO change the URL and move to a method.
+				//TODO action deassign
 				if($a_object_id){
 					$actions[] = array(
 						'text' => $lng->txt("book_deassign_object"),
 						'url' => "ilias.de"
 					);
 				}
+				$ctrl->setParameterByClass('ilbookingparticipantgui', 'bkusr', $row['user_id']);
+
 				$actions[] = array(
 					'text' => $lng->txt("book_assign_object"),
-					'url' => "ilias.de"
+					'url' => $ctrl->getLinkTargetByClass("ilbookingparticipantgui", 'assignObjects')
 				);
+				$ctrl->setParameterByClass('ilbookingparticipantgui', 'bkusr', '');
 
 				$res[$index] = array(
 					"object_title" => array($booking_object->getTitle()),

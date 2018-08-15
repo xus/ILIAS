@@ -176,9 +176,10 @@ class ilBookingParticipantsTableGUI extends ilTable2GUI
 			$this->tpl->setVariable("TXT_OBJECT", $obj_title);
 			$this->tpl->parseCurrentBlock();
 		}
+
+		$this->tpl->setCurrentBlock('actions');
 		foreach($a_set['actions'] as $key => $action)
 		{
-			$this->tpl->setCurrentBlock('actions');
 			$this->tpl->setVariable("TXT_ACTION", $action['text']);
 			$this->tpl->setVariable("URL_ACTION", $action['url']);
 			$this->tpl->parseCurrentBlock();

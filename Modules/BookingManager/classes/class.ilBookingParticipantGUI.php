@@ -237,6 +237,17 @@ class ilBookingParticipantGUI
 		die("add user");
 	}
 
+	function assignObjects()
+	{
+		$this->tabs->clearTargets();
+		$this->tabs->setBackTarget($this->lng->txt('book_back_to_list'), $this->ctrl->getLinkTarget($this, 'render'));
+
+		include_once("./Modules/BookingManager/classes/class.ilBookingAssignObjectsTableGUI.php");
+		$table = new ilBookingAssignObjectsTableGUI($this, 'assignObjects', $this->ref_id, $this->pool_id);
+
+		$this->tpl->setContent($table->getHTML());
+	}
+
 }
 
 ?>
