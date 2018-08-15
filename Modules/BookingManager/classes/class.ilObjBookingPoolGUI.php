@@ -876,6 +876,7 @@ class ilObjBookingPoolGUI extends ilObjectGUI
 		
 		if($success)
 		{
+			$this->saveParticipant();
 			$this->handleBookingSuccess($success, $rsv_ids);
 		}
 		else
@@ -1143,6 +1144,7 @@ class ilObjBookingPoolGUI extends ilObjectGUI
 			}
 			if($success)
 			{
+				$this->saveParticipant();
 				$this->handleBookingSuccess($success, $rsv_ids);
 			}
 			else
@@ -1751,7 +1753,16 @@ class ilObjBookingPoolGUI extends ilObjectGUI
 		{
 			$ilLocator->addItem($this->object->getTitle(), $this->ctrl->getLinkTarget($this, "render"), "", $this->object->getRefId());
 		}
-	}		
+	}
+
+	/**
+	 * save booking participant.
+	 */
+	protected function saveParticipant()
+	{
+		include_once ("./Modules/BookingManager/classes/class.ilBookingParticipant.php");
+		$participant = new ilBookingParticipant($this->user_id_to_book, $this->object->getId());
+	}
 }
 
 ?>

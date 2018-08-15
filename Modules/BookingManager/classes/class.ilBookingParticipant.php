@@ -15,6 +15,10 @@ class ilBookingParticipant
 	 */
 	public function __construct($a_user_id, $a_booking_pool_id)
 	{
+		if(!ilObjUser::_exists($a_user_id) || !ilObjBookingPool::_exists($a_booking_pool_id)) {
+			return false;
+		}
+
 		global $DIC;
 		$this->lng = $DIC->language();
 		$this->db = $DIC->database();
@@ -67,6 +71,7 @@ class ilBookingParticipant
 	{
 		return $this->is_new;
 	}
+
 	static function getAssignableParticipants($a_bp_object_id)
 	{
 		global $DIC;

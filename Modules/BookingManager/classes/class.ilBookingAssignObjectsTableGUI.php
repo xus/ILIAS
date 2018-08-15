@@ -158,17 +158,17 @@ class ilBookingAssignObjectsTableGUI extends ilTable2GUI
 		$obj_items = ilBookingObject::getList($this->pool_id);
 		foreach($obj_items as $item)
 		{
-			$this->ctrl->setParameterByClass('ilbookingparticipantgui', 'bkusr', $this->user_id_to_book);
-			$this->ctrl->setParameterByClass('ilbookingparticipantgui', 'object_id', $item['booking_object_id']);
+			$this->ctrl->setParameterByClass('ilbookingobjectgui', 'bkusr', $this->user_id_to_book);
+			$this->ctrl->setParameterByClass('ilbookingobjectgui', 'object_id', $item['booking_object_id']);
 			$data[] = array(
 				'object_id' => $item['booking_object_id'],
 				'title' => $item['title'],
 				'description' => $item['description'],
 				'nr_items' => $item['nr_items'],
-				'url_assign'=> $this->ctrl->getLinkTargetByClass("ilbookingparticipantgui", 'assignObjects')
+				'url_assign'=> $this->ctrl->getLinkTargetByClass("ilbookingobjectgui", 'book')
 			);
-			$this->ctrl->setParameterByClass('ilbookingparticipantgui', 'bkusr', '');
-			$this->ctrl->setParameterByClass('ilbookingparticipantgui', 'object_id', '');
+			$this->ctrl->setParameterByClass('ilbookingobjectgui', 'bkusr', '');
+			$this->ctrl->setParameterByClass('ilbookingobjectgui', 'object_id', '');
 		}
 		$this->setData($data);
 	}
