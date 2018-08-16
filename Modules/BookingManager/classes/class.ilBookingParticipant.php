@@ -97,14 +97,11 @@ class ilBookingParticipant
 
 			$booking_object = new ilBookingObject($row['object_id']);
 
-//TODO fix this URL action
 			if(!isset($res[$index])) {
 				$res[$index] = array(
 					"user_id" => $row['user_id'],
 					"object_title" => array($booking_object->getTitle()),
-					"name" => $name,
-					"txt_action" => $lng->txt("book_assign"),
-					"url_action" => "ilias.de"
+					"name" => $name
 				);
 			}
 			else {

@@ -162,7 +162,7 @@ class ilBookingAssignParticipantsTableGUI extends ilTable2GUI
 		$this->ctrl->setParameter($this->parent_obj, 'bkusr', $a_set['user_id']);
 		$this->ctrl->setParameter($this->parent_obj, 'object_id', $this->bp_object_id);
 
-		$this->tpl->setVariable("TXT_ACTION", $a_set['txt_action']);
+		$this->tpl->setVariable("TXT_ACTION", $this->lng->txt("book_assign"));
 		$this->tpl->setVariable("URL_ACTION", $this->ctrl->getLinkTarget($this->parent_obj, 'book'));
 
 		$this->ctrl->setParameter($this->parent_obj, 'bkusr', '');
