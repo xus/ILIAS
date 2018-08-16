@@ -182,7 +182,7 @@ class ilBookingAssignObjectsTableGUI extends ilTable2GUI
 		$this->tpl->setVariable("TXT_TITLE", $a_set['title']);
 		$this->tpl->setVariable("TXT_DESCRIPTION", $a_set['description']);
 		$this->tpl->setVariable("TXT_AVAILABLE", $a_set['nr_items']);
-		$this->tpl->setVariable("TXT_ACTION", $this->lng->txt("book_assign_object"));
+		$this->tpl->setVariable("TXT_ACTION", $this->lng->txt("book_assign"));
 		$this->tpl->setVariable("URL_ACTION", $a_set['url_assign']);
 	}
 }

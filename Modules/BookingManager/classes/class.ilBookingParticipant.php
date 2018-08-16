@@ -103,7 +103,7 @@ class ilBookingParticipant
 					"user_id" => $row['user_id'],
 					"object_title" => array($booking_object->getTitle()),
 					"name" => $name,
-					"txt_action" => $lng->txt("book_assign_object"),
+					"txt_action" => $lng->txt("book_assign"),
 					"url_action" => "ilias.de"
 				);
 			}
@@ -164,7 +164,7 @@ class ilBookingParticipant
 				//TODO action deassign
 				if($a_object_id){
 					$actions[] = array(
-						'text' => $lng->txt("book_deassign_object"),
+						'text' => $lng->txt("book_deassign"),
 						'url' => "ilias.de"
 					);
 				}
