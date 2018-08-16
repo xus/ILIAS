@@ -72,7 +72,7 @@ class ilBookingParticipantsTableGUI extends ilTable2GUI
 
 		parent::__construct($a_parent_obj, $a_parent_cmd);
 
-		$this->setTitle($this->lng->txt("book_participants_list"));
+		$this->setTitle($this->lng->txt("participants"));
 
 		$this->addColumn($this->lng->txt("name"), "name");
 		$this->addColumn($this->lng->txt("book_bobj"));
