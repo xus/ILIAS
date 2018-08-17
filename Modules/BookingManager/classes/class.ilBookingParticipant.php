@@ -80,13 +80,20 @@ class ilBookingParticipant
 
 		$res = array();
 
-		$query = 'SELECT DISTINCT bm.user_id, br.object_id'.
+		/*$query = 'SELECT DISTINCT bm.user_id, br.object_id'.
 			' FROM il_booking_member bm, booking_reservation br'.
 			' WHERE bm.user_id NOT IN ('.
 				'SELECT user_id FROM booking_reservation'.
 				' WHERE object_id = '.$ilDB->quote($a_bp_object_id, 'integer').
 				' AND (status IS NULL OR status <> '.ilBookingReservation::STATUS_CANCELLED.'))'.
-			' AND br.object_id = '.$ilDB->quote($a_bp_object_id, 'integer');
+			' AND br.object_id = '.$ilDB->quote($a_bp_object_id, 'integer');*/
+		$query = 'SELECT DISTINCT bm.user_id'.
+			' FROM il_booking_member bm'.
+			' WHERE bm.user_id NOT IN ('.
+				'SELECT user_id'.
+				' FROM booking_reservation'.
+				' WHERE object_id = '.$ilDB->quote($a_bp_object_id, 'integer').
+				' AND (status IS NULL OR status <> '.ilBookingReservation::STATUS_CANCELLED.'))';
 
 		$set = $ilDB->query($query);
 
