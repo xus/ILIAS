@@ -1,8 +1,8 @@
 <#1>
 <?php
-if (!$ilDB->tableExists('il_booking_member'))
+if (!$ilDB->tableExists('booking_member'))
 {
-	$ilDB->createTable('il_booking_member', array(
+	$ilDB->createTable('booking_member', array(
 		'participant_id' => array(
 			'type' => 'integer',
 			'length' => 4,
@@ -27,8 +27,8 @@ if (!$ilDB->tableExists('il_booking_member'))
 			'default' => 0
 		)
 	));
-	$ilDB->addPrimaryKey('il_booking_member', array('participant_id', 'user_id', 'booking_pool_id'));
-	$ilDB->createSequence('il_booking_member');
+	$ilDB->addPrimaryKey('booking_member', array('participant_id', 'user_id', 'booking_pool_id'));
+	$ilDB->createSequence('booking_member');
 }
 ?>
 <#2>
