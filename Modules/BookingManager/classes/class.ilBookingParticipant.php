@@ -76,16 +76,17 @@ class ilBookingParticipant
 	{
 		global $DIC;
 
-		$lng = $DIC->language();
 		$ilDB = $DIC->database();
 
 		$res = array();
 
 		$query = 'SELECT DISTINCT bm.user_id, br.object_id'.
-			' FROM il_booking_member bm'.
-			' LEFT JOIN booking_reservation br ON (bm.user_id = br.user_id)'.
-			' WHERE bm.user_id NOT IN('.
-			' SELECT br.user_id FROM booking_reservation br WHERE br.object_id = '.$ilDB->quote($a_bp_object_id, 'integer').')';
+			' FROM il_booking_member bm, booking_reservation br'.
+			' WHERE bm.user_id NOT IN ('.
+				'SELECT user_id FROM booking_reservation'.
+				' WHERE object_id = '.$ilDB->quote($a_bp_object_id, 'integer').
+				' AND (status IS NULL OR status <> '.ilBookingReservation::STATUS_CANCELLED.'))'.
+			' AND br.object_id = '.$ilDB->quote($a_bp_object_id, 'integer');
 
 		$set = $ilDB->query($query);
 
