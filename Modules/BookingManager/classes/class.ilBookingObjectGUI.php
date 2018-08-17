@@ -56,7 +56,7 @@ class ilBookingObjectGUI
 	protected $pool_id; // [int]
 	protected $pool_has_schedule; // [bool]
 	protected $pool_overall_limit; // [int]
-
+	protected $user_to_deasign;
 	/**
 	 * @var int
 	 */
@@ -88,6 +88,7 @@ class ilBookingObjectGUI
 			: $a_parent_obj->object->getOverallLimit();
 
 		$this->object_id = (int) $_REQUEST['object_id'];
+		$this->user_to_deasign = (int) $_REQUEST['bkusr'];
 		$this->rsv_ids = array_map('intval', explode(";", $_GET["rsv_ids"]));
 	}
 
@@ -524,6 +525,9 @@ class ilBookingObjectGUI
 		include_once 'Modules/BookingManager/classes/class.ilBookingObject.php';
 		$type = new ilBookingObject($id);
 		$conf->addItem('object_id', $id, $type->getTitle());
+		if($this->user_to_deasign) {
+			$conf->addHiddenItem('bkusr', $this->user_to_deasign);
+		}
 		$conf->setConfirm($lng->txt('book_set_cancel'), 'rsvCancelUser');
 		$conf->setCancel($lng->txt('cancel'), 'render');
 
@@ -533,19 +537,23 @@ class ilBookingObjectGUI
 	function rsvCancelUser()
 	{
 		$ilCtrl = $this->ctrl;
-		$ilUser = $this->user;
 		$lng = $this->lng;
-		
+
+		if($this->user_to_deasign) {
+			$user_id = $this->user_to_deasign;
+		} else {
+			$user_id = $this->user->getId();
+		}
+
 		$id = $this->object_id;
-		if(!$id)
-		{
+		if(!$id || !$user_id) {
 			return;
 		}
 		
 		include_once 'Modules/BookingManager/classes/class.ilBookingReservation.php';
-		$id = ilBookingReservation::getObjectReservationForUser($id, $ilUser->getId());
+		$id = ilBookingReservation::getObjectReservationForUser($id, $user_id);
 		$obj = new ilBookingReservation($id);
-		if ($obj->getUserId() != $ilUser->getId())
+		if ($obj->getUserId() != $user_id)
 		{
 			ilUtil::sendFailure($lng->txt('permission_denied'), true);
 			$ilCtrl->redirect($this, 'render');

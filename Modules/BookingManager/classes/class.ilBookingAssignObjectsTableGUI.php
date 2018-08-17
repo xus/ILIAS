@@ -87,13 +87,11 @@ class ilBookingAssignObjectsTableGUI extends ilTable2GUI
 		{
 			$this->user_id_to_book = (int)$_GET['bkusr'];
 			if(!ilObjUser::_exists($this->user_id_to_book)) {
-				ilLoggerFactory::getRootLogger()->debug("Redirect 1");
 				$this->ctrl->redirect($a_parent_obj, $a_parent_cmd);
 			}
 			$user_name_data = ilObjUser::_lookupName($this->user_id_to_book);
 			$user_name = $user_name_data['lastname'].", ".$user_name_data['firstname'];
 		} else {
-			ilLoggerFactory::getRootLogger()->debug("Redirect 2");
 			$this->ctrl->redirect($a_parent_obj, 'render');
 		}
 
