@@ -124,21 +124,21 @@ class ilBookingParticipant
 
 		$res = array();
 
-		$query = 'SELECT bm.user_id, bm.booking_pool_id, br.object_id'.
+		$query = 'SELECT bm.user_id, bm.booking_pool_id, br.object_id, bo.title'.
 			' FROM il_booking_member bm'.
-			' LEFT JOIN booking_reservation br ON (bm.user_id = br.user_id)';
+			' LEFT JOIN booking_reservation br ON (bm.user_id = br.user_id)'.
+			' LEFT JOIN booking_object bo ON (br.object_id = bo.booking_object_id)';
 
 		$where = array('bm.booking_pool_id ='.$ilDB->quote($a_booking_pool, 'integer'));
 		if($a_object_id)
 		{
 			$where[] = 'br.object_id = '.$ilDB->quote($a_object_id, 'integer');
 		}
-		//deal with filter later.
-		/*if($filter['title'])
+		if($a_filter['title'])
 		{
-			$where[] = '('.$ilDB->like('title', 'text', '%'.$filter['title'].'%').
-				' OR '.$ilDB->like('description', 'text', '%'.$filter['title'].'%').')';
-		}*/
+			$where[] = '('.$ilDB->like('title', 'text', '%'.$a_filter['title'].'%').
+				' OR '.$ilDB->like('description', 'text', '%'.$a_filter['title'].'%').')';
+		}
 		if($a_filter['user_id'])
 		{
 			$where[] = 'bm.user_id = '.$ilDB->quote($a_filter['user_id'], 'integer');
@@ -154,7 +154,6 @@ class ilBookingParticipant
 			$name = $user_name['lastname'].", ".$user_name['firstname'];
 			$index = $a_booking_pool."_".$row['user_id'];
 			$actions = array();
-			$booking_object = new ilBookingObject($row['object_id']);
 
 			if(!isset($res[$index]))
 			{
@@ -174,13 +173,13 @@ class ilBookingParticipant
 				$ctrl->setParameterByClass('ilbookingparticipantgui', 'bkusr', '');
 
 				$res[$index] = array(
-					"object_title" => array($booking_object->getTitle()),
+					"object_title" => array($row['title']),
 					"name" => $name,
 					"actions" => $actions
 				);
 			} else {
-				if(!in_array($booking_object->getTitle(), $res[$index]['object_title'])) {
-					array_push($res[$index]['object_title'], $booking_object->getTitle());
+				if(!in_array($row['title'], $res[$index]['object_title'])) {
+					array_push($res[$index]['object_title'], $row['title']);
 				}
 			}
 		}
