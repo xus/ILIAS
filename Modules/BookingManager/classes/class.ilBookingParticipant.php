@@ -132,7 +132,7 @@ class ilBookingParticipant
 
 		$res = array();
 
-		$query = 'SELECT bm.user_id, bm.booking_pool_id, br.object_id, bo.title'.
+		$query = 'SELECT bm.user_id, bm.booking_pool_id, br.object_id, bo.title, br.status'.
 			' FROM il_booking_member bm'.
 			' LEFT JOIN booking_reservation br ON (bm.user_id = br.user_id)'.
 			' LEFT JOIN booking_object bo ON (br.object_id = bo.booking_object_id)';
@@ -167,8 +167,7 @@ class ilBookingParticipant
 			{
 				$ctrl->setParameterByClass('ilbookingobjectgui', 'bkusr', $row['user_id']);
 				$ctrl->setParameterByClass('ilbookingobjectgui', 'object_id', $row['object_id']);
-				//TODO action deassign
-				if($a_object_id){
+				if($a_object_id && $row['status'] !=  ilBookingReservation::STATUS_CANCELLED){
 					$actions[] = array(
 						'text' => $lng->txt("book_deassign"),
 						'url' => $ctrl->getLinkTargetByClass("ilbookingobjectgui", 'rsvConfirmCancelUser')
@@ -185,12 +184,15 @@ class ilBookingParticipant
 				$ctrl->setParameterByClass('ilbookingparticipantgui', 'bkusr', '');
 
 				$res[$index] = array(
-					"object_title" => array($row['title']),
+					"object_title" => array(),
 					"name" => $name,
 					"actions" => $actions
 				);
+				if($row['status'] !=  ilBookingReservation::STATUS_CANCELLED) {
+					$res[$index]['object_title'] = array($row['title']);
+				}
 			} else {
-				if(!in_array($row['title'], $res[$index]['object_title'])) {
+				if(!in_array($row['title'], $res[$index]['object_title']) && $row['status'] !=  ilBookingReservation::STATUS_CANCELLED) {
 					array_push($res[$index]['object_title'], $row['title']);
 				}
 			}
