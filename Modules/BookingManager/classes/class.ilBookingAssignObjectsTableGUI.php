@@ -101,7 +101,6 @@ class ilBookingAssignObjectsTableGUI extends ilTable2GUI
 
 		$this->setTitle($this->lng->txt("book_assign_object").": ".$user_name);
 
-		$this->addColumn("", "");
 		$this->addColumn($this->lng->txt("title"), "title");
 		$this->addColumn($this->lng->txt("description"));
 		$this->addColumn($this->lng->txt("availability"));
