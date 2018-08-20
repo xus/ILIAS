@@ -135,7 +135,7 @@ class ilBookingParticipant
 		$query = 'SELECT bm.user_id, bm.booking_pool_id, br.object_id, bo.title, br.status'.
 			' FROM il_booking_member bm'.
 			' LEFT JOIN booking_reservation br ON (bm.user_id = br.user_id)'.
-			' LEFT JOIN booking_object bo ON (br.object_id = bo.booking_object_id)';
+			' LEFT JOIN booking_object bo ON (br.object_id = bo.booking_object_id AND bo.pool_id = '.$ilDB->quote($a_booking_pool, 'integer').')';
 
 		$where = array('bm.booking_pool_id ='.$ilDB->quote($a_booking_pool, 'integer'));
 		if($a_object_id)
