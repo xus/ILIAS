@@ -223,20 +223,6 @@ class ilBookingParticipantGUI
 		$this->render();
 	}
 
-	//TODO implement or remove
-	public function post()
-	{
-		ilLoggerFactory::getRootLogger()->debug("***** POST *****");
-		die("post");
-	}
-
-	//TODO implement or remove
-	public function addUser()
-	{
-		ilLoggerFactory::getRootLogger()->debug("*** ADD User");
-		die("add user");
-	}
-
 	function assignObjects()
 	{
 		$this->tabs->clearTargets();
