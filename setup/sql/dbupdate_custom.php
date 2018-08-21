@@ -35,6 +35,6 @@ if (!$ilDB->tableExists('booking_member'))
 <?php
 if(!$ilDB->tableColumnExists('booking_reservation','assigner_id'))
 {
-	$ilDB->addTableColumn("booking_reservation", "assigner_id", array("type" => "integer", "length" => 2, "notnull" => true, "default" => 0));
+	$ilDB->addTableColumn("booking_reservation", "assigner_id", array("type" => "integer", "length" => 4, "notnull" => true, "default" => 0));
 }
 ?>

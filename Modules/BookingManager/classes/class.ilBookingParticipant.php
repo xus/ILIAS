@@ -38,7 +38,7 @@ class ilBookingParticipant
 
 	protected function read()
 	{
-		$query = 'SELECT participant_id FROM il_booking_member'.
+		$query = 'SELECT participant_id FROM booking_member'.
 			' WHERE user_id = '.$this->db->quote($this->participant_id, 'integer').
 			' AND booking_pool_id = '.$this->db->quote($this->booking_pool_id, 'integer');
 
@@ -55,9 +55,9 @@ class ilBookingParticipant
 	{
 
 		$assigner_id = $this->il_user->getId();
-		$next_id = $this->db->nextId('il_booking_member');
+		$next_id = $this->db->nextId('booking_member');
 
-		$query = 'INSERT INTO il_booking_member'.
+		$query = 'INSERT INTO booking_member'.
 			' (participant_id, user_id, booking_pool_id, assigner_user_id)'.
 			' VALUES ('.$this->db->quote($next_id, 'integer').
 			','.$this->db->quote($this->participant_id, 'integer').
@@ -81,14 +81,14 @@ class ilBookingParticipant
 		$res = array();
 
 		/*$query = 'SELECT DISTINCT bm.user_id, br.object_id'.
-			' FROM il_booking_member bm, booking_reservation br'.
+			' FROM booking_member bm, booking_reservation br'.
 			' WHERE bm.user_id NOT IN ('.
 				'SELECT user_id FROM booking_reservation'.
 				' WHERE object_id = '.$ilDB->quote($a_bp_object_id, 'integer').
 				' AND (status IS NULL OR status <> '.ilBookingReservation::STATUS_CANCELLED.'))'.
 			' AND br.object_id = '.$ilDB->quote($a_bp_object_id, 'integer');*/
 		$query = 'SELECT DISTINCT bm.user_id'.
-			' FROM il_booking_member bm'.
+			' FROM booking_member bm'.
 			' WHERE bm.user_id NOT IN ('.
 				'SELECT user_id'.
 				' FROM booking_reservation'.
@@ -133,7 +133,7 @@ class ilBookingParticipant
 		$res = array();
 
 		$query = 'SELECT bm.user_id, bm.booking_pool_id, br.object_id, bo.title, br.status'.
-			' FROM il_booking_member bm'.
+			' FROM booking_member bm'.
 			' LEFT JOIN booking_reservation br ON (bm.user_id = br.user_id)'.
 			' LEFT JOIN booking_object bo ON (br.object_id = bo.booking_object_id AND bo.pool_id = '.$ilDB->quote($a_booking_pool, 'integer').')';
 
@@ -208,7 +208,7 @@ class ilBookingParticipant
 	{
 		global $DIC;
 		$ilDB = $DIC->database();
-		$sql = 'SELECT * FROM il_booking_member WHERE booking_pool_id = '.$ilDB->quote($a_booking_pool_id, 'integer');
+		$sql = 'SELECT * FROM booking_member WHERE booking_pool_id = '.$ilDB->quote($a_booking_pool_id, 'integer');
 
 		$set = $ilDB->query($sql);
 
@@ -237,7 +237,7 @@ class ilBookingParticipant
 
 		$sql = "SELECT ud.usr_id,ud.lastname,ud.firstname,ud.login".
 			" FROM usr_data ud ".
-			" RIGHT JOIN il_booking_member m ON (ud.usr_id = m.user_id)".
+			" RIGHT JOIN booking_member m ON (ud.usr_id = m.user_id)".
 			" WHERE ud.usr_id <> ".$ilDB->quote(ANONYMOUS_USER_ID, "integer").
 			" AND m.booking_pool_id = ".$ilDB->quote($a_pool_id, "integer").
 			" ORDER BY ud.lastname,ud.firstname";
