@@ -101,43 +101,15 @@ class ilBookingAssignParticipantsTableGUI extends ilTable2GUI
 		$this->setEnableHeader(true);
 		$this->setFormAction($this->ctrl->getFormAction($a_parent_obj, $a_parent_cmd));
 		$this->setRowTemplate("tpl.booking_assign_participant_row.html", "Modules/BookingManager");
-		//$this->setResetCommand("resetParticipantsFilter");
-		//$this->setFilterCommand("applyParticipantsFilter");
-		//$this->setDisableFilterHiding(true);
 
-		$this->initFilter();
+		$this->getItems();
 
-		$this->getItems($this->getCurrentFilter());
-
-	}
-
-	//TODO implement the filters if any.
-	function initFilter()
-	{
-		return array();
-	}
-
-	/**
-	 * Get current filter settings
-	 * @return	array
-	 */
-	function getCurrentFilter()
-	{
-		$filter = array();
-
-		if($this->filter["user_id"])
-		{
-			$filter["user_id"] = $this->filter["user_id"];
-		}
-
-		return $filter;
 	}
 
 	/**
 	 * Gather data and build rows
-	 * @param array $filter
 	 */
-	function getItems(array $filter = null)
+	function getItems()
 	{
 		include_once "Modules/BookingManager/classes/class.ilBookingParticipant.php";
 		$data = ilBookingParticipant::getAssignableParticipants($this->bp_object_id);
