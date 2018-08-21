@@ -1,5 +1,11 @@
 <?php
+/* Copyright (c) 1998-2018 ILIAS open source, Extended GPL, see docs/LICENSE */
 
+/**
+ * Class ilBookingParticipant
+ *
+ * @author Jesús López <lopez@leifos.com>
+ */
 class ilBookingParticipant
 {
 	protected $lng;
@@ -36,6 +42,10 @@ class ilBookingParticipant
 		}
 	}
 
+	/**
+	 * Read from DB
+	 * @return int|bool participant id if found.
+	 */
 	protected function read()
 	{
 		$query = 'SELECT participant_id FROM booking_member'.
@@ -51,6 +61,9 @@ class ilBookingParticipant
 		}
 	}
 
+	/**
+	 * Save booking participant in DB
+	 */
 	protected function save()
 	{
 
@@ -67,11 +80,20 @@ class ilBookingParticipant
 		$this->db->manipulate($query);
 	}
 
+	/**
+	 * @return bool IF readed or created
+	 */
 	public function getIsNew()
 	{
 		return $this->is_new;
 	}
 
+	/**
+	 * Get participants who can not have a reservation for this booking pool object id.
+	 *
+	 * @param $a_bp_object_id booking pool object
+	 * @return array formated data to display in gui table.
+	 */
 	static function getAssignableParticipants($a_bp_object_id)
 	{
 		global $DIC;
@@ -80,13 +102,6 @@ class ilBookingParticipant
 
 		$res = array();
 
-		/*$query = 'SELECT DISTINCT bm.user_id, br.object_id'.
-			' FROM booking_member bm, booking_reservation br'.
-			' WHERE bm.user_id NOT IN ('.
-				'SELECT user_id FROM booking_reservation'.
-				' WHERE object_id = '.$ilDB->quote($a_bp_object_id, 'integer').
-				' AND (status IS NULL OR status <> '.ilBookingReservation::STATUS_CANCELLED.'))'.
-			' AND br.object_id = '.$ilDB->quote($a_bp_object_id, 'integer');*/
 		$query = 'SELECT DISTINCT bm.user_id'.
 			' FROM booking_member bm'.
 			' WHERE bm.user_id NOT IN ('.
@@ -208,6 +223,7 @@ class ilBookingParticipant
 	}
 
 	/**
+	 * Get all participants for a booking pool.
 	 * @param $a_booking_pool_id
 	 * @return array
 	 */
@@ -229,7 +245,7 @@ class ilBookingParticipant
 	}
 
 	/**
-	 * Get all users who are participants in this booking pool.
+	 *Get user data from db for an specific pool id.
 	 *
 	 * @param integer $a_pool_id
 	 * @return array
@@ -259,6 +275,12 @@ class ilBookingParticipant
 		return $res;
 	}
 
+	/**
+	 * Returns true if the participant has a reservation for this object.
+	 * @param $a_booking_object_id
+	 * @param $a_participant_id
+	 * @return bool
+	 */
 	protected function isParticipantAssigned($a_booking_object_id, $a_participant_id)
 	{
 		if(!empty(ilBookingReservation::getObjectReservationForUser($a_booking_object_id, $a_participant_id))){
