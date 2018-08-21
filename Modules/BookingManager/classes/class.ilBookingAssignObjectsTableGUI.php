@@ -103,7 +103,7 @@ class ilBookingAssignObjectsTableGUI extends ilTable2GUI
 
 		$this->addColumn($this->lng->txt("title"), "title");
 		$this->addColumn($this->lng->txt("description"));
-		$this->addColumn($this->lng->txt("availability"));
+		$this->addColumn($this->lng->txt("available"));
 		$this->addColumn($this->lng->txt("action"));
 
 		//Fix this order field
