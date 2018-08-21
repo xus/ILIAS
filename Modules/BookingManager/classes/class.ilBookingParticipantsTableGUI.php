@@ -153,11 +153,7 @@ class ilBookingParticipantsTableGUI extends ilTable2GUI
 	{
 		include_once "Modules/BookingManager/classes/class.ilBookingParticipant.php";
 
-		if($filter["object"]) {
-			$data = ilBookingParticipant::getList($this->pool_id, $filter, $filter["object"]);
-		} else {
-			$data = ilBookingParticipant::getList($this->pool_id, $filter);
-		}
+		$data = ilBookingParticipant::getList($this->pool_id, $filter);
 
 		$this->setMaxCount(sizeof($data));
 		$this->setData($data);
