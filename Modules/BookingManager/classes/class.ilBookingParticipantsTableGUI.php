@@ -40,16 +40,7 @@ class ilBookingParticipantsTableGUI extends ilTable2GUI
 	 * @var
 	 */
 	protected $objects; // array
-
-	// todo we can get rid of this vars
-	protected $has_schedule;	// [bool]
-	protected $may_edit;	// [bool]
-	protected $may_assign; // [bool]
-	protected $overall_limit;	// [int]
-	protected $reservations = array();	// [array]
-	protected $current_bookings; // [int]
-
-
+	
 	/**
 	 * Constructor
 	 * @param	ilBookingParticipantGUI 	$a_parent_obj
