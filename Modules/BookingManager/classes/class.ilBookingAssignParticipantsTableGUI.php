@@ -56,13 +56,6 @@ class ilBookingAssignParticipantsTableGUI extends ilTable2GUI
 	 */
 	protected $objects; // array
 
-	//TODO clean unused vars.
-	protected $has_schedule;	// [bool]
-	protected $may_edit;	// [bool]
-	protected $may_assign; // [bool]
-	protected $overall_limit;	// [int]
-	protected $reservations = array();	// [array]
-
 	/**
 	 * Constructor
 	 * @param	ilBookingObjectGUI 	$a_parent_obj

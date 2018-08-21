@@ -56,13 +56,6 @@ class ilBookingAssignObjectsTableGUI extends ilTable2GUI
 	 */
 	protected $objects; // array
 
-	//TODO clean unused vars.
-	protected $has_schedule;	// [bool]
-	protected $may_edit;	// [bool]
-	protected $may_assign; // [bool]
-	protected $overall_limit;	// [int]
-	protected $reservations = array();	// [array]
-
 	/**
 	 * Constructor
 	 * @param	ilBookingParticipantGUI 	$a_parent_obj
@@ -113,43 +106,16 @@ class ilBookingAssignObjectsTableGUI extends ilTable2GUI
 		$this->setEnableHeader(true);
 		//$this->setFormAction($this->ctrl->getFormAction($a_parent_obj, $a_parent_cmd));
 		$this->setRowTemplate("tpl.booking_assign_object_row.html", "Modules/BookingManager");
-		//$this->setResetCommand("resetParticipantsFilter");
-		//$this->setFilterCommand("applyParticipantsFilter");
-		//$this->setDisableFilterHiding(true);
 
-		//$this->initFilter();
+		$this->getItems();
 
-		$this->getItems($this->getCurrentFilter());
-
-	}
-
-	//TODO implement the filters if any.
-	function initFilter()
-	{
-		return array();
-	}
-
-	/**
-	 * Get current filter settings
-	 * @return	array
-	 */
-	function getCurrentFilter()
-	{
-		$filter = array();
-		// filter for object if needed.
-		/*if($this->filter["user_id"])
-		{
-			$filter["user_id"] = $this->filter["user_id"];
-		}*/
-
-		return $filter;
 	}
 
 	/**
 	 * Gather data and build rows
 	 * @param array $filter
 	 */
-	function getItems(array $filter = null)
+	function getItems()
 	{
 		$data = array();
 		$obj_items = ilBookingObject::getList($this->pool_id);
