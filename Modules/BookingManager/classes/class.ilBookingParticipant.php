@@ -137,12 +137,7 @@ class ilBookingParticipant
 		return $res;
 	}
 
-	/**
-	 * @param $a_booking_pool
-	 * @param array|null $a_filter
-	 * @return array
-	 */
-	static function getList($a_booking_pool, array $a_filter = null)
+	static function getList($a_booking_pool, array $a_filter = null, $a_object_id = null)
 	{
 		global $DIC;
 
@@ -151,7 +146,6 @@ class ilBookingParticipant
 		$ctrl = $DIC->ctrl();
 
 		$res = array();
-		$bp_object_id = 0;
 
 		$query = 'SELECT bm.user_id, bm.booking_pool_id, br.object_id, bo.title, br.status'.
 			' FROM booking_member bm'.
@@ -159,10 +153,9 @@ class ilBookingParticipant
 			' LEFT JOIN booking_object bo ON (br.object_id = bo.booking_object_id AND bo.pool_id = '.$ilDB->quote($a_booking_pool, 'integer').')';
 
 		$where = array('bm.booking_pool_id ='.$ilDB->quote($a_booking_pool, 'integer'));
-		if($filter["object"])
+		if($a_object_id)
 		{
-			$bp_object_id = $filter["object"];
-			$where[] = 'br.object_id = '.$ilDB->quote($bp_object_id, 'integer');
+			$where[] = 'br.object_id = '.$ilDB->quote($a_object_id, 'integer');
 		}
 		if($a_filter['title'])
 		{
@@ -189,7 +182,7 @@ class ilBookingParticipant
 			{
 				$ctrl->setParameterByClass('ilbookingobjectgui', 'bkusr', $row['user_id']);
 				$ctrl->setParameterByClass('ilbookingobjectgui', 'object_id', $row['object_id']);
-				if($bp_object_id && $row['status'] !=  ilBookingReservation::STATUS_CANCELLED){
+				if($a_object_id && $row['status'] !=  ilBookingReservation::STATUS_CANCELLED){
 					$actions[] = array(
 						'text' => $lng->txt("book_deassign"),
 						'url' => $ctrl->getLinkTargetByClass("ilbookingobjectgui", 'rsvConfirmCancelUser')
