@@ -173,6 +173,12 @@ class ilBookingParticipant
 
 		while($row = $ilDB->fetchAssoc($set))
 		{
+			$status = $row['status'];
+			//Nothing to show if the status is canceled when filtering by object
+			if($status == ilBookingReservation::STATUS_CANCELLED && $a_object_id){
+				continue;
+			}
+
 			$user_name = ilObjUser::_lookupName($row['user_id']);
 			$name = $user_name['lastname'].", ".$user_name['firstname'];
 			$index = $a_booking_pool."_".$row['user_id'];
@@ -182,12 +188,10 @@ class ilBookingParticipant
 			{
 				$ctrl->setParameterByClass('ilbookingobjectgui', 'bkusr', $row['user_id']);
 				$ctrl->setParameterByClass('ilbookingobjectgui', 'object_id', $row['object_id']);
-				if($a_object_id && $row['status'] !=  ilBookingReservation::STATUS_CANCELLED){
-					$actions[] = array(
-						'text' => $lng->txt("book_deassign"),
-						'url' => $ctrl->getLinkTargetByClass("ilbookingobjectgui", 'rsvConfirmCancelUser')
-					);
-				}
+				$actions[] = array(
+					'text' => $lng->txt("book_deassign"),
+					'url' => $ctrl->getLinkTargetByClass("ilbookingobjectgui", 'rsvConfirmCancelUser')
+				);
 				$ctrl->setParameterByClass('ilbookingparticipantgui', 'bkusr', '');
 				$ctrl->setParameterByClass('ilbookingparticipantgui', 'object_id', '');
 
@@ -203,11 +207,11 @@ class ilBookingParticipant
 					"name" => $name,
 					"actions" => $actions
 				);
-				if($row['status'] !=  ilBookingReservation::STATUS_CANCELLED) {
+				if($status !=  ilBookingReservation::STATUS_CANCELLED) {
 					$res[$index]['object_title'] = array($row['title']);
 				}
 			} else {
-				if(!in_array($row['title'], $res[$index]['object_title']) && $row['status'] !=  ilBookingReservation::STATUS_CANCELLED) {
+				if(!in_array($row['title'], $res[$index]['object_title']) && $status !=  ilBookingReservation::STATUS_CANCELLED) {
 					array_push($res[$index]['object_title'], $row['title']);
 				}
 			}
