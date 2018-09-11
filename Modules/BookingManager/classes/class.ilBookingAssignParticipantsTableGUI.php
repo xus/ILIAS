@@ -83,7 +83,7 @@ class ilBookingAssignParticipantsTableGUI extends ilTable2GUI
 
 		$this->setTitle($this->lng->txt("book_assign_participant").": ".$this->bp_object->getTitle());
 
-		$this->addColumn("", "");
+		//$this->addColumn("", "");
 		$this->addColumn($this->lng->txt("name"), "name");
 		$this->addColumn($this->lng->txt("book_bobj"));
 		$this->addColumn($this->lng->txt("action"));
