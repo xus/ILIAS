@@ -187,6 +187,7 @@ class ilBookingParticipant
 			if(!isset($res[$index]))
 			{
 				#23577
+				//Cancel reservation only if filtered by object id.
 				if($a_object_id)
 				{
 					$ctrl->setParameterByClass('ilbookingobjectgui', 'bkusr', $row['user_id']);
@@ -199,26 +200,36 @@ class ilBookingParticipant
 					$ctrl->setParameterByClass('ilbookingparticipantgui', 'object_id', '');
 				}
 
+				$res[$index] = array(
+					"object_title" => array(),
+					"name" => $name
+				);
+
+				if($status !=  ilBookingReservation::STATUS_CANCELLED) {
+					$res[$index]['object_title'] = array($row['title']);
+					$res[$index]['obj_count'] = 1;
+				}
+			}
+			else
+			{
+				if(!in_array($row['title'], $res[$index]['object_title']) && $status !=  ilBookingReservation::STATUS_CANCELLED) {
+					array_push($res[$index]['object_title'], $row['title']);
+					$res[$index]['obj_count'] = $res[$index]['obj_count'] + 1;
+				}
+			}
+
+			if($res[$index]['obj_count'] < ilBookingObject::getNumberOfObjectsForPool($a_booking_pool))
+			{
 				$ctrl->setParameterByClass('ilbookingparticipantgui', 'bkusr', $row['user_id']);
 				$actions[] = array(
 					'text' => $lng->txt("book_assign_object"),
 					'url' => $ctrl->getLinkTargetByClass("ilbookingparticipantgui", 'assignObjects')
 				);
 				$ctrl->setParameterByClass('ilbookingparticipantgui', 'bkusr', '');
-
-				$res[$index] = array(
-					"object_title" => array(),
-					"name" => $name,
-					"actions" => $actions
-				);
-				if($status !=  ilBookingReservation::STATUS_CANCELLED) {
-					$res[$index]['object_title'] = array($row['title']);
-				}
-			} else {
-				if(!in_array($row['title'], $res[$index]['object_title']) && $status !=  ilBookingReservation::STATUS_CANCELLED) {
-					array_push($res[$index]['object_title'], $row['title']);
-				}
 			}
+
+			//add the actions
+			$res[$index]['actions'] = $actions;
 		}
 		return $res;
 	}
