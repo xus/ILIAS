@@ -186,14 +186,18 @@ class ilBookingParticipant
 
 			if(!isset($res[$index]))
 			{
-				$ctrl->setParameterByClass('ilbookingobjectgui', 'bkusr', $row['user_id']);
-				$ctrl->setParameterByClass('ilbookingobjectgui', 'object_id', $row['object_id']);
-				$actions[] = array(
-					'text' => $lng->txt("book_deassign"),
-					'url' => $ctrl->getLinkTargetByClass("ilbookingobjectgui", 'rsvConfirmCancelUser')
-				);
-				$ctrl->setParameterByClass('ilbookingparticipantgui', 'bkusr', '');
-				$ctrl->setParameterByClass('ilbookingparticipantgui', 'object_id', '');
+				#23577
+				if($a_object_id)
+				{
+					$ctrl->setParameterByClass('ilbookingobjectgui', 'bkusr', $row['user_id']);
+					$ctrl->setParameterByClass('ilbookingobjectgui', 'object_id', $row['object_id']);
+					$actions[] = array(
+						'text' => $lng->txt("book_deassign"),
+						'url' => $ctrl->getLinkTargetByClass("ilbookingobjectgui", 'rsvConfirmCancelUser')
+					);
+					$ctrl->setParameterByClass('ilbookingparticipantgui', 'bkusr', '');
+					$ctrl->setParameterByClass('ilbookingparticipantgui', 'object_id', '');
+				}
 
 				$ctrl->setParameterByClass('ilbookingparticipantgui', 'bkusr', $row['user_id']);
 				$actions[] = array(
