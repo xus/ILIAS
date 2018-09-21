@@ -205,14 +205,14 @@ class ilBookingParticipant
 					"name" => $name
 				);
 
-				if($status !=  ilBookingReservation::STATUS_CANCELLED) {
+				if($status !=  ilBookingReservation::STATUS_CANCELLED && $row['title'] != "") {
 					$res[$index]['object_title'] = array($row['title']);
 					$res[$index]['obj_count'] = 1;
 				}
 			}
 			else
 			{
-				if(!in_array($row['title'], $res[$index]['object_title']) && $status !=  ilBookingReservation::STATUS_CANCELLED) {
+				if($row['title'] != "" && (!in_array($row['title'], $res[$index]['object_title']) && $status !=  ilBookingReservation::STATUS_CANCELLED)) {
 					array_push($res[$index]['object_title'], $row['title']);
 					$res[$index]['obj_count'] = $res[$index]['obj_count'] + 1;
 				}
