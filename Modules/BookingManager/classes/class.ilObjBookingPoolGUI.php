@@ -1248,6 +1248,12 @@ class ilObjBookingPoolGUI extends ilObjectGUI
 			$filter["object"] = $this->book_obj_id;
 		}
 
+		// coming from participants tab to cancel reservations.
+		if($_GET['user_id'])
+		{
+			$filter["user_id"] = (int)$_GET['user_id'];
+		}
+
 		include_once 'Modules/BookingManager/classes/class.ilBookingReservationsTableGUI.php';
 		$table = new ilBookingReservationsTableGUI($this, 'log', $this->ref_id, 
 			$this->object->getId(), $show_all, 
