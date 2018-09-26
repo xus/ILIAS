@@ -137,8 +137,9 @@ class ilExSubmissionTeamGUI
 			}
 
 			$button = ilLinkButton::getInstance();							
-			
-			if(!$a_submission->getAssignment()->getTeamTutor())
+
+			//TODO CHECK THIS
+			if(!$a_submission->getAssignment()->getTeamFormation())
 			{
 				$button->setCaption("exc_manage_team");
 				$button->setUrl($ilCtrl->getLinkTargetByClass(array("ilExSubmissionGUI", "ilExSubmissionTeamGUI"), "submissionScreenTeam"));							
@@ -165,7 +166,8 @@ class ilExSubmissionTeamGUI
 					$team_info = '<span class="warning">'.$lng->txt("exc_no_team_yet_notice").'</span>';		
 				}	
 
-				if(!$a_submission->getAssignment()->getTeamTutor())
+				//TODO CHeck this
+				if(!$a_submission->getAssignment()->getTeamFormation())
 				{
 					$button = ilLinkButton::getInstance();
 					$button->setPrimary(true);
@@ -211,8 +213,9 @@ class ilExSubmissionTeamGUI
 	
 	protected function canEditTeam()
 	{
+		//TODO check this
 		return (($this->submission->canSubmit() &&
-			!$this->submission->getAssignment()->getTeamTutor()) ||
+			!$this->submission->getAssignment()->getTeamFormation()) ||
 			$this->submission->isTutor());
 	}
 	
@@ -247,7 +250,7 @@ class ilExSubmissionTeamGUI
 				)
 			);
 	 	}
-		else if($this->submission->getAssignment()->getTeamTutor())
+		else if($this->submission->getAssignment()->getTeamFormation()) // TODO CHECK THIS
 		{
 			ilUtil::sendInfo($this->lng->txt("exc_no_team_yet_info_tutor"));
 		}

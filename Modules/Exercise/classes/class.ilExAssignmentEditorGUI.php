@@ -286,6 +286,46 @@ class ilExAssignmentEditorGUI
 			$form->addItem($rd_template);
 		}
 
+		if($a_type == ilExAssignment::TYPE_UPLOAD_TEAM)
+		{
+			$rd_team = new ilRadioGroupInputGUI($lng->txt("exc_team_formation"), "team_formation");
+			$rd_team->setRequired(true);
+			$radio_participants = new ilRadioOption($lng->txt("exc_team_by_participants"), ilExAssignment::TEAMS_FORMED_BY_PARTICIPANTS, "info1");
+			$radio_tutors = new ilRadioOption($lng->txt("exc_team_by_tutors"), ilExAssignment::TEAMS_FORMED_BY_TUTOR, "info2");
+			$radio_random = new ilRadioOption($lng->txt("exc_team_by_random"), ilExAssignment::TEAMS_FORMED_BY_RANDOM, "info3");
+
+			//random options
+			$number_teams = new ilNumberInputGUI($lng->txt("exc_teams"), "number_teams");
+			$number_teams->setInfo($lng->txt("exc_teams"));
+			$number_teams->setRequired(true);
+			$number_teams->setSize(3);
+			$number_teams->setMinValue(1);
+			$radio_random->addSubItem($number_teams);
+
+			$min_team_participants = new ilNumberInputGUI($lng->txt("exc_min_team_participants"), "min_participants_team");
+			$min_team_participants->setInfo($lng->txt("exc_min_team_participants"));
+			$min_team_participants->setRequired(true);
+			$min_team_participants->setSize(3);
+			$min_team_participants->setMinValue(1);
+			$radio_random->addSubItem($min_team_participants);
+
+			$max_team_participants = new ilNumberInputGUI($lng->txt("exc_max_team_participants"), "max_participants_team");
+			$max_team_participants->setInfo($lng->txt("exc_max_team_participants"));
+			$max_team_participants->setRequired(true);
+			$max_team_participants->setSize(3);
+			$max_team_participants->setMinValue(1);
+			$radio_random->addSubItem($max_team_participants);
+
+			$radio_assignment = new ilRadioOption($lng->txt("exc_team_by_assignment"), ilExAssignment::TEAMS_FORMED_BY_ASSIGNMENT, "info4");
+
+			$rd_team->addOption($radio_participants);
+			$rd_team->addOption($radio_tutors);
+			$rd_team->addOption($radio_random);
+
+			$rd_team->addOption($radio_assignment);
+			$form->addItem($rd_team);
+		}
+
 		// mandatory
 		$cb = new ilCheckboxInputGUI($lng->txt("exc_mandatory"), "mandatory");
 		$cb->setInfo($lng->txt("exc_mandatory_info"));
@@ -406,13 +446,6 @@ class ilExAssignmentEditorGUI
 			$max_file_tgl->addSubItem($max_file);
 		}
 
-		if($a_type == ilExAssignment::TYPE_UPLOAD_TEAM)
-		{
-			$cbtut = new ilCheckboxInputGUI($lng->txt("exc_team_management_tutor"), "team_tutor");
-			$cbtut->setInfo($lng->txt("exc_team_management_tutor_info"));
-			$cbtut->setChecked(false);
-			$form->addItem($cbtut);
-		}
 		// after submission
 		$sub_header = new ilFormSectionHeaderGUI();
 		$sub_header->setTitle($lng->txt("exc_after_submission"), "after_submission");
@@ -644,7 +677,13 @@ class ilExAssignmentEditorGUI
 					$valid = false;						
 				}				
 			}
-			
+
+			/* HERE THE TEAM FORMATION VALIDATION
+			if($a_form->getInput("team_formation") == ilExAssignment::TEAMS_FORMED_BY_RANDOM)
+			{
+				//$valid = $this->validateTeamsFormation();
+			}
+			*/
 			if($valid)
 			{
 				$res = array(
@@ -660,7 +699,10 @@ class ilExAssignmentEditorGUI
 					,"max_file" => $a_form->getInput("max_file_tgl")
 						? $a_form->getInput("max_file")
 						: null
-					,"team_tutor" => $a_form->getInput("team_tutor")							
+					,"team_formation" => $a_form->getInput("team_formation")
+					,"number_teams" => $a_form->getInput("number_teams")
+					,"min_participants_team" => $a_form->getInput("min_participants_team")
+					,"max_participants_team" => $a_form->getInput("max_participants_team")
 				);
 				// portfolio template
 				if($a_form->getInput("template_id") && $a_form->getInput("template"))
@@ -755,7 +797,10 @@ class ilExAssignmentEditorGUI
 		$a_ass->setExtendedDeadline($a_input["deadline_ext"]);
 									
 		$a_ass->setMaxFile($a_input["max_file"]);		
-		$a_ass->setTeamTutor($a_input["team_tutor"]);
+		$a_ass->setTeamFormation($a_input['team_formation']);
+		$a_ass->setNumberTeams($a_input['number_teams']);
+		$a_ass->setMinParticipantsTeam($a_input['min_participants_team']);
+		$a_ass->setMaxParticipantsTeam($a_input['max_participants_team']);
 
 		$a_ass->setPortfolioTemplateId($a_input['template_id']);
 
@@ -962,7 +1007,10 @@ class ilExAssignmentEditorGUI
 					
 		if($this->assignment->getType() == ilExAssignment::TYPE_UPLOAD_TEAM)
 		{		
-			$values["team_tutor"] = $this->assignment->getTeamTutor();
+			$values["team_formation"] = $this->assignment->getTeamFormation();
+			$values["number_teams"] = $this->assignment->getNumberTeams();
+			$values["min_participants_team"] = $this->assignment->getMinParticipantsTeam();
+			$values["max_participants_team"] = $this->assignment->getMaxParticipantsTeam();
 		}
 
 		if ($this->assignment->getFeedbackDateCustom())

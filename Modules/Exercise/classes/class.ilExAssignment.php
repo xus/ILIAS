@@ -43,6 +43,11 @@ class ilExAssignment
 	const PEER_REVIEW_VALID_NONE = 1;
 	const PEER_REVIEW_VALID_ONE = 2;
 	const PEER_REVIEW_VALID_ALL = 3;
+
+	const TEAMS_FORMED_BY_PARTICIPANTS = 1;
+	const TEAMS_FORMED_BY_TUTOR = 2;
+	const TEAMS_FORMED_BY_RANDOM = 3;
+	const TEAMS_FORMED_BY_ASSIGNMENT = 4;
 	
 	protected $id;
 	protected $exc_id;
@@ -69,7 +74,10 @@ class ilExAssignment
 	protected $feedback_cron;
 	protected $feedback_date;
 	protected $feedback_date_custom;
-	protected $team_tutor = false;
+	protected $team_formation;
+	protected $number_teams;
+	protected $min_participants_team;
+	protected $max_participants_team;
 	protected $max_file;
 	protected $portfolio_template;
 	protected $min_char_limit;
@@ -779,25 +787,79 @@ class ilExAssignment
 	}
 
 	/**
-	 * Set team management by tutor
+	 * Set team management type
 	 * 
-	 * @param bool $a_value
+	 * @param integer $a_value
 	 */
-	function setTeamTutor($a_value)
+	function setTeamFormation($a_value)
 	{
-		$this->team_tutor = (bool)$a_value;
+		$this->team_formation = $a_value;
 	}
 	
 	/**
-	 * Get team management by tutor
+	 * Get team management type
 	 * 
 	 * @return bool 
 	 */
-	function getTeamTutor()
+	function getTeamFormation()
 	{
-		return $this->team_tutor;
+		return $this->team_formation;
 	}
-	
+
+	/**
+	 * Get number of teams to generate randomly
+	 *
+	 * @param integer $a_value
+	 */
+	function setNumberTeams($a_value)
+	{
+		$this->number_teams = $a_value;
+	}
+
+	/**
+	 * Get the number of teams to generate randomly
+	 * @return integer
+	 */
+	function getNumberTeams()
+	{
+		return $this->number_teams;
+	}
+
+	/**
+	 * Set the minimum amount of participants per team
+	 * @param integer $a_value
+	 */
+	function setMinParticipantsTeam($a_value)
+	{
+		$this->min_participants_team = $a_value;
+	}
+
+	/**
+	 * Get the minimum amount of participants per team
+	 * @return integer
+	 */
+	function getMinParticipantsTeam()
+	{
+		return $this->min_participants_team;
+	}
+
+	/**
+	 * Set the maximum amount of participants per team
+	 * @param int $a_value
+	 */
+	function setMaxParticipantsTeam($a_value)
+	{
+		$this->max_participants_team = $a_value;
+	}
+
+	/**
+	 * Get the maximum amount of participants per team
+	 * @return integer
+	 */
+	function getMaxParticipantsTeam()
+	{
+		return $this->max_participants_team;
+	}
 	/**
 	 * Set max number of uploads
 	 * 
@@ -895,7 +957,10 @@ class ilExAssignment
 		$this->setFeedbackDate($a_set["fb_date"]);
 		$this->setFeedbackDateCustom($a_set["fb_date_custom"]);
 		$this->setFeedbackCron($a_set["fb_cron"]);
-		$this->setTeamTutor($a_set["team_tutor"]);
+		$this->setTeamFormation($a_set["team_formation"]);
+		$this->setNumberTeams($a_set["num_teams"]);
+		$this->setMinParticipantsTeam($a_set["min_participants_team"]);
+		$this->setMaxParticipantsTeam($a_set["max_participants_team"]);
 		$this->setMaxFile($a_set["max_file"]);
 		$this->setPortfolioTemplateId($a_set["portfolio_template"]);
 		$this->setMinCharLimit($a_set["min_char_limit"]);
@@ -943,7 +1008,10 @@ class ilExAssignment
 			"fb_date" => array("integer", $this->getFeedbackDate()),
 			"fb_date_custom" => array("integer", $this->getFeedbackDateCustom()),
 			"fb_cron" => array("integer", $this->hasFeedbackCron()),
-			"team_tutor" => array("integer", $this->getTeamTutor()),
+			"team_formation" => array("integer", $this->getTeamFormation()),
+			"num_teams" => array("integer", $this->getNumberTeams()),
+			"min_participants_team" => array("integer", $this->getMinParticipantsTeam()),
+			"max_participants_team" => array("integer", $this->getMaxParticipantsTeam()),
 			"max_file" => array("integer", $this->getMaxFile()),
 			"portfolio_template" => array("integer", $this->getPortFolioTemplateId()),
 			"min_char_limit" => array("integer", $this->getMinCharLimit()),
@@ -990,7 +1058,10 @@ class ilExAssignment
 			"fb_date" => array("integer", $this->getFeedbackDate()),
 			"fb_date_custom" => array("integer", $this->getFeedbackDateCustom()),
 			"fb_cron" => array("integer", $this->hasFeedbackCron()),
-			"team_tutor" => array("integer", $this->getTeamTutor()),
+			"team_formation" => array("integer", $this->getTeamFormation()),
+			"num_teams" => array("integer", $this->getNumberTeams()),
+			"min_participants_team" => array("integer", $this->getMinParticipantsTeam()),
+			"max_participants_team" => array("integer", $this->getMaxParticipantsTeam()),
 			"max_file" => array("integer", $this->getMaxFile()),
 			"portfolio_template" => array("integer", $this->getPortFolioTemplateId()),
 			"min_char_limit" => array("integer", $this->getMinCharLimit()),
@@ -1108,7 +1179,10 @@ class ilExAssignment
 			$new_ass->setFeedbackDate($d->getFeedbackDate());
 			$new_ass->setFeedbackDateCustom($d->getFeedbackDateCustom());
 			$new_ass->setFeedbackCron($d->hasFeedbackCron()); // #16295
-			$new_ass->setTeamTutor($d->getTeamTutor());
+			$new_ass->setTeamFormation($d->getTeamFormation());
+			$new_ass->setNumberTeams($d->getNumberTeams());
+			$new_ass->setMinParticipantsTeam($d->getMinParticipantsTeam());
+			$new_ass->setMaxParticipantsTeam($d->getMaxParticipantsTeam());
 			$new_ass->setMaxFile($d->getMaxFile());
 			$new_ass->setMinCharLimit($d->getMinCharLimit());
 			$new_ass->setMaxCharLimit($d->getMaxCharLimit());
