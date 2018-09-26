@@ -290,9 +290,21 @@ class ilExAssignmentEditorGUI
 		{
 			$rd_team = new ilRadioGroupInputGUI($lng->txt("exc_team_formation"), "team_formation");
 			$rd_team->setRequired(true);
-			$radio_participants = new ilRadioOption($lng->txt("exc_team_by_participants"), ilExAssignment::TEAMS_FORMED_BY_PARTICIPANTS, "info1");
-			$radio_tutors = new ilRadioOption($lng->txt("exc_team_by_tutors"), ilExAssignment::TEAMS_FORMED_BY_TUTOR, "info2");
-			$radio_random = new ilRadioOption($lng->txt("exc_team_by_random"), ilExAssignment::TEAMS_FORMED_BY_RANDOM, "info3");
+			$radio_participants = new ilRadioOption(
+				$lng->txt("exc_team_by_participants"),
+				ilExAssignment::TEAMS_FORMED_BY_PARTICIPANTS,
+				$lng->txt("exc_team_by_participants_info")
+			);
+			$radio_tutors = new ilRadioOption(
+				$lng->txt("exc_team_by_tutors"),
+				ilExAssignment::TEAMS_FORMED_BY_TUTOR,
+				$lng->txt("exc_team_by_tutors_info")
+			);
+			$radio_random = new ilRadioOption(
+				$lng->txt("exc_team_by_random"),
+				ilExAssignment::TEAMS_FORMED_BY_RANDOM,
+				$lng->txt("exc_team_by_random")
+			);
 
 			//random options
 			$number_teams = new ilNumberInputGUI($lng->txt("exc_teams"), "number_teams");
@@ -316,7 +328,11 @@ class ilExAssignmentEditorGUI
 			$max_team_participants->setMinValue(1);
 			$radio_random->addSubItem($max_team_participants);
 
-			$radio_assignment = new ilRadioOption($lng->txt("exc_team_by_assignment"), ilExAssignment::TEAMS_FORMED_BY_ASSIGNMENT, "info4");
+			$radio_assignment = new ilRadioOption(
+				$lng->txt("exc_team_by_assignment"),
+				ilExAssignment::TEAMS_FORMED_BY_ASSIGNMENT,
+				$lng->txt("exc_team_by_assignment")
+			);
 
 			$rd_team->addOption($radio_participants);
 			$rd_team->addOption($radio_tutors);
