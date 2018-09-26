@@ -6,6 +6,13 @@ include_once("./Modules/Exercise/classes/class.ilExAssignment.php");
 include_once("./Modules/Exercise/classes/class.ilExAssignmentReminder.php");
 
 /**
+ * TODO
+ * set the alert for the radiogroup
+ * Define the proper error messages and add them to the lang files.
+ * Create the teams.
+ * Are all this values mandatory?
+ */
+/**
 * Class ilExAssignmentEditorGUI
 *
 * @author Jörg Lützenkirchen <luetzenkirchen@leifos.com>
@@ -303,7 +310,7 @@ class ilExAssignmentEditorGUI
 			$radio_random = new ilRadioOption(
 				$lng->txt("exc_team_by_random"),
 				ilExAssignment::TEAMS_FORMED_BY_RANDOM,
-				$lng->txt("exc_team_by_random")
+				$lng->txt("exc_team_by_random_info")."<br>".$lng->txt("exc_total_members").": ".$this->getExerciseTotalMembers()
 			);
 
 			//random options
@@ -312,6 +319,7 @@ class ilExAssignmentEditorGUI
 			$number_teams->setRequired(true);
 			$number_teams->setSize(3);
 			$number_teams->setMinValue(1);
+			$number_teams->setMaxValue($this->getExerciseTotalMembers());
 			$radio_random->addSubItem($number_teams);
 
 			$min_team_participants = new ilNumberInputGUI($lng->txt("exc_min_team_participants"), "min_participants_team");
@@ -319,6 +327,7 @@ class ilExAssignmentEditorGUI
 			$min_team_participants->setRequired(true);
 			$min_team_participants->setSize(3);
 			$min_team_participants->setMinValue(1);
+			$min_team_participants->setMaxValue($this->getExerciseTotalMembers());
 			$radio_random->addSubItem($min_team_participants);
 
 			$max_team_participants = new ilNumberInputGUI($lng->txt("exc_max_team_participants"), "max_participants_team");
@@ -326,6 +335,7 @@ class ilExAssignmentEditorGUI
 			$max_team_participants->setRequired(true);
 			$max_team_participants->setSize(3);
 			$max_team_participants->setMinValue(1);
+			$max_team_participants->setMaxValue($this->getExerciseTotalMembers());
 			$radio_random->addSubItem($max_team_participants);
 
 			$radio_assignment = new ilRadioOption(
@@ -339,6 +349,8 @@ class ilExAssignmentEditorGUI
 			$rd_team->addOption($radio_random);
 
 			$rd_team->addOption($radio_assignment);
+			//TODO configure this error alert.
+			$rd_team->setAlert(null);
 			$form->addItem($rd_team);
 		}
 
@@ -694,12 +706,20 @@ class ilExAssignmentEditorGUI
 				}				
 			}
 
-			/* HERE THE TEAM FORMATION VALIDATION
+
 			if($a_form->getInput("team_formation") == ilExAssignment::TEAMS_FORMED_BY_RANDOM)
 			{
-				//$valid = $this->validateTeamsFormation();
+				$team_validation = $this->validationTeamsFormation(
+					$a_form->getInput("number_teams"),
+					$a_form->getInput("min_participants_team"),
+					$a_form->getInput("max_participants_team")
+				);
+				if($team_validation['status'] == 'error') {
+					$error_msg = $team_validation['msg'];
+					$valid = false;
+				}
 			}
-			*/
+
 			if($valid)
 			{
 				$res = array(
@@ -789,7 +809,12 @@ class ilExAssignmentEditorGUI
 			}
 			else
 			{
-				ilUtil::sendFailure($lng->txt("form_input_not_valid"));
+				$failure_msg = $lng->txt("form_input_not_valid");
+				if(isset($error_msg))
+				{
+					$failure_msg .="<br>".$error_msg;
+				}
+				ilUtil::sendFailure($failure_msg);
 			}
 		}
 	}
@@ -1792,5 +1817,52 @@ class ilExAssignmentEditorGUI
 		}
 							
 		$ilCtrl->redirect($this, "listAssignments");		
+	}
+
+	/**
+	 * @param $a_num_teams integer
+	 * @param $a_min_participants integer
+	 * @param $a_max_participants integer
+	 * @return array
+	 */
+	function validationTeamsFormation($a_num_teams, $a_min_participants, $a_max_participants)
+	{
+		$total_members = $this->getExerciseTotalMembers();
+		$members_per_team = $total_members / $a_num_teams;
+		$members_smaller_team = $total_members % $a_num_teams;
+
+		if($a_min_participants > $a_max_participants)
+		{
+			$message = "Minimal number of team participants can't be smaller than Maximal number of team participants";
+			return array("status" => "error", "msg" => $message);
+		}
+
+		if($members_per_team > $a_max_participants)
+		{
+			$message = "Teams can not be bigger than the max participants limit per team. Increase the number of groups or decrease the maximal number of participants.";
+			return array("status" => "error", "msg" => $message);
+		}
+
+		if($members_per_team < $a_min_participants)
+		{
+			$message = "Teams can not be smaller than the min participants entered. Decrease the number of groups or increase the minimal number of participants.";
+			return array("status" => "error", "msg" => $message);
+		}
+
+		if($members_smaller_team > 0 && $members_smaller_team < $a_min_participants)
+		{
+			$message = "Teams can not be created. The smaller team does not have enough members. Please, configure the number of teams and limits properly.";
+			return array("status" => "error", "msg" => $message);
+		}
+
+		return array("status" => "success", "msg" => "");
+	}
+
+	function getExerciseTotalMembers()
+	{
+		$exercise = new ilObjExercise($this->exercise_id, false);
+		$exc_members = new ilExerciseMembers($exercise);
+
+		return count($exc_members->getMembers());
 	}
 }
