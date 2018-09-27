@@ -9,7 +9,6 @@ include_once("./Modules/Exercise/classes/class.ilExAssignmentReminder.php");
  * TODO
  * set the alert for the radiogroup
  * Define the proper error messages and add them to the lang files.
- * Create the teams.
  * Are all this values mandatory?
  */
 /**
