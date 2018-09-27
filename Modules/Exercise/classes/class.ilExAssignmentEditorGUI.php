@@ -10,6 +10,8 @@ include_once("./Modules/Exercise/classes/class.ilExAssignmentReminder.php");
  * set the alert for the radiogroup
  * Define the proper error messages and add them to the lang files.
  * Are all this values mandatory?
+ * Remove old methods like adoptTeamAssignmentsFormObject
+ * Check lang vars of adopted teams from assignment.
  */
 /**
 * Class ilExAssignmentEditorGUI
@@ -294,6 +296,8 @@ class ilExAssignmentEditorGUI
 
 		if($a_type == ilExAssignment::TYPE_UPLOAD_TEAM)
 		{
+			$has_teams = (bool)count(ilExAssignmentTeam::getAssignmentTeamMap($this->assignment->getId()));
+
 			$rd_team = new ilRadioGroupInputGUI($lng->txt("exc_team_formation"), "team_formation");
 			$rd_team->setRequired(true);
 			$radio_participants = new ilRadioOption(
@@ -343,10 +347,32 @@ class ilExAssignmentEditorGUI
 				$lng->txt("exc_team_by_assignment")
 			);
 
+			$radio_assignment_adopt = new ilRadioGroupInputGUI($lng->txt("exc_assignment"), "ass_adpt");
+			$radio_assignment_adopt->setValue(-1);
+			$radio_assignment_adopt->addOption(new ilRadioOption($lng->txt("exc_team_assignment_adopt_none"), -1));
+			$options = ilExAssignmentTeam::getAdoptableTeamAssignments($this->exercise_id);
+			foreach($options as $id => $item)
+			{
+				$option = new ilRadioOption($item["title"], $id);
+				$option->setInfo($lng->txt("exc_team_assignment_adopt_teams").": ".$item["teams"]);
+				$radio_assignment_adopt->addOption($option);
+			}
+			$radio_assignment->addSubItem($radio_assignment_adopt);
+
+			if($has_teams)
+			{
+				$radio_tutors->setDisabled(true);
+				$number_teams->setDisabled(true);
+				$min_team_participants->setDisabled(true);
+				$max_team_participants->setDisabled(true);
+				$radio_participants->setDisabled(true);
+				$radio_random->setDisabled(true);
+				$radio_assignment->setDisabled(true);
+
+			}
 			$rd_team->addOption($radio_participants);
 			$rd_team->addOption($radio_tutors);
 			$rd_team->addOption($radio_random);
-
 			$rd_team->addOption($radio_assignment);
 			$form->addItem($rd_team);
 		}
@@ -1774,7 +1800,7 @@ class ilExAssignmentEditorGUI
 	//
 	// TEAM
 	// 
-	
+
 	public function adoptTeamAssignmentsFormObject()
 	{
 		$ilCtrl = $this->ctrl;
