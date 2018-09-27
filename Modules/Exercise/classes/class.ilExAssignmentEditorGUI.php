@@ -296,7 +296,12 @@ class ilExAssignmentEditorGUI
 
 		if($a_type == ilExAssignment::TYPE_UPLOAD_TEAM)
 		{
-			$has_teams = (bool)count(ilExAssignmentTeam::getAssignmentTeamMap($this->assignment->getId()));
+			if($a_mode == "edit") {
+				$has_teams = (bool)count(ilExAssignmentTeam::getAssignmentTeamMap($this->assignment->getId()));
+			} else {
+				$has_teams = false;
+			}
+
 
 			$rd_team = new ilRadioGroupInputGUI($lng->txt("exc_team_formation"), "team_formation");
 			$rd_team->setRequired(true);
