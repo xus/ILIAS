@@ -14359,3 +14359,4 @@ exc#:#exc_teams#:#Number of Teams
 exc#:#exc_min_team_participants#:#Minimal Number of Participants
 exc#:#exc_max_team_participants#:#Maximal Number of Participants
 exc#:#exc_total_members#:#Total Exercise Members
+exc#:#exc_value_can_not_set#:#This value can not be set.

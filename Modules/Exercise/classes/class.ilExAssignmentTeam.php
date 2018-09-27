@@ -72,6 +72,11 @@ class ilExAssignmentTeam
 	{
 		return $this->id;
 	}
+
+	private function setId($a_id)
+	{
+		$this->id = $a_id;
+	}
 	
 	protected function read($a_id)
 	{
@@ -85,7 +90,7 @@ class ilExAssignmentTeam
 		$set = $ilDB->query($sql);
 		if($ilDB->numRows($set))
 		{
-			$this->id = $a_id;
+			$this->setId($a_id);
 		
 			while($row = $ilDB->fetchAssoc($set))
 			{
@@ -132,6 +137,25 @@ class ilExAssignmentTeam
 		}
 		
 		return $id;
+	}
+
+	function createTeam($a_assignment_id, $a_user_id)
+	{
+		$ilDB = $this->db;
+
+		$id = $ilDB->nextId("il_exc_team");
+
+		$fields = array("id" => array("integer", $id),
+			"ass_id" => array("integer", $a_assignment_id),
+			"user_id" => array("integer", $a_user_id));
+		$ilDB->insert("il_exc_team", $fields);
+
+		self::writeTeamLog($id, self::TEAM_LOG_CREATE_TEAM);
+		self::writeTeamLog($id, self::TEAM_LOG_ADD_MEMBER,
+			ilObjUser::_lookupFullname($a_user_id));
+
+		return $id;
+
 	}
 	
 	/**
@@ -546,6 +570,44 @@ class ilExAssignmentTeam
 		}
 		
 		return ilUtil::sortArray($res, "title", "asc", false, true);
+	}
+
+	public function createRandomTeams($a_exercise_id, $a_assignment_id, $a_number_teams)
+	{
+		//just in case...
+		if(count(self::getAssignmentTeamMap($a_assignment_id)))
+		{
+			return false;
+		}
+
+		$exercise = new ilObjExercise($a_exercise_id, false);
+		$obj_exc_members = new ilExerciseMembers($exercise);
+		$members = $obj_exc_members->getMembers();
+		$members_per_team = round(count($members) / $a_number_teams);
+
+		shuffle($members);
+
+		for($i=0;$i<$a_number_teams;$i++)
+		{
+			$members_counter = 0;
+			while(!empty($members) && $members_counter < $members_per_team)
+			{
+				$member_id = array_pop($members);
+				if($members_counter == 0)
+				{
+					$team_id = $this->createTeam($a_assignment_id, $member_id);
+					$this->setId($team_id);
+					$this->assignment_id = $a_assignment_id;
+				}
+				else
+				{
+					$this->addTeamMember($member_id);
+				}
+				$members_counter++;
+			}
+		}
+
+		return true;
 	}
 }
 

@@ -349,8 +349,6 @@ class ilExAssignmentEditorGUI
 			$rd_team->addOption($radio_random);
 
 			$rd_team->addOption($radio_assignment);
-			//TODO configure this error alert.
-			$rd_team->setAlert(null);
 			$form->addItem($rd_team);
 		}
 
@@ -706,7 +704,6 @@ class ilExAssignmentEditorGUI
 				}				
 			}
 
-
 			if($a_form->getInput("team_formation") == ilExAssignment::TEAMS_FORMED_BY_RANDOM)
 			{
 				$team_validation = $this->validationTeamsFormation(
@@ -715,7 +712,10 @@ class ilExAssignmentEditorGUI
 					$a_form->getInput("max_participants_team")
 				);
 				if($team_validation['status'] == 'error') {
-					$error_msg = $team_validation['msg'];
+					$a_form->getItemByPostVar("team_formation")
+						->setAlert($team_validation['msg']);
+					$a_form->getItemByPostVar($team_validation["field"])
+						->setAlert($lng->txt("exc_value_can_not_set"));
 					$valid = false;
 				}
 			}
@@ -809,12 +809,7 @@ class ilExAssignmentEditorGUI
 			}
 			else
 			{
-				$failure_msg = $lng->txt("form_input_not_valid");
-				if(isset($error_msg))
-				{
-					$failure_msg .="<br>".$error_msg;
-				}
-				ilUtil::sendFailure($failure_msg);
+				ilUtil::sendFailure($lng->txt("form_input_not_valid"));
 			}
 		}
 	}
@@ -1166,11 +1161,42 @@ class ilExAssignmentEditorGUI
 		$form = $this->initAssignmentForm($this->assignment->getType(), "edit");
 		$input = $this->processForm($form);
 		if(is_array($input))
-		{							
+		{
+			//previous data configuration
 			$old_deadline = $this->assignment->getDeadline();
 			$old_ext_deadline = $this->assignment->getExtendedDeadline();
-			
+
+			if($this->assignment->getType() == ilExAssignment::TYPE_UPLOAD_TEAM)
+			{
+				//$old_formation_option = $this->assignment->getTeamFormation();
+				$old_number_teams = $this->assignment->getNumberTeams();
+				$old_min_participants = $this->assignment->getMinParticipantsTeam();
+				$old_max_participants = $this->assignment->getMaxParticipantsTeam();
+			}
+
+			//import the form to persistence
 			$this->importFormToAssignment($this->assignment, $input);
+
+			//new data configuration
+			if($this->assignment->getType() == ilExAssignment::TYPE_UPLOAD_TEAM)
+			{
+				if($this->assignment->getTeamFormation() == ilExAssignment::TEAMS_FORMED_BY_RANDOM)
+				{
+					$number_teams = $this->assignment->getNumberTeams();
+					$min_participants = $this->assignment->getMinParticipantsTeam();
+					$max_participants = $this->assignment->getMaxParticipantsTeam();
+
+					if($old_number_teams != $number_teams ||
+						$old_min_participants != $min_participants ||
+						$old_max_participants != $max_participants
+					)
+					{
+						include_once "Modules/Exercise/classes/class.ilExAssignmentTeam.php";
+						$ass_team = new ilExAssignmentTeam();
+						$ass_team->createRandomTeams($this->exercise_id, $this->assignment->getId(), $number_teams, $max_participants);
+					}
+				}
+			}
 			
 			$new_deadline = $this->assignment->getDeadline();
 			$new_ext_deadline = $this->assignment->getExtendedDeadline();
@@ -1828,31 +1854,31 @@ class ilExAssignmentEditorGUI
 	function validationTeamsFormation($a_num_teams, $a_min_participants, $a_max_participants)
 	{
 		$total_members = $this->getExerciseTotalMembers();
-		$members_per_team = $total_members / $a_num_teams;
+		$members_per_team = round($total_members / $a_num_teams);
 		$members_smaller_team = $total_members % $a_num_teams;
 
 		if($a_min_participants > $a_max_participants)
 		{
-			$message = "Minimal number of team participants can't be smaller than Maximal number of team participants";
-			return array("status" => "error", "msg" => $message);
+			$message = "Maximal number of team participants can't be smaller than Minimal number of team participants";
+			return array("status" => "error", "msg" => $message, "field" => "max_participants_team");
 		}
 
 		if($members_per_team > $a_max_participants)
 		{
-			$message = "Teams can not be bigger than the max participants limit per team. Increase the number of groups or decrease the maximal number of participants.";
-			return array("status" => "error", "msg" => $message);
+			$message = "Maximum Number of Participants can't be set as ".$a_max_participants." because teams are set with ".$members_per_team." participants";
+			return array("status" => "error", "msg" => $message, "field" => "max_participants_team");
 		}
 
 		if($members_per_team < $a_min_participants)
 		{
-			$message = "Teams can not be smaller than the min participants entered. Decrease the number of groups or increase the minimal number of participants.";
-			return array("status" => "error", "msg" => $message);
+			$message = "Minimum Number of Participants can't be set as ".$a_min_participants." because teams are set with ".$members_per_team." participants";
+			return array("status" => "error", "msg" => $message, "field" => "min_participants_team");
 		}
 
 		if($members_smaller_team > 0 && $members_smaller_team < $a_min_participants)
 		{
 			$message = "Teams can not be created. The smaller team does not have enough members. Please, configure the number of teams and limits properly.";
-			return array("status" => "error", "msg" => $message);
+			return array("status" => "error", "msg" => $message, "field" => "min_participants_team");
 		}
 
 		return array("status" => "success", "msg" => "");
