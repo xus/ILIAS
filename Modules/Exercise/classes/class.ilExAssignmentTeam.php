@@ -572,11 +572,23 @@ class ilExAssignmentTeam
 		return ilUtil::sortArray($res, "title", "asc", false, true);
 	}
 
+	/**
+	 * Create random teams for assignment type "team upload" following specific rules.
+	 * example:
+	 *  - total exercise members : 9 members
+	 *  - total number of teams to create (defined via form): 4 groups
+	 *  - number of users per team --> 9 / 4 = 2 users
+	 *  - users to spread over groups --> 9 % 4 = 1 user
+	 *  - final teams: 3 teams of 2 users and 1 team of 3 users.
+	 * @param $a_exercise_id integer
+	 * @param $a_assignment_id integer
+	 * @param $a_number_teams integer
+	 * @return bool
+	 */
 	public function createRandomTeams($a_exercise_id, $a_assignment_id, $a_number_teams)
 	{
 		//just in case...
-		if(count(self::getAssignmentTeamMap($a_assignment_id)))
-		{
+		if(count(self::getAssignmentTeamMap($a_assignment_id))) {
 			return false;
 		}
 
@@ -607,6 +619,17 @@ class ilExAssignmentTeam
 			}
 		}
 
+		//get the new teams, remove duplicates.
+		$teams = array_unique(array_values(self::getAssignmentTeamMap($a_assignment_id)));
+		shuffle($teams);
+
+		while(!empty($members))
+		{
+			$member_id = array_pop($members);
+			$team_id = array_pop($teams);
+			$this->setId($team_id);
+			$this->addTeamMember($member_id);
+		}
 		return true;
 	}
 }

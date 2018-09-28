@@ -1189,14 +1189,6 @@ class ilExAssignmentEditorGUI
 			$old_deadline = $this->assignment->getDeadline();
 			$old_ext_deadline = $this->assignment->getExtendedDeadline();
 
-			if($this->assignment->getType() == ilExAssignment::TYPE_UPLOAD_TEAM)
-			{
-				//$old_formation_option = $this->assignment->getTeamFormation();
-				$old_number_teams = $this->assignment->getNumberTeams();
-				$old_min_participants = $this->assignment->getMinParticipantsTeam();
-				$old_max_participants = $this->assignment->getMaxParticipantsTeam();
-			}
-
 			//import the form to persistence
 			$this->importFormToAssignment($this->assignment, $input);
 
@@ -1206,13 +1198,7 @@ class ilExAssignmentEditorGUI
 				if($this->assignment->getTeamFormation() == ilExAssignment::TEAMS_FORMED_BY_RANDOM)
 				{
 					$number_teams = $this->assignment->getNumberTeams();
-					$min_participants = $this->assignment->getMinParticipantsTeam();
-					$max_participants = $this->assignment->getMaxParticipantsTeam();
-
-					if($old_number_teams != $number_teams ||
-						$old_min_participants != $min_participants ||
-						$old_max_participants != $max_participants
-					)
+					if(count(ilExAssignmentTeam::getAssignmentTeamMap($this->assignment->getId())) == 0)
 					{
 						include_once "Modules/Exercise/classes/class.ilExAssignmentTeam.php";
 						$ass_team = new ilExAssignmentTeam();
@@ -1797,82 +1783,7 @@ class ilExAssignmentEditorGUI
 			$tpl->setContent($form->getHtml());
 		}		
 	}
-	
-	
-	//
-	// TEAM
-	// 
-/*
-	public function adoptTeamAssignmentsFormObject()
-	{
-		$ilCtrl = $this->ctrl;
-		$ilTabs = $this->tabs;
-		$lng = $this->lng;
-		$tpl = $this->tpl;
-		
-		if(!$this->assignment)
-		{
-			$ilCtrl->redirect($this, "listAssignments");
-		}
-		
-		$ilTabs->clearTargets();
-		$ilTabs->setBackTarget($lng->txt("back"),
-			$ilCtrl->getLinkTarget($this, "listAssignments"));
-		
-		include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
-		$form = new ilPropertyFormGUI();		         
-		$form->setTitle($lng->txt("exc_team_assignment_adopt"));
-		$form->setFormAction($ilCtrl->getFormAction($this, "adoptTeamAssignments"));
-		
-		include_once "Modules/Exercise/classes/class.ilExAssignmentTeam.php";
-		$options = ilExAssignmentTeam::getAdoptableTeamAssignments($this->assignment->getExerciseId());
-		
-		// we must not have existing teams in assignment
-		if(array_key_exists($this->assignment->getId(), $options))
-		{
-			$ilCtrl->redirect($this, "listAssignments");
-		}
-		
-		$teams = new ilRadioGroupInputGUI($lng->txt("exc_assignment"), "ass_adpt");
-		$teams->setValue(-1);
-		
-		$teams->addOption(new ilRadioOption($lng->txt("exc_team_assignment_adopt_none"), -1));
-		
-		foreach($options as $id => $item)
-		{
-			$option = new ilRadioOption($item["title"], $id);
-			$option->setInfo($lng->txt("exc_team_assignment_adopt_teams").": ".$item["teams"]);
-			$teams->addOption($option);
-		}
-		
-		$form->addItem($teams);
-	
-		$form->addCommandButton("adoptTeamAssignments", $lng->txt("save"));
-		$form->addCommandButton("listAssignments", $lng->txt("cancel"));
 
-		$tpl->setContent($form->getHTML());
-	}
-*/
-	/*
-	public function adoptTeamAssignmentsObject()
-	{
-		$ilCtrl = $this->ctrl;
-		$lng = $this->lng;
-		
-		$src_ass_id = (int)$_POST["ass_adpt"];
-		
-		if($this->assignment && 
-			$src_ass_id > 0)
-		{
-			include_once "Modules/Exercise/classes/class.ilExAssignmentTeam.php";
-			ilExAssignmentTeam::adoptTeams($src_ass_id, $this->assignment->getId());			
-			
-			ilUtil::sendSuccess($lng->txt("settings_saved"), true);
-		}
-							
-		$ilCtrl->redirect($this, "listAssignments");		
-	}
-*/
 	/**
 	 * @param $a_num_teams integer
 	 * @param $a_min_participants integer
@@ -1912,6 +1823,10 @@ class ilExAssignmentEditorGUI
 		return array("status" => "success", "msg" => "");
 	}
 
+	/**
+	 * Get the total number of exercise members
+	 * @return int
+	 */
 	function getExerciseTotalMembers()
 	{
 		$exercise = new ilObjExercise($this->exercise_id, false);
@@ -1920,6 +1835,10 @@ class ilExAssignmentEditorGUI
 		return count($exc_members->getMembers());
 	}
 
+	/**
+	 * Create the same teams like another assignment.
+	 * @param ilExAssignment $a_assignment
+	 */
 	function adoptTeamsFromAssignment($a_assignment)
 	{
 		$assignment_adopt = $a_assignment->getAssignmentAdoptTeams();
