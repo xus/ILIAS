@@ -373,7 +373,7 @@ class ilExAssignmentEditorGUI
 				$radio_participants->setDisabled(true);
 				$radio_random->setDisabled(true);
 				$radio_assignment->setDisabled(true);
-
+				$radio_assignment_adopt->setDisabled(true);
 			}
 			$rd_team->addOption($radio_participants);
 			$rd_team->addOption($radio_tutors);
@@ -1217,6 +1217,12 @@ class ilExAssignmentEditorGUI
 						$ass_team = new ilExAssignmentTeam();
 						$ass_team->createRandomTeams($this->exercise_id, $this->assignment->getId(), $number_teams);
 					}
+				}
+				elseif ($this->assignment->getTeamFormation() == ilExAssignment::TEAMS_FORMED_BY_ASSIGNMENT)
+				{
+					$assignment_adopt = $this->assignment->getAssignmentAdoptTeams();
+					ilExAssignmentTeam::adoptTeams($assignment_adopt, $this->assignment->getId());
+					ilUtil::sendInfo($lng->txt("exc_teams_assignment_adopted"), true);
 				}
 			}
 			
