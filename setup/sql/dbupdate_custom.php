@@ -37,3 +37,13 @@
 		));
 	}
 ?>
+<#3>
+<?php
+	if(!$ilDB->tableColumnExists('exc_assignment', 'assignment_adopt'))
+	{
+		$ilDB->addTableColumn('exc_assignment', "assignment_adopt", array(
+			"type" => 'integer',
+			"length" => 1
+		));
+	}
+?>

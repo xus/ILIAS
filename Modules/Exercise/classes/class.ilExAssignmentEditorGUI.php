@@ -769,6 +769,7 @@ class ilExAssignmentEditorGUI
 					,"number_teams" => $a_form->getInput("number_teams")
 					,"min_participants_team" => $a_form->getInput("min_participants_team")
 					,"max_participants_team" => $a_form->getInput("max_participants_team")
+					,"ass_adpt" => $a_form->getInput("ass_adpt")
 				);
 				// portfolio template
 				if($a_form->getInput("template_id") && $a_form->getInput("template"))
@@ -867,6 +868,7 @@ class ilExAssignmentEditorGUI
 		$a_ass->setNumberTeams($a_input['number_teams']);
 		$a_ass->setMinParticipantsTeam($a_input['min_participants_team']);
 		$a_ass->setMaxParticipantsTeam($a_input['max_participants_team']);
+		$a_ass->setAssignmentAdoptTeams($a_input['ass_adpt']);
 
 		$a_ass->setPortfolioTemplateId($a_input['template_id']);
 
@@ -985,17 +987,6 @@ class ilExAssignmentEditorGUI
 			
 			$this->importFormToAssignment($ass, $input);			
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
-						
-			// adopt teams for team upload?
-			if($ass->getType() == ilExAssignment::TYPE_UPLOAD_TEAM)
-			{				
-				include_once "Modules/Exercise/classes/class.ilExAssignmentTeam.php";
-				if(sizeof(ilExAssignmentTeam::getAdoptableTeamAssignments($this->exercise_id, $ass->getId())))
-				{
-					$ilCtrl->setParameter($this, "ass_id", $ass->getId());
-					$ilCtrl->redirect($this, "adoptTeamAssignmentsForm");
-				}
-			}			
 			
 			// because of sub-tabs we stay on settings screen
 			$ilCtrl->setParameter($this, "ass_id", $ass->getId());
@@ -1077,6 +1068,7 @@ class ilExAssignmentEditorGUI
 			$values["number_teams"] = $this->assignment->getNumberTeams();
 			$values["min_participants_team"] = $this->assignment->getMinParticipantsTeam();
 			$values["max_participants_team"] = $this->assignment->getMaxParticipantsTeam();
+			$values["ass_adpt"] = $this->assignment->getAssignmentAdoptTeams();
 		}
 
 		if ($this->assignment->getFeedbackDateCustom())
@@ -1805,7 +1797,7 @@ class ilExAssignmentEditorGUI
 	//
 	// TEAM
 	// 
-
+/*
 	public function adoptTeamAssignmentsFormObject()
 	{
 		$ilCtrl = $this->ctrl;
@@ -1855,7 +1847,8 @@ class ilExAssignmentEditorGUI
 
 		$tpl->setContent($form->getHTML());
 	}
-	
+*/
+	/*
 	public function adoptTeamAssignmentsObject()
 	{
 		$ilCtrl = $this->ctrl;
@@ -1874,7 +1867,7 @@ class ilExAssignmentEditorGUI
 							
 		$ilCtrl->redirect($this, "listAssignments");		
 	}
-
+*/
 	/**
 	 * @param $a_num_teams integer
 	 * @param $a_min_participants integer

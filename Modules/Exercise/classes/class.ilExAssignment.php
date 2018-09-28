@@ -78,6 +78,7 @@ class ilExAssignment
 	protected $number_teams;
 	protected $min_participants_team;
 	protected $max_participants_team;
+	protected $assignment_adopt;
 	protected $max_file;
 	protected $portfolio_template;
 	protected $min_char_limit;
@@ -860,6 +861,25 @@ class ilExAssignment
 	{
 		return $this->max_participants_team;
 	}
+
+	/**
+	 * Set the assignment id from where the teams were copied.
+	 * @param $a_value integer
+	 */
+	function setAssignmentAdoptTeams($a_value)
+	{
+		$this->assignment_adopt = $a_value;
+	}
+
+	/**
+	 * Get the assignment id from where the teams were copied.
+	 * @return integer
+	 */
+	function getAssignmentAdoptTeams()
+	{
+		return $this->assignment_adopt;
+	}
+
 	/**
 	 * Set max number of uploads
 	 * 
@@ -961,6 +981,7 @@ class ilExAssignment
 		$this->setNumberTeams($a_set["num_teams"]);
 		$this->setMinParticipantsTeam($a_set["min_participants_team"]);
 		$this->setMaxParticipantsTeam($a_set["max_participants_team"]);
+		$this->setAssignmentAdoptTeams($a_set['assignment_adopt']);
 		$this->setMaxFile($a_set["max_file"]);
 		$this->setPortfolioTemplateId($a_set["portfolio_template"]);
 		$this->setMinCharLimit($a_set["min_char_limit"]);
@@ -1015,7 +1036,8 @@ class ilExAssignment
 			"max_file" => array("integer", $this->getMaxFile()),
 			"portfolio_template" => array("integer", $this->getPortFolioTemplateId()),
 			"min_char_limit" => array("integer", $this->getMinCharLimit()),
-			"max_char_limit" => array("integer", $this->getMaxCharLimit())
+			"max_char_limit" => array("integer", $this->getMaxCharLimit()),
+			"assignment_adopt" => array("integer", $this->getAssignmentAdoptTeams())
 		));
 		$this->setId($next_id);
 		$exc = new ilObjExercise($this->getExerciseId(), false);
@@ -1065,7 +1087,8 @@ class ilExAssignment
 			"max_file" => array("integer", $this->getMaxFile()),
 			"portfolio_template" => array("integer", $this->getPortFolioTemplateId()),
 			"min_char_limit" => array("integer", $this->getMinCharLimit()),
-			"max_char_limit" => array("integer", $this->getMaxCharLimit())
+			"max_char_limit" => array("integer", $this->getMaxCharLimit()),
+			"assignment_adopt" => array("integer", $this->getAssignmentAdoptTeams())
 			),
 			array(
 			"id" => array("integer", $this->getId()),
