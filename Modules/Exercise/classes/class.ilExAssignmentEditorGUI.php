@@ -10,8 +10,6 @@ include_once("./Modules/Exercise/classes/class.ilExAssignmentReminder.php");
  * set the alert for the radiogroup
  * Define the proper error messages and add them to the lang files.
  * Are all this values mandatory?
- * Remove old methods like adoptTeamAssignmentsFormObject
- * Check lang vars of adopted teams from assignment.
  */
 /**
 * Class ilExAssignmentEditorGUI
