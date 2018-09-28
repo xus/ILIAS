@@ -985,7 +985,8 @@ class ilExAssignmentEditorGUI
 			$ass->setExerciseId($this->exercise_id);
 			$ass->setType($input["type"]);	
 			
-			$this->importFormToAssignment($ass, $input);			
+			$this->importFormToAssignment($ass, $input);
+			$this->adoptTeamsFromAssignment($ass);
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
 			
 			// because of sub-tabs we stay on settings screen
@@ -1220,9 +1221,7 @@ class ilExAssignmentEditorGUI
 				}
 				elseif ($this->assignment->getTeamFormation() == ilExAssignment::TEAMS_FORMED_BY_ASSIGNMENT)
 				{
-					$assignment_adopt = $this->assignment->getAssignmentAdoptTeams();
-					ilExAssignmentTeam::adoptTeams($assignment_adopt, $this->assignment->getId());
-					ilUtil::sendInfo($lng->txt("exc_teams_assignment_adopted"), true);
+					$this->adoptTeamsFromAssignment($this->assignment);
 				}
 			}
 			
@@ -1919,5 +1918,12 @@ class ilExAssignmentEditorGUI
 		$exc_members = new ilExerciseMembers($exercise);
 
 		return count($exc_members->getMembers());
+	}
+
+	function adoptTeamsFromAssignment($a_assignment)
+	{
+		$assignment_adopt = $a_assignment->getAssignmentAdoptTeams();
+		ilExAssignmentTeam::adoptTeams($assignment_adopt, $a_assignment->getId());
+		ilUtil::sendInfo($this->lng->txt("exc_teams_assignment_adopted"), true);
 	}
 }
