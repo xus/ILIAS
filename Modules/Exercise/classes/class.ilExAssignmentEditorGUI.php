@@ -1215,7 +1215,7 @@ class ilExAssignmentEditorGUI
 					{
 						include_once "Modules/Exercise/classes/class.ilExAssignmentTeam.php";
 						$ass_team = new ilExAssignmentTeam();
-						$ass_team->createRandomTeams($this->exercise_id, $this->assignment->getId(), $number_teams, $max_participants);
+						$ass_team->createRandomTeams($this->exercise_id, $this->assignment->getId(), $number_teams);
 					}
 				}
 			}
