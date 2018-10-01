@@ -981,7 +981,9 @@ class ilExAssignmentEditorGUI
 			$ass->setType($input["type"]);	
 			
 			$this->importFormToAssignment($ass, $input);
-			$this->adoptTeamsFromAssignment($ass);
+
+			//teams management
+			$this->generateTeams($ass);
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
 			
 			// because of sub-tabs we stay on settings screen
@@ -1187,24 +1189,8 @@ class ilExAssignmentEditorGUI
 			//import the form to persistence
 			$this->importFormToAssignment($this->assignment, $input);
 
-			//new data configuration
-			if($this->assignment->getType() == ilExAssignment::TYPE_UPLOAD_TEAM)
-			{
-				if($this->assignment->getTeamFormation() == ilExAssignment::TEAMS_FORMED_BY_RANDOM)
-				{
-					$number_teams = $this->assignment->getNumberTeams();
-					if(count(ilExAssignmentTeam::getAssignmentTeamMap($this->assignment->getId())) == 0)
-					{
-						include_once "Modules/Exercise/classes/class.ilExAssignmentTeam.php";
-						$ass_team = new ilExAssignmentTeam();
-						$ass_team->createRandomTeams($this->exercise_id, $this->assignment->getId(), $number_teams, $this->assignment->getMinParticipantsTeam());
-					}
-				}
-				elseif ($this->assignment->getTeamFormation() == ilExAssignment::TEAMS_FORMED_BY_ASSIGNMENT)
-				{
-					$this->adoptTeamsFromAssignment($this->assignment);
-				}
-			}
+			//teams management
+			$this->generateTeams($this->assignment);
 			
 			$new_deadline = $this->assignment->getDeadline();
 			$new_ext_deadline = $this->assignment->getExtendedDeadline();
@@ -1849,5 +1835,29 @@ class ilExAssignmentEditorGUI
 		$assignment_adopt = $a_assignment->getAssignmentAdoptTeams();
 		ilExAssignmentTeam::adoptTeams($assignment_adopt, $a_assignment->getId());
 		ilUtil::sendInfo($this->lng->txt("exc_teams_assignment_adopted"), true);
+	}
+
+	/**
+	 * @param ilExAssignment $a_assignment
+	 */
+	function generateTeams(ilExAssignment $a_assignment)
+	{
+		if($a_assignment->getType() == ilExAssignment::TYPE_UPLOAD_TEAM)
+		{
+			if($a_assignment->getTeamFormation() == ilExAssignment::TEAMS_FORMED_BY_RANDOM)
+			{
+				$number_teams = $a_assignment->getNumberTeams();
+				if(count(ilExAssignmentTeam::getAssignmentTeamMap($a_assignment->getId())) == 0)
+				{
+					$ass_team = new ilExAssignmentTeam();
+					$ass_team->createRandomTeams($this->exercise_id, $a_assignment->getId(), $number_teams, $a_assignment->getMinParticipantsTeam());
+				}
+			}
+			elseif ($a_assignment->getTeamFormation() == ilExAssignment::TEAMS_FORMED_BY_ASSIGNMENT)
+			{
+				$this->adoptTeamsFromAssignment($a_assignment);
+			}
+		}
+
 	}
 }
