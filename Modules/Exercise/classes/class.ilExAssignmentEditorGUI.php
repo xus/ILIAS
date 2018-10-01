@@ -1812,11 +1812,10 @@ class ilExAssignmentEditorGUI
 			$message = "Maximal number of team participants can't be smaller than Minimal number of team participants";
 			return array("status" => "error", "msg" => $message, "field" => "max_participants_team");
 		}
-
-		//members per team +1 (because total_members % num teams)
-		if( $a_max_participants > 0 && ($members_per_team + 1)> $a_max_participants)
+		
+		if( $a_max_participants > 0 && $members_per_team > $a_max_participants)
 		{
-			$message = "Maximum Number of Participants can't be set as ".$a_max_participants." because teams are set with ".$members_per_team." participants";
+			$message = "Maximum Number of Participants can't be set as ".$a_max_participants." because some teams need to be set with ".$members_per_team." participants";
 			return array("status" => "error", "msg" => $message, "field" => "max_participants_team");
 		}
 
