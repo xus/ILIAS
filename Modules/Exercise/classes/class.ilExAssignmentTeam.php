@@ -583,9 +583,10 @@ class ilExAssignmentTeam
 	 * @param $a_exercise_id integer
 	 * @param $a_assignment_id integer
 	 * @param $a_number_teams integer
+	 * @param $a_min_participants integer
 	 * @return bool
 	 */
-	public function createRandomTeams($a_exercise_id, $a_assignment_id, $a_number_teams)
+	public function createRandomTeams($a_exercise_id, $a_assignment_id, $a_number_teams, $a_min_participants)
 	{
 		//just in case...
 		if(count(self::getAssignmentTeamMap($a_assignment_id))) {
@@ -595,11 +596,23 @@ class ilExAssignmentTeam
 		$exercise = new ilObjExercise($a_exercise_id, false);
 		$obj_exc_members = new ilExerciseMembers($exercise);
 		$members = $obj_exc_members->getMembers();
-		$members_per_team = round(count($members) / $a_number_teams);
+		$total_exc_members = count($members);
+
+		$number_of_teams = $a_number_teams;
+		if(!$number_of_teams)
+		{
+			if($a_min_participants) {
+				$number_of_teams = round($total_exc_members / $a_min_participants);
+			} else {
+				$number_of_teams = random_int(1, $total_exc_members);
+			}
+		}
+
+		$members_per_team = round($total_exc_members / $number_of_teams);
 
 		shuffle($members);
 
-		for($i=0;$i<$a_number_teams;$i++)
+		for($i=0;$i<$number_of_teams;$i++)
 		{
 			$members_counter = 0;
 			while(!empty($members) && $members_counter < $members_per_team)

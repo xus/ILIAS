@@ -322,7 +322,6 @@ class ilExAssignmentEditorGUI
 			//random options
 			$number_teams = new ilNumberInputGUI($lng->txt("exc_teams"), "number_teams");
 			$number_teams->setInfo($lng->txt("exc_teams"));
-			$number_teams->setRequired(true);
 			$number_teams->setSize(3);
 			$number_teams->setMinValue(1);
 			$number_teams->setMaxValue($this->getExerciseTotalMembers());
@@ -330,7 +329,6 @@ class ilExAssignmentEditorGUI
 
 			$min_team_participants = new ilNumberInputGUI($lng->txt("exc_min_team_participants"), "min_participants_team");
 			$min_team_participants->setInfo($lng->txt("exc_min_team_participants"));
-			$min_team_participants->setRequired(true);
 			$min_team_participants->setSize(3);
 			$min_team_participants->setMinValue(1);
 			$min_team_participants->setMaxValue($this->getExerciseTotalMembers());
@@ -338,7 +336,6 @@ class ilExAssignmentEditorGUI
 
 			$max_team_participants = new ilNumberInputGUI($lng->txt("exc_max_team_participants"), "max_participants_team");
 			$max_team_participants->setInfo($lng->txt("exc_max_team_participants"));
-			$max_team_participants->setRequired(true);
 			$max_team_participants->setSize(3);
 			$max_team_participants->setMinValue(1);
 			$max_team_participants->setMaxValue($this->getExerciseTotalMembers());
@@ -1200,7 +1197,7 @@ class ilExAssignmentEditorGUI
 					{
 						include_once "Modules/Exercise/classes/class.ilExAssignmentTeam.php";
 						$ass_team = new ilExAssignmentTeam();
-						$ass_team->createRandomTeams($this->exercise_id, $this->assignment->getId(), $number_teams);
+						$ass_team->createRandomTeams($this->exercise_id, $this->assignment->getId(), $number_teams, $this->assignment->getMinParticipantsTeam());
 					}
 				}
 				elseif ($this->assignment->getTeamFormation() == ilExAssignment::TEAMS_FORMED_BY_ASSIGNMENT)
@@ -1791,8 +1788,24 @@ class ilExAssignmentEditorGUI
 	function validationTeamsFormation($a_num_teams, $a_min_participants, $a_max_participants)
 	{
 		$total_members = $this->getExerciseTotalMembers();
-		$members_per_team = round($total_members / $a_num_teams);
-		$members_smaller_team = $total_members % $a_num_teams;
+		$number_of_teams = $a_num_teams;
+
+		if($number_of_teams){
+			$members_per_team = round($total_members / $a_num_teams);
+		} else {
+			if($a_min_participants)
+			{
+				$number_of_teams = round($total_members / $a_min_participants);
+				$participants_extra_team =  $total_members % $a_min_participants;
+				if($participants_extra_team > $number_of_teams)
+				{
+					//Can't create teams with this minimum of participants.
+					$message = "The Minimum number of team participants ".$a_min_participants." is too big, please decrease the value.";
+					return array("status" => "error", "msg" => $message, "field" => "min_participants_team");
+				}
+			}
+			$members_per_team = 0;
+		}
 
 		if($a_min_participants > $a_max_participants)
 		{
@@ -1800,21 +1813,16 @@ class ilExAssignmentEditorGUI
 			return array("status" => "error", "msg" => $message, "field" => "max_participants_team");
 		}
 
-		if($members_per_team > $a_max_participants)
+		//members per team +1 (because total_members % num teams)
+		if( $a_max_participants > 0 && ($members_per_team + 1)> $a_max_participants)
 		{
 			$message = "Maximum Number of Participants can't be set as ".$a_max_participants." because teams are set with ".$members_per_team." participants";
 			return array("status" => "error", "msg" => $message, "field" => "max_participants_team");
 		}
 
-		if($members_per_team < $a_min_participants)
+		if($members_per_team > 0 && $members_per_team < $a_min_participants)
 		{
 			$message = "Minimum Number of Participants can't be set as ".$a_min_participants." because teams are set with ".$members_per_team." participants";
-			return array("status" => "error", "msg" => $message, "field" => "min_participants_team");
-		}
-
-		if($members_smaller_team > 0 && $members_smaller_team < $a_min_participants)
-		{
-			$message = "Teams can not be created. The smaller team does not have enough members. Please, configure the number of teams and limits properly.";
 			return array("status" => "error", "msg" => $message, "field" => "min_participants_team");
 		}
 
