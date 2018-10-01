@@ -1800,7 +1800,7 @@ class ilExAssignmentEditorGUI
 				if($participants_extra_team > $number_of_teams)
 				{
 					//Can't create teams with this minimum of participants.
-					$message = "The Minimum number of team participants ".$a_min_participants." is too big, please decrease the value.";
+					$message = sprintf($this->lng->txt("exc_team_minimal_too_big"),$a_min_participants);
 					return array("status" => "error", "msg" => $message, "field" => "min_participants_team");
 				}
 			}
@@ -1809,19 +1809,19 @@ class ilExAssignmentEditorGUI
 
 		if($a_min_participants > $a_max_participants)
 		{
-			$message = "Maximal number of team participants can't be smaller than Minimal number of team participants";
+			$message = $this->lng->txt("exc_team_min_big_than_max");
 			return array("status" => "error", "msg" => $message, "field" => "max_participants_team");
 		}
 		
 		if( $a_max_participants > 0 && $members_per_team > $a_max_participants)
 		{
-			$message = "Maximum Number of Participants can't be set as ".$a_max_participants." because some teams need to be set with ".$members_per_team." participants";
+			$message = sprintf($this->lng->txt("exc_team_max_small_than_members"),$a_max_participants, $members_per_team);
 			return array("status" => "error", "msg" => $message, "field" => "max_participants_team");
 		}
 
 		if($members_per_team > 0 && $members_per_team < $a_min_participants)
 		{
-			$message = "Minimum Number of Participants can't be set as ".$a_min_participants." because teams are set with ".$members_per_team." participants";
+			$message = sprintf($this->lng->txt("exc_team_min_small_than_members"),$a_min_participants, $members_per_team);
 			return array("status" => "error", "msg" => $message, "field" => "min_participants_team");
 		}
 

@@ -14361,3 +14361,7 @@ exc#:#exc_max_team_participants#:#Maximal Number of Participants
 exc#:#exc_total_members#:#Total Exercise Members
 exc#:#exc_value_can_not_set#:#This value can not be set.
 exc#:#exc_teams_assignment_adopted#:#Teams adopted from existing assignment
+exc#:#exc_team_minimal_too_big#:#Minimal number of team participants %s is too big, please decrease the value.
+exc#:#exc_team_min_big_than_max#:#Maximal number of team participants can not be smaller than Minimal number of team participants.
+exc#:#exc_team_max_small_than_members#:#Maximal Number of Participants can not be set as %s because some teams need to be set with %s participants.
+exc#:#exc_team_min_small_than_members#:#Minimal Number of Participants can not be set as %s because teams are set with %s participants.
