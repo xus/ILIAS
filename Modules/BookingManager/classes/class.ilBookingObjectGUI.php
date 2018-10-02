@@ -637,13 +637,16 @@ class ilBookingObjectGUI
 		
 		ilDatePresentation::setUseRelativeDates($olddt);		
 		
-		
+
+		/*
+		#23578 since Booking pool participants.
 		$obj = new ilBookingReservation($book_id);
 		if ($obj->getUserId() != $ilUser->getId())
 		{
 			return;
 		}
-		
+		*/
+
 		include_once 'Modules/BookingManager/classes/class.ilBookingObject.php';
 		$obj = new ilBookingObject($id);
 		$pfile = $obj->getPostFile();
