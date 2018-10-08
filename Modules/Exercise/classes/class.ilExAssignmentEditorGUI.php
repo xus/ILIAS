@@ -320,25 +320,28 @@ class ilExAssignmentEditorGUI
 			);
 
 			//random options
-			$number_teams = new ilNumberInputGUI($lng->txt("exc_teams"), "number_teams");
-			$number_teams->setInfo($lng->txt("exc_teams"));
+			$number_teams = new ilNumberInputGUI($lng->txt("exc_num_teams"), "number_teams");
 			$number_teams->setSize(3);
 			$number_teams->setMinValue(1);
 			$number_teams->setMaxValue($this->getExerciseTotalMembers());
+			$number_teams->setRequired(true);
+			$number_teams->setSuffix($lng->txt("exc_team_assignment_adopt_teams"));
 			$radio_random->addSubItem($number_teams);
 
 			$min_team_participants = new ilNumberInputGUI($lng->txt("exc_min_team_participants"), "min_participants_team");
-			$min_team_participants->setInfo($lng->txt("exc_min_team_participants"));
 			$min_team_participants->setSize(3);
 			$min_team_participants->setMinValue(1);
 			$min_team_participants->setMaxValue($this->getExerciseTotalMembers());
+			$min_team_participants->setRequired(true);
+			$min_team_participants->setSuffix($lng->txt("exc_participants"));
 			$radio_random->addSubItem($min_team_participants);
 
 			$max_team_participants = new ilNumberInputGUI($lng->txt("exc_max_team_participants"), "max_participants_team");
-			$max_team_participants->setInfo($lng->txt("exc_max_team_participants"));
 			$max_team_participants->setSize(3);
 			$max_team_participants->setMinValue(1);
 			$max_team_participants->setMaxValue($this->getExerciseTotalMembers());
+			$max_team_participants->setRequired(true);
+			$max_team_participants->setSuffix($lng->txt("exc_participants"));
 			$radio_random->addSubItem($max_team_participants);
 
 			$radio_assignment = new ilRadioOption(
