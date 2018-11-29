@@ -515,10 +515,7 @@ class ilExerciseManagementGUI
 	{
 		$this->initFilter();
 
-		//tabs
-		$this->tabs_gui->clearTargets();
-		$this->tabs_gui->setBackTarget($this->lng->txt("back"),
-			$this->ctrl->getLinkTarget($this, "members"));
+		$this->setBackToMembers();
 
 		$button_print = $this->ui_factory->button()->standard($this->lng->txt('print'), "#")
 			->withOnLoadCode(function($id) {
@@ -583,6 +580,72 @@ class ilExerciseManagementGUI
 		$this->tpl->setContent($report_html);
 	}
 
+	/**
+	 * TODO -> Deal with the redirection after update the grade via action button.
+	 *
+	 * Extract the data collection to another method. List and compare use this. DRY
+	 */
+	public function compareTextAssignmentsObject()
+	{
+		$this->setBackToMembers();
+
+		//TODO -> Find best way to create title for this list of panels.
+		$report_html = "";
+		//TODO create proper title.
+		$report_title = $this->lng->txt("exc_compare_submissions");
+		$report_html .= "<h1>".$report_title."</h1>";
+
+		//peer review object for this assignment
+		$peer_review = new ilExPeerReview($this->assignment);
+
+		//participant ids selected via checkboxes
+		$participants = array_keys($this->getMultiActionUserIds());
+
+		foreach($participants as $participant_id)
+		{
+
+			$submission = new ilExSubmission($this->assignment,$participant_id);
+
+			//submission data array
+			$file = reset($submission->getFiles());
+
+			//user data
+			//TODO refactor the data collection to a method.
+			$user = new ilObjUser($file["user_id"]);
+			$uname = $user->getFirstname()." ".$user->getLastname();
+
+			$data = array(
+				"uid" => $file["user_id"],
+				"uname" => $uname,
+				"udate" => $file["ts"],
+				"utext" => ilRTE::_replaceMediaObjectImageSrc($file["atext"], 1) // mob id to mob src
+			);
+
+			//get data peer and assign it
+			$data["peer"] = array();
+			foreach($peer_review->getPeerReviewsByPeerId($file['user_id']) as $key => $value)
+			{
+				$data["peer"][] = $value['giver_id'];
+			}
+
+			$data["fb_received"] = count($data["peer"]);
+			$data["fb_given"] = $peer_review->countGivenFeedback(true, $file["user_id"]);
+
+			$submission_data = $this->assignment->getExerciseMemberAssignmentData($file["user_id"], $this->filter["status"]);
+
+			if(is_array($submission_data))
+			{
+				$data = array_merge($data, $submission_data);
+
+				$report_html .= $this->getReportPanel($data);
+				$total_reports++;
+
+			}
+		}
+
+		$this->tpl->setContent($report_html);
+	}
+
 	public function getReportPanel($a_data)
 	{
 		$modal = $this->getEvaluationModal($a_data);
@@ -627,7 +690,9 @@ class ilExerciseManagementGUI
 			->withCard($this->ui_factory->card()->standard($this->lng->txt('text_assignment'))->withSections(array($this->ui_factory->legacy($card_tpl->get()))))->withActions($actions);
 
 		$feedback_tpl = new ilTemplate("tpl.exc_report_feedback.html", true, true, "Modules/Exercise");
-		if(array_key_exists("peer", $a_data) && $this->filter["feedback"] == "submission_feedback")
+		//if(array_key_exists("peer", $a_data) && $this->filter["feedback"] == "submission_feedback")
+		//TODO READ WHAT IS THIS SUBMISSION FEEDBACK DOING
+		if(array_key_exists("peer", $a_data)
 		{
 			$feedback_tpl->setCurrentBlock("feedback");
 			foreach($a_data["peer"] as $peer_id)
@@ -2159,6 +2224,17 @@ class ilExerciseManagementGUI
 		$submit->setCaption("filter");
 		$submit->setCommand("listTextAssignment");
 		$this->toolbar->addButtonInstance($submit);
+	}
+
+	/**
+	 * Add the Back link to the tabs. (used in submission list and submission compare)
+	 */
+	protected function setBackToMembers()
+	{
+		//tabs
+		$this->tabs_gui->clearTargets();
+		$this->tabs_gui->setBackTarget($this->lng->txt("back"),
+			$this->ctrl->getLinkTarget($this, "members"));
 	}
 }
 
