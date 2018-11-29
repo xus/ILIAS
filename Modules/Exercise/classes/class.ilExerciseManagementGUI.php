@@ -690,9 +690,8 @@ class ilExerciseManagementGUI
 			->withCard($this->ui_factory->card()->standard($this->lng->txt('text_assignment'))->withSections(array($this->ui_factory->legacy($card_tpl->get()))))->withActions($actions);
 
 		$feedback_tpl = new ilTemplate("tpl.exc_report_feedback.html", true, true, "Modules/Exercise");
-		//if(array_key_exists("peer", $a_data) && $this->filter["feedback"] == "submission_feedback")
-		//TODO READ WHAT IS THIS SUBMISSION FEEDBACK DOING
-		if(array_key_exists("peer", $a_data))
+		//if no feedback filter the feedback is displayed. Can be list submissions or compare submissions.
+		if(array_key_exists("peer", $a_data) && ($this->filter["feedback"] == "submission_feedback") || $this->filter["feedback"] == "")
 		{
 			$feedback_tpl->setCurrentBlock("feedback");
 			foreach($a_data["peer"] as $peer_id)
@@ -2189,8 +2188,6 @@ class ilExerciseManagementGUI
 
 		if($_POST["filter_feedback"]) {
 			$this->filter["feedback"] = trim(ilUtil::stripSlashes($_POST["filter_feedback"]));
-		} else {
-			$this->filter["feedback"] = "submission_feedback";
 		}
 
 		$this->lng->loadLanguageModule("search");
