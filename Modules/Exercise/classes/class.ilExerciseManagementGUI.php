@@ -692,7 +692,7 @@ class ilExerciseManagementGUI
 		$feedback_tpl = new ilTemplate("tpl.exc_report_feedback.html", true, true, "Modules/Exercise");
 		//if(array_key_exists("peer", $a_data) && $this->filter["feedback"] == "submission_feedback")
 		//TODO READ WHAT IS THIS SUBMISSION FEEDBACK DOING
-		if(array_key_exists("peer", $a_data)
+		if(array_key_exists("peer", $a_data))
 		{
 			$feedback_tpl->setCurrentBlock("feedback");
 			foreach($a_data["peer"] as $peer_id)
