@@ -66,8 +66,8 @@ class ilExerciseManagementGUI
 	const VIEW_PARTICIPANT = 2;	
 	const VIEW_GRADES = 3;
 
-	const FEEDBACK_ONLY_SUBMISSION = "submission_feedback";
-	const FEEDBACK_FULL_SUBMISSION = "submission_only";
+	const FEEDBACK_ONLY_SUBMISSION = "submission_only";
+	const FEEDBACK_FULL_SUBMISSION = "submission_feedback";
 
 	const GRADE_NOT_GRADED = "notgraded";
 	const GRADE_PASSED = "passed";
@@ -691,7 +691,7 @@ class ilExerciseManagementGUI
 
 		$feedback_tpl = new ilTemplate("tpl.exc_report_feedback.html", true, true, "Modules/Exercise");
 		//if no feedback filter the feedback is displayed. Can be list submissions or compare submissions.
-		if(array_key_exists("peer", $a_data) && ($this->filter["feedback"] == "submission_feedback") || $this->filter["feedback"] == "")
+		if(array_key_exists("peer", $a_data) && ($this->filter["feedback"] == self::FEEDBACK_FULL_SUBMISSION) || $this->filter["feedback"] == "")
 		{
 			$feedback_tpl->setCurrentBlock("feedback");
 			foreach($a_data["peer"] as $peer_id)
@@ -2206,8 +2206,8 @@ class ilExerciseManagementGUI
 
 		$si_feedback = new ilSelectInputGUI($this->lng->txt("feedback"), "filter_feedback");
 		$options = array(
-			"submission_feedback" => $this->lng->txt("submissions_feedback"),
-			"submission_only" => $this->lng->txt("submissions_only")
+			self::FEEDBACK_FULL_SUBMISSION => $this->lng->txt("submissions_feedback"),
+			self::FEEDBACK_ONLY_SUBMISSION => $this->lng->txt("submissions_only")
 		);
 		$si_feedback->setOptions($options);
 		$si_feedback->setValue($this->filter["feedback"]);
