@@ -524,17 +524,13 @@ class ilExerciseManagementGUI
 		$this->toolbar->addSeparator();
 		$this->toolbar->addComponent($button_print);
 
-		//retrieve data
-		//$peer_review = new ilExPeerReview($this->assignment);
-		//$peer_data = $peer_review->getAllPeerReviews();
-
 		include_once "Services/User/classes/class.ilUserUtil.php";
 		include_once "Services/RTE/classes/class.ilRTE.php";
 
+		$group_panels_tpl = new ilTemplate("tpl.exc_group_report_panels.html", TRUE, TRUE, "Modules/Exercise");
+		$group_panels_tpl->setVariable('TITLE', $this->lng->txt("exc_list_text_assignment").": ".$this->assignment->getTitle());
+
 		$report_html = "";
-		//TODO create proper title.
-		$report_title = $this->lng->txt("exc_list_text_assignment").": ".$this->assignment->getTitle();
-		$report_html .= "<h1>".$report_title."</h1>";
 		$total_reports = 0;
 		foreach(ilExSubmission::getAllAssignmentFiles($this->assignment->getExerciseId(), $this->assignment->getId()) as $file)
 		{
@@ -561,7 +557,8 @@ class ilExerciseManagementGUI
 			$report_html .= $mtpl->get();
 		}
 
-		$this->tpl->setContent($report_html);
+		$group_panels_tpl->setVariable('CONTENT', $report_html);
+		$this->tpl->setContent($group_panels_tpl->get());
 	}
 
 	/**
@@ -573,12 +570,10 @@ class ilExerciseManagementGUI
 	{
 		$this->setBackToMembers();
 
-		//TODO -> Find best way to create title for this list of panels.
-		$report_html = "";
-		//TODO create proper title.
-		$report_title = $this->lng->txt("exc_compare_submissions");
-		$report_html .= "<h1>".$report_title."</h1>";
+		$group_panels_tpl = new ilTemplate("tpl.exc_group_report_panels.html", TRUE, TRUE, "Modules/Exercise");
+		$group_panels_tpl->setVariable('TITLE', $this->lng->txt("exc_compare_selected_submissions"));
 
+		$report_html = "";
 		//participant ids selected via checkboxes
 		$participants = array_keys($this->getMultiActionUserIds());
 
@@ -601,7 +596,8 @@ class ilExerciseManagementGUI
 			}
 		}
 
-		$this->tpl->setContent($report_html);
+		$group_panels_tpl->setVariable('CONTENT', $report_html);
+		$this->tpl->setContent($group_panels_tpl->get());
 	}
 
 	public function getReportPanel($a_data)
