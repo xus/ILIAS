@@ -525,8 +525,8 @@ class ilExerciseManagementGUI
 		$this->toolbar->addComponent($button_print);
 
 		//retrieve data
-		$peer_review = new ilExPeerReview($this->assignment);
-		$peer_data = $peer_review->getAllPeerReviews();
+		//$peer_review = new ilExPeerReview($this->assignment);
+		//$peer_data = $peer_review->getAllPeerReviews();
 
 		include_once "Services/User/classes/class.ilUserUtil.php";
 		include_once "Services/RTE/classes/class.ilRTE.php";
@@ -540,28 +540,12 @@ class ilExerciseManagementGUI
 		{
 			if(trim($file["atext"]))
 			{
-				$user = new ilObjUser($file["user_id"]);
-				$uname = $user->getFirstname()." ".$user->getLastname();
-				$data = array(
-					"uid" => $file["user_id"],
-					"uname" => $uname,
-					"udate" => $file["ts"],
-					"utext" => ilRTE::_replaceMediaObjectImageSrc($file["atext"], 1) // mob id to mob src
-				);
-
-				if(isset($peer_data[$file["user_id"]]))
-				{
-					$data["peer"] = array_keys($peer_data[$file["user_id"]]);
-				}
-
-				$data["fb_received"] = count($data["peer"]);
-				$data["fb_given"] = $peer_review->countGivenFeedback(true, $file["user_id"]);
-
+				$feedback_data = $this->collectFeedbackDataFromPeer($file);
 				$submission_data = $this->assignment->getExerciseMemberAssignmentData($file["user_id"], $this->filter["status"]);
 
 				if(is_array($submission_data))
 				{
-					$data = array_merge($data, $submission_data);
+					$data = array_merge($feedback_data, $submission_data);
 					$report_html .= $this->getReportPanel($data);
 					$total_reports++;
 
@@ -595,51 +579,25 @@ class ilExerciseManagementGUI
 		$report_title = $this->lng->txt("exc_compare_submissions");
 		$report_html .= "<h1>".$report_title."</h1>";
 
-		//peer review object for this assignment
-		$peer_review = new ilExPeerReview($this->assignment);
-
 		//participant ids selected via checkboxes
 		$participants = array_keys($this->getMultiActionUserIds());
 
 		foreach($participants as $participant_id)
 		{
-
 			$submission = new ilExSubmission($this->assignment,$participant_id);
 
 			//submission data array
 			$file = reset($submission->getFiles());
 
-			//user data
-			//TODO refactor the data collection to a method.
-			$user = new ilObjUser($file["user_id"]);
-			$uname = $user->getFirstname()." ".$user->getLastname();
-
-			$data = array(
-				"uid" => $file["user_id"],
-				"uname" => $uname,
-				"udate" => $file["ts"],
-				"utext" => ilRTE::_replaceMediaObjectImageSrc($file["atext"], 1) // mob id to mob src
-			);
-
-			//get data peer and assign it
-			$data["peer"] = array();
-			foreach($peer_review->getPeerReviewsByPeerId($file['user_id']) as $key => $value)
-			{
-				$data["peer"][] = $value['giver_id'];
-			}
-
-			$data["fb_received"] = count($data["peer"]);
-			$data["fb_given"] = $peer_review->countGivenFeedback(true, $file["user_id"]);
+			$feedback_data = $this->collectFeedbackDataFromPeer($file);
 
 			$submission_data = $this->assignment->getExerciseMemberAssignmentData($file["user_id"], $this->filter["status"]);
 
 			if(is_array($submission_data))
 			{
-				$data = array_merge($data, $submission_data);
-
+				$data = array_merge($feedback_data, $submission_data);
 				$report_html .= $this->getReportPanel($data);
 				$total_reports++;
-
 			}
 		}
 
@@ -2233,5 +2191,34 @@ class ilExerciseManagementGUI
 		$this->tabs_gui->setBackTarget($this->lng->txt("back"),
 			$this->ctrl->getLinkTarget($this, "members"));
 	}
-}
 
+	/**
+	 * @param $a_data array submission data
+	 * @return $data array
+	 */
+	public function collectFeedbackDataFromPeer(array $a_data): array
+	{
+		$user = new ilObjUser($a_data["user_id"]);
+		$uname = $user->getFirstname()." ".$user->getLastname();
+
+		$data = array(
+			"uid" => $a_data["user_id"],
+			"uname" => $uname,
+			"udate" => $a_data["ts"],
+			"utext" => ilRTE::_replaceMediaObjectImageSrc($a_data["atext"], 1) // mob id to mob src
+		);
+
+		//get data peer and assign it
+		$peer_review = new ilExPeerReview($this->assignment);
+		$data["peer"] = array();
+		foreach($peer_review->getPeerReviewsByPeerId($a_data['user_id']) as $key => $value)
+		{
+			$data["peer"][] = $value['giver_id'];
+		}
+
+		$data["fb_received"] = count($data["peer"]);
+		$data["fb_given"] = $peer_review->countGivenFeedback(true, $a_data["user_id"]);
+
+		return $data;
+	}
+}
