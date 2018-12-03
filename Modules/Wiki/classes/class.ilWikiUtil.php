@@ -709,7 +709,6 @@ class ilWikiUtil
 			$a_action = "new";
 		}
 		
-		//TODO remove duplicate code
 		foreach(array_unique($users) as $idx => $user_id)
 		{
 			if($user_id != $ilUser->getId() &&					 
@@ -721,13 +720,13 @@ class ilWikiUtil
 
 				if($a_action == "comment")
 				{
-					$subject = sprintf($ulng->txt('wiki_notification_comment'), $wiki->getTitle(), $page->getTitle());
+					$subject = sprintf($ulng->txt('wiki_notification_comment_subject'), $wiki->getTitle(), $page->getTitle());
 					$message = sprintf($ulng->txt('wiki_change_notification_salutation'), ilObjUser::_lookupFullname($user_id))."\n\n";
 
 					$message .= $ulng->txt('wiki_notification_'.$a_action).":\n\n";
 					$message .= $ulng->txt('wiki').": ".$wiki->getTitle()."\n";
 					$message .= $ulng->txt('page').": ".$page->getTitle()."\n";
-					$message .= $ulng->txt('wiki_comented_by').": ".ilUserUtil::getNamePresentation($ilUser->getId())."\n";
+					$message .= $ulng->txt('wiki_commented_by').": ".ilUserUtil::getNamePresentation($ilUser->getId())."\n";
 
 					if($snippet)
 					{
