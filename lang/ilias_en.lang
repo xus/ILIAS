@@ -14973,3 +14973,5 @@ content#:#cont_notification_comment_subject#:#A comment was added to %s: %s
 content#:#cont_change_notification_salutation#:#Hello %s,
 content#:#cont_notification_comment#:#the following Learning Module Page has been commented
 content#:#cont_commented_by#:#Commented by
+exercise#:#exc_enable_versioning#:#Enable versioning
+exercise#:#exc_enable_versioning_info#:#Allow tutors and participants to create different versions of a submission
