@@ -4477,7 +4477,6 @@ class ilLMPresentationGUI
 		$note = new ilNote($a_note_id);
 		$note = $note->getText();
 
-		include_once "./Modules/LearningModule/classes/class.ilLearningModuleNotification.php";
 		$notification = new ilLearningModuleNotification("comment", ilNotification::TYPE_LM_PAGE, $this->lm, $a_page_id,$note);
 		$notification->send();
 	}
