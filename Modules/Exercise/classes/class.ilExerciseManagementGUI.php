@@ -66,8 +66,8 @@ class ilExerciseManagementGUI
 	const VIEW_PARTICIPANT = 2;	
 	const VIEW_GRADES = 3;
 
-	const FEEDBACK_ONLY_SUBMISSION = "submission_feedback";
-	const FEEDBACK_FULL_SUBMISSION = "submission_only";
+	const FEEDBACK_ONLY_SUBMISSION = "submission_only";
+	const FEEDBACK_FULL_SUBMISSION = "submission_feedback";
 
 	const GRADE_NOT_GRADED = "notgraded";
 	const GRADE_PASSED = "passed";
@@ -515,10 +515,7 @@ class ilExerciseManagementGUI
 	{
 		$this->initFilter();
 
-		//tabs
-		$this->tabs_gui->clearTargets();
-		$this->tabs_gui->setBackTarget($this->lng->txt("back"),
-			$this->ctrl->getLinkTarget($this, "members"));
+		$this->setBackToMembers();
 
 		$button_print = $this->ui_factory->button()->standard($this->lng->txt('print'), "#")
 			->withOnLoadCode(function($id) {
@@ -527,44 +524,24 @@ class ilExerciseManagementGUI
 		$this->toolbar->addSeparator();
 		$this->toolbar->addComponent($button_print);
 
-		//retrieve data
-		$peer_review = new ilExPeerReview($this->assignment);
-		$peer_data = $peer_review->getAllPeerReviews();
-
 		include_once "Services/User/classes/class.ilUserUtil.php";
 		include_once "Services/RTE/classes/class.ilRTE.php";
 
+		$group_panels_tpl = new ilTemplate("tpl.exc_group_report_panels.html", TRUE, TRUE, "Modules/Exercise");
+		$group_panels_tpl->setVariable('TITLE', $this->lng->txt("exc_list_text_assignment").": ".$this->assignment->getTitle());
+
 		$report_html = "";
-		//TODO create proper title.
-		$report_title = $this->lng->txt("exc_list_text_assignment").": ".$this->assignment->getTitle();
-		$report_html .= "<h1>".$report_title."</h1>";
 		$total_reports = 0;
 		foreach(ilExSubmission::getAllAssignmentFiles($this->assignment->getExerciseId(), $this->assignment->getId()) as $file)
 		{
 			if(trim($file["atext"]))
 			{
-				$user = new ilObjUser($file["user_id"]);
-				$uname = $user->getFirstname()." ".$user->getLastname();
-				$data = array(
-					"uid" => $file["user_id"],
-					"uname" => $uname,
-					"udate" => $file["ts"],
-					"utext" => ilRTE::_replaceMediaObjectImageSrc($file["atext"], 1) // mob id to mob src
-				);
-
-				if(isset($peer_data[$file["user_id"]]))
-				{
-					$data["peer"] = array_keys($peer_data[$file["user_id"]]);
-				}
-
-				$data["fb_received"] = count($data["peer"]);
-				$data["fb_given"] = $peer_review->countGivenFeedback(true, $file["user_id"]);
-
+				$feedback_data = $this->collectFeedbackDataFromPeer($file);
 				$submission_data = $this->assignment->getExerciseMemberAssignmentData($file["user_id"], $this->filter["status"]);
 
 				if(is_array($submission_data))
 				{
-					$data = array_merge($data, $submission_data);
+					$data = array_merge($feedback_data, $submission_data);
 					$report_html .= $this->getReportPanel($data);
 					$total_reports++;
 
@@ -580,7 +557,47 @@ class ilExerciseManagementGUI
 			$report_html .= $mtpl->get();
 		}
 
-		$this->tpl->setContent($report_html);
+		$group_panels_tpl->setVariable('CONTENT', $report_html);
+		$this->tpl->setContent($group_panels_tpl->get());
+	}
+
+	/**
+	 * TODO -> Deal with the redirection after update the grade via action button.
+	 *
+	 * Extract the data collection to another method. List and compare use this. DRY
+	 */
+	public function compareTextAssignmentsObject()
+	{
+		$this->setBackToMembers();
+
+		$group_panels_tpl = new ilTemplate("tpl.exc_group_report_panels.html", TRUE, TRUE, "Modules/Exercise");
+		$group_panels_tpl->setVariable('TITLE', $this->lng->txt("exc_compare_selected_submissions"));
+
+		$report_html = "";
+		//participant ids selected via checkboxes
+		$participants = array_keys($this->getMultiActionUserIds());
+
+		foreach($participants as $participant_id)
+		{
+			$submission = new ilExSubmission($this->assignment,$participant_id);
+
+			//submission data array
+			$file = reset($submission->getFiles());
+
+			$feedback_data = $this->collectFeedbackDataFromPeer($file);
+
+			$submission_data = $this->assignment->getExerciseMemberAssignmentData($file["user_id"], $this->filter["status"]);
+
+			if(is_array($submission_data))
+			{
+				$data = array_merge($feedback_data, $submission_data);
+				$report_html .= $this->getReportPanel($data);
+				$total_reports++;
+			}
+		}
+
+		$group_panels_tpl->setVariable('CONTENT', $report_html);
+		$this->tpl->setContent($group_panels_tpl->get());
 	}
 
 	public function getReportPanel($a_data)
@@ -627,7 +644,8 @@ class ilExerciseManagementGUI
 			->withCard($this->ui_factory->card()->standard($this->lng->txt('text_assignment'))->withSections(array($this->ui_factory->legacy($card_tpl->get()))))->withActions($actions);
 
 		$feedback_tpl = new ilTemplate("tpl.exc_report_feedback.html", true, true, "Modules/Exercise");
-		if(array_key_exists("peer", $a_data) && $this->filter["feedback"] == "submission_feedback")
+		//if no feedback filter the feedback is displayed. Can be list submissions or compare submissions.
+		if(array_key_exists("peer", $a_data) && ($this->filter["feedback"] == self::FEEDBACK_FULL_SUBMISSION) || $this->filter["feedback"] == "")
 		{
 			$feedback_tpl->setCurrentBlock("feedback");
 			foreach($a_data["peer"] as $peer_id)
@@ -2124,8 +2142,6 @@ class ilExerciseManagementGUI
 
 		if($_POST["filter_feedback"]) {
 			$this->filter["feedback"] = trim(ilUtil::stripSlashes($_POST["filter_feedback"]));
-		} else {
-			$this->filter["feedback"] = "submission_feedback";
 		}
 
 		$this->lng->loadLanguageModule("search");
@@ -2144,8 +2160,8 @@ class ilExerciseManagementGUI
 
 		$si_feedback = new ilSelectInputGUI($this->lng->txt("feedback"), "filter_feedback");
 		$options = array(
-			"submission_feedback" => $this->lng->txt("submissions_feedback"),
-			"submission_only" => $this->lng->txt("submissions_only")
+			self::FEEDBACK_FULL_SUBMISSION => $this->lng->txt("submissions_feedback"),
+			self::FEEDBACK_ONLY_SUBMISSION => $this->lng->txt("submissions_only")
 		);
 		$si_feedback->setOptions($options);
 		$si_feedback->setValue($this->filter["feedback"]);
@@ -2160,5 +2176,45 @@ class ilExerciseManagementGUI
 		$submit->setCommand("listTextAssignment");
 		$this->toolbar->addButtonInstance($submit);
 	}
-}
 
+	/**
+	 * Add the Back link to the tabs. (used in submission list and submission compare)
+	 */
+	protected function setBackToMembers()
+	{
+		//tabs
+		$this->tabs_gui->clearTargets();
+		$this->tabs_gui->setBackTarget($this->lng->txt("back"),
+			$this->ctrl->getLinkTarget($this, "members"));
+	}
+
+	/**
+	 * @param $a_data array submission data
+	 * @return $data array
+	 */
+	public function collectFeedbackDataFromPeer(array $a_data): array
+	{
+		$user = new ilObjUser($a_data["user_id"]);
+		$uname = $user->getFirstname()." ".$user->getLastname();
+
+		$data = array(
+			"uid" => $a_data["user_id"],
+			"uname" => $uname,
+			"udate" => $a_data["ts"],
+			"utext" => ilRTE::_replaceMediaObjectImageSrc($a_data["atext"], 1) // mob id to mob src
+		);
+
+		//get data peer and assign it
+		$peer_review = new ilExPeerReview($this->assignment);
+		$data["peer"] = array();
+		foreach($peer_review->getPeerReviewsByPeerId($a_data['user_id']) as $key => $value)
+		{
+			$data["peer"][] = $value['giver_id'];
+		}
+
+		$data["fb_received"] = count($data["peer"]);
+		$data["fb_given"] = $peer_review->countGivenFeedback(true, $a_data["user_id"]);
+
+		return $data;
+	}
+}
