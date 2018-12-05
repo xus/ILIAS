@@ -248,7 +248,6 @@ class ilLMPresentationGUI
 			default:
 				if($_GET["ntf"])
 				{
-					ilLoggerFactory::getRootLogger()->debug("PAGE ID = ".$this->getCurrentPageId());
 					switch($_GET["ntf"])
 					{
 						case 1:
@@ -1219,6 +1218,9 @@ class ilLMPresentationGUI
 		{
 			$notes_gui->enablePublicNotes();
 		}
+
+		$callback = array($this, "observeNoteAction");
+		$notes_gui->addObserver($callback);
 
 		if ($next_class == "ilnotegui")
 		{
@@ -4470,14 +4472,14 @@ class ilLMPresentationGUI
 		exit;
 	}
 
-	//TODO the callback for this one.
 	function observeNoteAction($a_lm_id, $a_page_id, $a_type, $a_action, $a_note_id)
 	{
 		$note = new ilNote($a_note_id);
 		$note = $note->getText();
 
-		include_once "./Services/Notification/classes/class.ilNotification.php";
-		ilWikiUtil::sendNotification("comment", ilNotification::TYPE_WIKI_PAGE, $this->getWikiRefId(), $a_page_id, $note);
+		include_once "./Modules/LearningModule/classes/class.ilLearningModuleNotification.php";
+		$notification = new ilLearningModuleNotification("comment", ilNotification::TYPE_LM_PAGE, $this->lm, $a_page_id,note);
+		$notification->send();
 	}
 
 }
