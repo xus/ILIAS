@@ -481,7 +481,11 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 
 		if($this->ass->isVersionable())
 		{
-			$this->tpl->setVariable("VAL_VERSION", $a_row["submission_obj"]->getLastVersionNumber());
+			if($a_row["submission_obj"]->getLastVersionNumber() > 0) {
+				$this->tpl->setVariable("VAL_VERSION", $a_row["submission_obj"]->getLastVersionNumber());
+			} else {
+				$this->tpl->setVariable("VAL_VERSION", "");
+			}
 		}
 		
 		// actions
