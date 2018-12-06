@@ -227,7 +227,7 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 		
 		$cols["notice"] = array($this->lng->txt("exc_tbl_notice"), "note");
 
-		if($this->hasVersioningMode())
+		if($this->ass->isVersionable())
 		{
 			$cols["version"] = array($this->lng->txt("version"), "version");
 			$this->cols_mandatory[] = "version";
@@ -479,9 +479,9 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 			}			
 		}
 
-		if($this->hasVersioningMode())
+		if($this->ass->isVersionable())
 		{
-			$this->tpl->setVariable("VAL_VERSION", "dummy value for now");
+			$this->tpl->setVariable("VAL_VERSION", $a_row["submission_obj"]->getLastVersionNumber());
 		}
 		
 		// actions
@@ -620,7 +620,27 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 				"",
 				$ilCtrl->getLinkTargetByClass("ilExSubmissionTeamGUI", "showTeamLog")
 			);	
-		}									
+		}
+
+		if($this->ass->isVersionable())
+		{
+			//TODO -> check this behavior with teams!
+			$ilCtrl->setParameterByClass("ilExerciseManagementGUI", "usr_id", $a_user_id);
+
+			//TODO -> If freezed do not show this action
+			$actions->addItem(
+				$this->lng->txt("exc_tbl_freeze_version"),
+				"",
+				$ilCtrl->getLinkTargetByClass("ilExerciseManagementGUI", "freezeVersion")
+			);
+
+			//TODO -> Do not show this action ¡f no frozen versions
+			$actions->addItem(
+				$this->lng->txt("exc_tbl_show_frozen_versions"),
+				"",
+				$ilCtrl->getLinkTargetByClass("ilExerciseManagementGUI", "showVersions")
+			);
+		}
 		
 		$this->tpl->setVariable("ACTIONS", $actions->getHTML());
 	}
@@ -640,15 +660,4 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 			implode("\n", $this->comment_modals);
 	}
 
-	protected function hasVersioningMode()
-	{
-		if($this->ass->getType() == ilExAssignment::TYPE_TEXT)
-		{
-			$exc_settings = new ilSetting("excs");
-			if($exc_settings->get("enable_versioning")) {
-				return true;
-			}
-		}
-		return false;
-	}
 }

@@ -2217,4 +2217,19 @@ class ilExerciseManagementGUI
 
 		return $data;
 	}
+
+	public function freezeVersionObject()
+	{
+		$user_id = (int)$_GET['usr_id'];
+
+		$submission = new ilExSubmission($this->assignment, $user_id);
+		$submission->setVersion();
+		//TODO create info message
+		$this->ctrl->redirect($this, "members");
+	}
+
+	public function showVersions()
+	{
+		//TODO
+	}
 }

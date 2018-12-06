@@ -2566,6 +2566,18 @@ class ilExAssignment
 		}
 		return $calculated_deadlines;
 	}
+
+	public function isVersionable()
+	{
+		if($this->getType() == ilExAssignment::TYPE_TEXT)
+		{
+			$exc_settings = new ilSetting("excs");
+			if($exc_settings->get("enable_versioning")) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
 
 ?>

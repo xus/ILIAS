@@ -14,8 +14,6 @@ class ilExSubmission
 	const TYPE_TEXT = "Text";
 	const TYPE_REPO_OBJECT = "RepoObject";	// Wikis
 
-
-
 	/**
 	 * @var ilObjUser
 	 */
@@ -1665,6 +1663,48 @@ class ilExSubmission
 		);
 
 		return $targetdir;
+	}
+
+	/**
+	 * Update the submission with the next version number and set it as versioned.
+	 * The user will be allowed to submit again.
+	 * @return int
+	 */
+	public function setVersion()
+	{
+		$next_version = $this->getLastVersionNumber() + 1;
+
+		$this->db->manipulate("UPDATE exc_returned".
+			" SET version = ".$this->db->quote($next_version, "integer").
+			", versioned = ".$this->db->quote(1, "integer").
+			" WHERE ass_id = ".
+			$this->db->quote($this->assignment->getId(), "integer").
+			" AND user_id = ".
+			$this->db->quote($this->user_id, "ingeger").
+			" AND version = ".
+			$this->db->quote($this->getLastVersionNumber(), "integer"));
+
+		return $next_version;
+	}
+
+	/**
+	 * @return integer
+	 */
+	public function getLastVersionNumber() : int
+	{
+		$sql = "SELECT max(version) version".
+			" FROM exc_returned".
+			" WHERE ass_id = ".
+			$this->db->quote($this->assignment->getId(), "integer").
+			" AND user_id = ".
+			$this->db->quote($this->user_id, "ingeger");
+
+		$res = $this->db->query($sql);
+
+		$row = $this->db->fetchAssoc($res);
+
+		return (int)$row['version'];
+
 	}
 }
 
