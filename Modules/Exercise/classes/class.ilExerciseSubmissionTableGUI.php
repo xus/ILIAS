@@ -627,19 +627,23 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 			//TODO -> check this behavior with teams!
 			$ilCtrl->setParameterByClass("ilExerciseManagementGUI", "usr_id", $a_user_id);
 
-			//TODO -> If freezed do not show this action
-			$actions->addItem(
-				$this->lng->txt("exc_tbl_freeze_version"),
-				"",
-				$ilCtrl->getLinkTargetByClass("ilExerciseManagementGUI", "freezeVersion")
-			);
+			if( ! $a_row["submission_obj"]->isVersioned())
+			{
+				$actions->addItem(
+					$this->lng->txt("exc_tbl_freeze_version"),
+					"",
+					$ilCtrl->getLinkTargetByClass("ilExerciseManagementGUI", "freezeVersion")
+				);
+			}
 
-			//TODO -> Do not show this action ¡f no frozen versions
-			$actions->addItem(
-				$this->lng->txt("exc_tbl_show_frozen_versions"),
-				"",
-				$ilCtrl->getLinkTargetByClass("ilExerciseManagementGUI", "showVersions")
-			);
+			if($a_row["submission_obj"]->getLastVersionNumber())
+			{
+				$actions->addItem(
+					$this->lng->txt("exc_tbl_show_frozen_versions"),
+					"",
+					$ilCtrl->getLinkTargetByClass("ilExerciseManagementGUI", "showVersions")
+				);
+			}
 		}
 		
 		$this->tpl->setVariable("ACTIONS", $actions->getHTML());

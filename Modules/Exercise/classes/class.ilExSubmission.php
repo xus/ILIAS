@@ -1700,11 +1700,27 @@ class ilExSubmission
 			$this->db->quote($this->user_id, "ingeger");
 
 		$res = $this->db->query($sql);
-
 		$row = $this->db->fetchAssoc($res);
 
 		return (int)$row['version'];
 
+	}
+
+	public function isVersioned() : bool
+	{
+		$sql = "SELECT versioned".
+			" FROM exc_returned".
+			" WHERE ass_id = ".
+			$this->db->quote($this->assignment->getId(), "integer").
+			" AND user_id = ".
+			$this->db->quote($this->user_id, "ingeger").
+			" AND version = ".
+			$this->db->quote($this->getLastVersionNumber(), "integer");
+
+		$res = $this->db->query($sql);
+		$row = $this->db->fetchAssoc($res);
+
+		return (bool)$row['versioned'];
 	}
 }
 
