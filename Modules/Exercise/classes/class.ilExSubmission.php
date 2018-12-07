@@ -199,7 +199,8 @@ class ilExSubmission
 	public function canSubmit()
 	{
 		return ($this->isOwner() &&
-			$this->state->isSubmissionAllowed());
+			$this->state->isSubmissionAllowed() ||
+			$this->isVersioned());
 	}
 	
 	public function canView()
