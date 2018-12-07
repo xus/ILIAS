@@ -1676,21 +1676,64 @@ class ilExSubmission
 	 * The user will be allowed to submit again.
 	 * @return int
 	 */
-	public function setVersion()
+	public function setVersion() : int
 	{
-		$next_version = $this->getLastVersionNumber() + 1;
+		if($this->isVersionable())
+		{
+			$next_version = $this->getLastVersionNumber() + 1;
 
-		$this->db->manipulate("UPDATE exc_returned".
-			" SET version = ".$this->db->quote($next_version, "integer").
-			", versioned = ".$this->db->quote(1, "integer").
+			$sql = "UPDATE exc_returned".
+				" SET version = ".$this->db->quote($next_version, "integer").
+				", versioned = ".$this->db->quote(1, "integer").
+				" WHERE ass_id = ".
+				$this->db->quote($this->assignment->getId(), "integer").
+				" AND user_id = ".
+				$this->db->quote($this->user_id, "ingeger");
+
+			if($this->isVersioned())
+			{
+				$sql .= " AND version = ".
+				$this->db->quote(0, "integer");
+			}
+			else
+			{
+				$sql .= " AND version = ".
+				$this->db->quote($this->getLastVersionNumber(), "integer");
+			}
+
+			$this->db->manipulate($sql);
+
+			return $next_version;
+		}
+
+		return 0;
+	}
+
+	//Todo find better method name
+	public function isVersionable() : bool
+	{
+		if( ! $this->isVersioned())
+		{
+			return true;
+		}
+
+		$sql = "SELECT count(version) total".
+			" FROM exc_returned".
 			" WHERE ass_id = ".
 			$this->db->quote($this->assignment->getId(), "integer").
 			" AND user_id = ".
 			$this->db->quote($this->user_id, "ingeger").
 			" AND version = ".
-			$this->db->quote($this->getLastVersionNumber(), "integer"));
+			$this->db->quote(0, "ingeger");
 
-		return $next_version;
+		$res = $this->db->query($sql);
+		$row = $this->db->fetchAssoc($res);
+		if($row['total'] > 0)
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

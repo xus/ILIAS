@@ -631,7 +631,7 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 			//TODO -> check this behavior with teams!
 			$ilCtrl->setParameterByClass("ilExerciseManagementGUI", "usr_id", $a_user_id);
 
-			if( ! $a_row["submission_obj"]->isVersioned())
+			if($a_row["submission_obj"]->isVersionable())
 			{
 				$actions->addItem(
 					$this->lng->txt("exc_tbl_freeze_version"),
