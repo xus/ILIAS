@@ -522,8 +522,13 @@ class ilExSubmission
 		if($a_min_timestamp)
 		{
 			$sql .= " AND ts > ".$ilDB->quote($a_min_timestamp, "timestamp");
-		}	
-		
+		}
+
+		if($this->isVersioned())
+		{
+			$sql .= " ORDER BY returned_id DESC LIMIT 1";
+		}
+
 		$result = $ilDB->query($sql);
 		
 		$delivered_files = array();

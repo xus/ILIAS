@@ -259,9 +259,12 @@ class ilExSubmissionTextGUI extends ilExSubmissionBaseGUI
 			$existing = $this->submission->getFiles();
 
 			//If versioned, new DB entry
-			if($this->submission->isVersioned()){
+			if($this->submission->isVersioned() && $existing[0]['versioned'])
+			{
 				$returned_id = $this->submission->addResourceObject("TEXT", $text);
-			} else {
+			}
+			else
+			{
 				$returned_id = $this->submission->updateTextSubmission(
 				// mob src to mob id
 					ilRTE::_replaceMediaObjectImageSrc($text, 0));
