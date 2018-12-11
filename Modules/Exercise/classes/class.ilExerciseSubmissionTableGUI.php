@@ -243,8 +243,15 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 		
 		$has_no_team_yet = ($a_ass->hasTeam() &&
 			!ilExAssignmentTeam::getTeamId($a_ass->getId(), $a_user_id));
-		
-		
+
+		//revisions data
+		if($this->ass->isVersionable())
+		{
+			$revision = new ilExSubmissionRevision($a_row['submission_obj']);
+			$number_of_revisions = $revision->getLastVersionNumber();
+			$is_submission_versioned = $revision->isVersioned();
+		}
+
 		// static columns
 
 		if($this->mode == self::MODE_BY_ASSIGNMENT)
@@ -481,8 +488,8 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 
 		if($this->ass->isVersionable())
 		{
-			if($a_row["submission_obj"]->getLastVersionNumber() > 0) {
-				$this->tpl->setVariable("VAL_VERSION", $a_row["submission_obj"]->getLastVersionNumber());
+			if($number_of_revisions) {
+				$this->tpl->setVariable("VAL_VERSION", $number_of_revisions);
 			} else {
 				$this->tpl->setVariable("VAL_VERSION", "");
 			}
@@ -631,7 +638,7 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 			//TODO -> check this behavior with teams!
 			$ilCtrl->setParameterByClass("ilExerciseManagementGUI", "usr_id", $a_user_id);
 
-			if($a_row["submission_obj"]->isVersionable())
+			if(!$is_submission_versioned)
 			{
 				$actions->addItem(
 					$this->lng->txt("exc_tbl_freeze_version"),
@@ -640,7 +647,7 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 				);
 			}
 
-			if($a_row["submission_obj"]->getLastVersionNumber())
+			if($number_of_revisions)
 			{
 				$actions->addItem(
 					$this->lng->txt("exc_tbl_show_frozen_versions"),

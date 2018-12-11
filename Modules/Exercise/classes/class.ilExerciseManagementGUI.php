@@ -2178,6 +2178,10 @@ class ilExerciseManagementGUI
 	}
 
 	/**
+	 * Versioning
+	 */
+
+	/**
 	 * Add the Back link to the tabs. (used in submission list and submission compare)
 	 */
 	protected function setBackToMembers()
@@ -2218,18 +2222,57 @@ class ilExerciseManagementGUI
 		return $data;
 	}
 
+	/**
+	 * Freeze one submission, update and assign version number.
+	 * Example in: Exercise Submissions table. (Submissions and Grades -> Assignment View tab)
+	 */
 	public function freezeVersionObject()
 	{
 		$user_id = (int)$_GET['usr_id'];
 
 		$submission = new ilExSubmission($this->assignment, $user_id);
-		$submission->setVersion();
+		$revision = new ilExSubmissionRevision($submission);
+		$revision->setVersion();
 		//TODO create info message
 		$this->ctrl->redirect($this, "members");
 	}
 
-	public function showVersions()
+	/**
+	 * Display a list of panels with all versioned submissions.
+	 */
+	public function showVersionsObject()
 	{
-		//TODO
+		$user_id = (int)$_GET['usr_id'];
+		$submission = new ilExSubmission($this->assignment, $user_id);
+		$revision_obj = new ilExSubmissionRevision($submission);
+		$submissions = $revision_obj->getRevisions();
+
+		$this->showVersionsPanel($submissions);
+	}
+
+	//Todo DTO?
+	// This is going to be a lot for this class
+	//interface + class
+	//Similar to  listTextAssignmentObject / compareTextAssignmentsObject
+	//TODO refactor lists of panels to avoid duplicate code.
+	public function showVersionsPanel(array $a_submissions)
+	{
+		$this->setBackToMembers();
+
+		$group_panels_tpl = new ilTemplate("tpl.exc_group_report_panels.html", TRUE, TRUE, "Modules/Exercise");
+		$group_panels_tpl->setVariable('TITLE', $this->lng->txt("exc_submission_versions"));
+
+		$report_html = "";
+
+		foreach($a_submissions as $submission)
+		{
+			$feedback_data = $this->collectFeedbackDataFromPeer($submission);
+			$data = array_merge($feedback_data, $submission);
+			$report_html .= $this->getReportPanel($data);
+			$total_reports++;
+		}
+
+		$group_panels_tpl->setVariable('CONTENT', $report_html);
+		$this->tpl->setContent($group_panels_tpl->get());
 	}
 }

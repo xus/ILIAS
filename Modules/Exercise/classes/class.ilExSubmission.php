@@ -658,6 +658,30 @@ class ilExSubmission
 		}
 		return $res;
 	}
+
+	/**
+	 * Return the submission ids related to the specific user and assignment
+	 * @param $a_user_id
+	 * @param $a_filetitle
+	 * @return array
+	 */
+	public function getSubmissionsByUser() : array
+	{
+		$sql = "SELECT *".
+			" FROM exc_returned".
+			" WHERE user_id = ".$this->db->quote($this->user_id, "integer").
+			" AND ass_id = ".$this->db->quote($this->assignment->getId(), "integer");
+
+		$set = $this->db->query($sql);
+
+		$res = array();
+		while($row = $this->db->fetchAssoc($set))
+		{
+			$res[] = $row;
+		}
+
+		return $res;
+	}
 	
 	function deleteAllFiles()
 	{						
@@ -1672,104 +1696,13 @@ class ilExSubmission
 	}
 
 	/**
-	 * Update the submission with the next version number and set it as versioned.
-	 * The user will be allowed to submit again.
-	 * @return int
+	 * Check if the submission has been versioned by tutor/admin
+	 * @return bool
 	 */
-	public function setVersion() : int
-	{
-		if($this->isVersionable())
-		{
-			$next_version = $this->getLastVersionNumber() + 1;
-
-			$sql = "UPDATE exc_returned".
-				" SET version = ".$this->db->quote($next_version, "integer").
-				", versioned = ".$this->db->quote(1, "integer").
-				" WHERE ass_id = ".
-				$this->db->quote($this->assignment->getId(), "integer").
-				" AND user_id = ".
-				$this->db->quote($this->user_id, "ingeger");
-
-			if($this->isVersioned())
-			{
-				$sql .= " AND version = ".
-				$this->db->quote(0, "integer");
-			}
-			else
-			{
-				$sql .= " AND version = ".
-				$this->db->quote($this->getLastVersionNumber(), "integer");
-			}
-
-			$this->db->manipulate($sql);
-
-			return $next_version;
-		}
-
-		return 0;
-	}
-
-	//Todo find better method name
-	public function isVersionable() : bool
-	{
-		if( ! $this->isVersioned())
-		{
-			return true;
-		}
-
-		$sql = "SELECT count(version) total".
-			" FROM exc_returned".
-			" WHERE ass_id = ".
-			$this->db->quote($this->assignment->getId(), "integer").
-			" AND user_id = ".
-			$this->db->quote($this->user_id, "ingeger").
-			" AND version = ".
-			$this->db->quote(0, "ingeger");
-
-		$res = $this->db->query($sql);
-		$row = $this->db->fetchAssoc($res);
-		if($row['total'] > 0)
-		{
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * @return integer
-	 */
-	public function getLastVersionNumber() : int
-	{
-		$sql = "SELECT max(version) version".
-			" FROM exc_returned".
-			" WHERE ass_id = ".
-			$this->db->quote($this->assignment->getId(), "integer").
-			" AND user_id = ".
-			$this->db->quote($this->user_id, "ingeger");
-
-		$res = $this->db->query($sql);
-		$row = $this->db->fetchAssoc($res);
-
-		return (int)$row['version'];
-
-	}
-
 	public function isVersioned() : bool
 	{
-		$sql = "SELECT versioned".
-			" FROM exc_returned".
-			" WHERE ass_id = ".
-			$this->db->quote($this->assignment->getId(), "integer").
-			" AND user_id = ".
-			$this->db->quote($this->user_id, "ingeger").
-			" AND version = ".
-			$this->db->quote($this->getLastVersionNumber(), "integer");
-
-		$res = $this->db->query($sql);
-		$row = $this->db->fetchAssoc($res);
-
-		return (bool)$row['versioned'];
+		$revision = new ilExSubmissionRevision($this);
+		return $revision->isVersioned();
 	}
 }
 

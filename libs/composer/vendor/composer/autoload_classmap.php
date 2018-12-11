@@ -4209,6 +4209,7 @@ return array(
     'ilExSubmissionFileGUI' => $baseDir . '/../../Modules/Exercise/classes/class.ilExSubmissionFileGUI.php',
     'ilExSubmissionGUI' => $baseDir . '/../../Modules/Exercise/classes/class.ilExSubmissionGUI.php',
     'ilExSubmissionObjectGUI' => $baseDir . '/../../Modules/Exercise/classes/class.ilExSubmissionObjectGUI.php',
+    'ilExSubmissionRevision' => $baseDir . '/../../Modules/Exercise/classes/class.ilExSubmissionRevision.php',
     'ilExSubmissionTeamGUI' => $baseDir . '/../../Modules/Exercise/classes/class.ilExSubmissionTeamGUI.php',
     'ilExSubmissionTextGUI' => $baseDir . '/../../Modules/Exercise/classes/class.ilExSubmissionTextGUI.php',
     'ilExampleCache' => $baseDir . '/../../Services/Cache/classes/class.ilExampleCache.php',

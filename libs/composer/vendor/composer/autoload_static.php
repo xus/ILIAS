@@ -4517,6 +4517,7 @@ class ComposerStaticInit2fffdf922cf8fdbf1f62eec345993c83
         'ilExSubmissionFileGUI' => __DIR__ . '/../..' . '/../../Modules/Exercise/classes/class.ilExSubmissionFileGUI.php',
         'ilExSubmissionGUI' => __DIR__ . '/../..' . '/../../Modules/Exercise/classes/class.ilExSubmissionGUI.php',
         'ilExSubmissionObjectGUI' => __DIR__ . '/../..' . '/../../Modules/Exercise/classes/class.ilExSubmissionObjectGUI.php',
+        'ilExSubmissionRevision' => __DIR__ . '/../..' . '/../../Modules/Exercise/classes/class.ilExSubmissionRevision.php',
         'ilExSubmissionTeamGUI' => __DIR__ . '/../..' . '/../../Modules/Exercise/classes/class.ilExSubmissionTeamGUI.php',
         'ilExSubmissionTextGUI' => __DIR__ . '/../..' . '/../../Modules/Exercise/classes/class.ilExSubmissionTextGUI.php',
         'ilExampleCache' => __DIR__ . '/../..' . '/../../Services/Cache/classes/class.ilExampleCache.php',
