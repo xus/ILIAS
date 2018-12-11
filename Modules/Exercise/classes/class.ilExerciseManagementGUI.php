@@ -515,8 +515,6 @@ class ilExerciseManagementGUI
 	{
 		$this->initFilter();
 
-		$this->setBackToMembers();
-
 		$button_print = $this->ui_factory->button()->standard($this->lng->txt('print'), "#")
 			->withOnLoadCode(function($id) {
 				return "$('#{$id}').click(function() { window.print(); return false; });";
@@ -524,80 +522,50 @@ class ilExerciseManagementGUI
 		$this->toolbar->addSeparator();
 		$this->toolbar->addComponent($button_print);
 
-		include_once "Services/User/classes/class.ilUserUtil.php";
-		include_once "Services/RTE/classes/class.ilRTE.php";
+		$title = $this->lng->txt("exc_list_text_assignment").": ".$this->assignment->getTitle();
 
-		$group_panels_tpl = new ilTemplate("tpl.exc_group_report_panels.html", TRUE, TRUE, "Modules/Exercise");
-		$group_panels_tpl->setVariable('TITLE', $this->lng->txt("exc_list_text_assignment").": ".$this->assignment->getTitle());
-
-		$report_html = "";
-		$total_reports = 0;
 		foreach(ilExSubmission::getAllAssignmentFiles($this->assignment->getExerciseId(), $this->assignment->getId()) as $file)
 		{
 			if(trim($file["atext"]))
 			{
-				$feedback_data = $this->collectFeedbackDataFromPeer($file);
-				$submission_data = $this->assignment->getExerciseMemberAssignmentData($file["user_id"], $this->filter["status"]);
-
-				if(is_array($submission_data))
-				{
-					$data = array_merge($feedback_data, $submission_data);
-					$report_html .= $this->getReportPanel($data);
-					$total_reports++;
-
-				}
+				$assignment_data = $this->assignment->getExerciseMemberAssignmentData($file["user_id"], $this->filter["status"]);
+				$submission_data[] = array_merge($file, $assignment_data);
 			}
 		}
-		if($total_reports == 0)
+		if(count($submission_data) == 0)
 		{
+			$group_panels_tpl = new ilTemplate("tpl.exc_group_report_panels.html", TRUE, TRUE, "Modules/Exercise");
+			$group_panels_tpl->setVariable('TITLE', $title);
 			$mtpl = new ilTemplate("tpl.message.html", true, true, "Services/Utilities");
 			$mtpl->setCurrentBlock("info_message");
 			$mtpl->setVariable("TEXT", $this->lng->txt("fiter_no_results"));
 			$mtpl->parseCurrentBlock();
 			$report_html .= $mtpl->get();
+
+			$group_panels_tpl->setVariable('CONTENT', $report_html);
+			$this->tpl->setContent($group_panels_tpl->get());
 		}
 
-		$group_panels_tpl->setVariable('CONTENT', $report_html);
-		$this->tpl->setContent($group_panels_tpl->get());
+		$this->showSubmissionPanels($title, $submission_data);
 	}
 
 	/**
 	 * TODO -> Deal with the redirection after update the grade via action button.
-	 *
-	 * Extract the data collection to another method. List and compare use this. DRY
 	 */
 	public function compareTextAssignmentsObject()
 	{
-		$this->setBackToMembers();
-
-		$group_panels_tpl = new ilTemplate("tpl.exc_group_report_panels.html", TRUE, TRUE, "Modules/Exercise");
-		$group_panels_tpl->setVariable('TITLE', $this->lng->txt("exc_compare_selected_submissions"));
-
-		$report_html = "";
 		//participant ids selected via checkboxes
 		$participants = array_keys($this->getMultiActionUserIds());
 
 		foreach($participants as $participant_id)
 		{
 			$submission = new ilExSubmission($this->assignment,$participant_id);
-
-			//submission data array
 			$file = reset($submission->getFiles());
-
-			$feedback_data = $this->collectFeedbackDataFromPeer($file);
-
-			$submission_data = $this->assignment->getExerciseMemberAssignmentData($file["user_id"], $this->filter["status"]);
-
-			if(is_array($submission_data))
-			{
-				$data = array_merge($feedback_data, $submission_data);
-				$report_html .= $this->getReportPanel($data);
-				$total_reports++;
-			}
+			$assignment_data = $this->assignment->getExerciseMemberAssignmentData($file["user_id"], $this->filter["status"]);
+			$submission_data[] = array_merge($file,$assignment_data);
 		}
 
-		$group_panels_tpl->setVariable('CONTENT', $report_html);
-		$this->tpl->setContent($group_panels_tpl->get());
+		$this->showSubmissionPanels($this->lng->txt("exc_compare_selected_submissions"), $submission_data);
 	}
 
 	public function getReportPanel($a_data)
@@ -2246,28 +2214,27 @@ class ilExerciseManagementGUI
 		$submission = new ilExSubmission($this->assignment, $user_id);
 		$revision_obj = new ilExSubmissionRevision($submission);
 		$submissions = $revision_obj->getRevisions();
-
-		$this->showVersionsPanel($submissions);
+		$this->showSubmissionPanels($this->lng->txt("exc_submission_versions"), $submissions);
 	}
 
-	//Todo DTO?
-	// This is going to be a lot for this class
-	//interface + class
-	//Similar to  listTextAssignmentObject / compareTextAssignmentsObject
-	//TODO refactor lists of panels to avoid duplicate code.
-	public function showVersionsPanel(array $a_submissions)
+	/**
+	 * Display the HTML with a bunch of sub panels.
+	 * @param string $a_title
+	 * @param array $a_submissions_data
+	 */
+	public function showSubmissionPanels(string $a_title, array $a_submissions_data)
 	{
 		$this->setBackToMembers();
 
 		$group_panels_tpl = new ilTemplate("tpl.exc_group_report_panels.html", TRUE, TRUE, "Modules/Exercise");
-		$group_panels_tpl->setVariable('TITLE', $this->lng->txt("exc_submission_versions"));
+		$group_panels_tpl->setVariable('TITLE', $a_title);
 
 		$report_html = "";
 
-		foreach($a_submissions as $submission)
+		foreach($a_submissions_data as $submission_data)
 		{
-			$feedback_data = $this->collectFeedbackDataFromPeer($submission);
-			$data = array_merge($feedback_data, $submission);
+			$feedback_data = $this->collectFeedbackDataFromPeer($submission_data);
+			$data = array_merge($feedback_data, $submission_data);
 			$report_html .= $this->getReportPanel($data);
 			$total_reports++;
 		}
