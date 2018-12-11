@@ -25277,24 +25277,3 @@ $ilDB->update("style_data", array(
 	"1" => array("integer", 1)
 ));
 ?>
-<#5431>
-<?php
-if (!$ilDB->tableColumnExists("exc_returned", 'versioned')) {
-	$ilDB->addTableColumn("exc_returned", 'versioned', [
-		"type"    => "integer",
-		"length"  => 1,
-		"default" => 0,
-	]);
-}
-if (!$ilDB->tableColumnExists("exc_returned", 'version')) {
-	$ilDB->addTableColumn("exc_returned", 'version', [
-		"type"    => "integer",
-		"length"  => 4,
-		"default" => 0,
-	]);
-}
-?>
-<#5432>
-<?php
-$ilCtrlStructureReader->getStructure();
-?>
