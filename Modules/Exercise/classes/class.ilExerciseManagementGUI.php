@@ -524,12 +524,15 @@ class ilExerciseManagementGUI
 
 		$title = $this->lng->txt("exc_list_text_assignment").": ".$this->assignment->getTitle();
 
+		$submission_data = array();
 		foreach(ilExSubmission::getAllAssignmentFiles($this->assignment->getExerciseId(), $this->assignment->getId()) as $file)
 		{
 			if(trim($file["atext"]))
 			{
 				$assignment_data = $this->assignment->getExerciseMemberAssignmentData($file["user_id"], $this->filter["status"]);
-				$submission_data[] = array_merge($file, $assignment_data);
+				if($assignment_data != '') {
+					$submission_data[] = array_merge($file, $assignment_data);
+				}
 			}
 		}
 		if(count($submission_data) == 0)

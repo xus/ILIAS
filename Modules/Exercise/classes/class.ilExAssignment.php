@@ -1521,7 +1521,7 @@ class ilExAssignment
 	 * @param $a_grade
 	 * @return array
 	 */
-	public function getExerciseMemberAssignmentData($a_user_id, $a_grade = "") : array
+	public function getExerciseMemberAssignmentData($a_user_id, $a_grade = "")
 	{
 		global $DIC;
 		$ilDB = $DIC->database();
@@ -1554,7 +1554,7 @@ class ilExAssignment
 			$data["comment"] = $rec["u_comment"];
 		}
 
-		return $data? $data : array();
+		return $data;
 
 	}
 
