@@ -2233,7 +2233,7 @@ class ilExerciseManagementGUI
 		$submission = new ilExSubmission($this->assignment, $user_id);
 		$revision = new ilExSubmissionRevision($submission);
 		$revision->setVersion();
-		//TODO create info message
+		ilUtil::sendSuccess($this->lng->txt("exc_submission_versioned_ok"), true);
 		$this->ctrl->redirect($this, "members");
 	}
 

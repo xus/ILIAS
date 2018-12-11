@@ -14979,3 +14979,4 @@ exercise#:#exc_tbl_freeze_version#:#Freeze version of Submission
 exercise#:#exc_tbl_show_frozen_versions#:#Show Frozen versions
 exercise#:#exc_btn_show_submissions#:#Show Submission History
 exercise#:#exc_btn_revise_submission#:#Revise Submission
+exercise#:#exc_submission_versioned_ok#:#Submission successfully frozen
