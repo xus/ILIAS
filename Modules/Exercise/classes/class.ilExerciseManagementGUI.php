@@ -73,6 +73,9 @@ class ilExerciseManagementGUI
 	const GRADE_PASSED = "passed";
 	const GRADE_FAILED = "failed";
 
+	const PANEL_TYPE_SUBMISSION = 1;
+	const PANEL_TYPE_REVISION = 2;
+
 	/**
 	 * Constructor
 	 * 
@@ -549,7 +552,7 @@ class ilExerciseManagementGUI
 			$this->tpl->setContent($group_panels_tpl->get());
 		}
 
-		$this->showSubmissionPanels($title, $submission_data);
+		$this->showSubmissionPanels($title, self::PANEL_TYPE_SUBMISSION, $submission_data);
 	}
 
 	/**
@@ -568,16 +571,25 @@ class ilExerciseManagementGUI
 			$submission_data[] = array_merge($file,$assignment_data);
 		}
 
-		$this->showSubmissionPanels($this->lng->txt("exc_compare_selected_submissions"), $submission_data);
+		$this->showSubmissionPanels($this->lng->txt("exc_compare_selected_submissions"), self::PANEL_TYPE_SUBMISSION, $submission_data);
 	}
 
-	public function getReportPanel($a_data)
+	/**
+	 * @param $a_type
+	 * @param $a_data
+	 * @return string
+	 * @throws ilDateTimeException
+	 */
+	public function getReportPanel(int $a_type, array $a_data)
 	{
-		$modal = $this->getEvaluationModal($a_data);
+		if($a_type == self::PANEL_TYPE_SUBMISSION)
+		{
+			$modal = $this->getEvaluationModal($a_data);
 
-		$actions = $this->ui_factory->dropdown()->standard(array(
-			$this->ui_factory->button()->shy($this->lng->txt("grade_evaluate"), "#")->withOnClick($modal->getShowSignal()),
-		));
+			$actions = $this->ui_factory->dropdown()->standard(array(
+				$this->ui_factory->button()->shy($this->lng->txt("grade_evaluate"), "#")->withOnClick($modal->getShowSignal()),
+			));
+		}
 
 		if($a_data['status'] == self::GRADE_NOT_GRADED) {
 			$str_status_key = $this->lng->txt('exc_tbl_status');
@@ -598,10 +610,13 @@ class ilExerciseManagementGUI
 		$card_content = array(
 			$this->lng->txt("exc_tbl_submission_date") => ilDatePresentation::formatDate(new ilDateTime($a_data["udate"], IL_CAL_DATETIME)),
 			$str_status_key => $str_status_value,
-			$str_evaluation_key => $str_evaluation_value,
-			$this->lng->txt('feedback_given') => $a_data['fb_given'],
-			$this->lng->txt('feedback_received') => $a_data['fb_received']
+			$str_evaluation_key => $str_evaluation_value
 		);
+		if($a_type == self::PANEL_TYPE_SUBMISSION)
+		{
+			$card_content[$this->lng->txt('feedback_given')] = $a_data['fb_given'];
+			$card_content[$this->lng->txt('feedback_received')] = $a_data['fb_received'];
+		}
 		$card_tpl = new ilTemplate("tpl.exc_report_details_card.html", true, true, "Modules/Exercise");
 		foreach($card_content as $key => $value)
 		{
@@ -612,7 +627,12 @@ class ilExerciseManagementGUI
 		}
 
 		$main_panel = $this->ui_factory->panel()->sub($a_data['uname'], $this->ui_factory->legacy($a_data['utext']))
-			->withCard($this->ui_factory->card()->standard($this->lng->txt('text_assignment'))->withSections(array($this->ui_factory->legacy($card_tpl->get()))))->withActions($actions);
+			->withCard($this->ui_factory->card()->standard($this->lng->txt('text_assignment'))->withSections(array($this->ui_factory->legacy($card_tpl->get()))));
+
+		if($a_type == self::PANEL_TYPE_SUBMISSION)
+		{
+			$main_panel = $main_panel->withActions($actions);
+		}
 
 		$feedback_tpl = new ilTemplate("tpl.exc_report_feedback.html", true, true, "Modules/Exercise");
 		//if no feedback filter the feedback is displayed. Can be list submissions or compare submissions.
@@ -655,7 +675,12 @@ class ilExerciseManagementGUI
 
 		$report = $this->ui_factory->panel()->report("", array($main_panel, $feedback_panel));
 
-		return $this->ui_renderer->render([$modal,$report]);
+		if($a_type == self::PANEL_TYPE_SUBMISSION)
+		{
+			return $this->ui_renderer->render([$modal,$report]);
+		}
+
+		return $this->ui_renderer->render($report);
 	}
 
 	public function getEvaluationModal($a_data)
@@ -2217,7 +2242,7 @@ class ilExerciseManagementGUI
 		$submission = new ilExSubmission($this->assignment, $user_id);
 		$revision_obj = new ilExSubmissionRevision($submission);
 		$submissions = $revision_obj->getRevisions();
-		$this->showSubmissionPanels($this->lng->txt("exc_submission_list_versions"), $submissions);
+		$this->showSubmissionPanels($this->lng->txt("exc_submission_list_versions"), self::PANEL_TYPE_REVISION, $submissions);
 	}
 
 	/**
@@ -2225,7 +2250,7 @@ class ilExerciseManagementGUI
 	 * @param string $a_title
 	 * @param array $a_submissions_data
 	 */
-	public function showSubmissionPanels(string $a_title, array $a_submissions_data)
+	public function showSubmissionPanels(string $a_title, int $a_type, array $a_submissions_data)
 	{
 		$this->setBackToMembers();
 
@@ -2238,7 +2263,7 @@ class ilExerciseManagementGUI
 		{
 			$feedback_data = $this->collectFeedbackDataFromPeer($submission_data);
 			$data = array_merge($feedback_data, $submission_data);
-			$report_html .= $this->getReportPanel($data);
+			$report_html .= $this->getReportPanel($a_type, $data);
 			$total_reports++;
 		}
 
