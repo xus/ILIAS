@@ -2217,7 +2217,7 @@ class ilExerciseManagementGUI
 		$submission = new ilExSubmission($this->assignment, $user_id);
 		$revision_obj = new ilExSubmissionRevision($submission);
 		$submissions = $revision_obj->getRevisions();
-		$this->showSubmissionPanels($this->lng->txt("exc_submission_versions"), $submissions);
+		$this->showSubmissionPanels($this->lng->txt("exc_submission_list_versions"), $submissions);
 	}
 
 	/**

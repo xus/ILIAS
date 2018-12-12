@@ -64,9 +64,9 @@ class ilExSubmissionRevision
 			$next_id = $this->db->nextId('exc_submission_version');
 
 			$affectedRows = $this->db->manipulateF(
-				"INSERT INTO exc_submission_version (id, returned_id, obj_id, user_id, filename, filetitle, mimetype, ts, ass_id, atext, late, team_id, status, mark, u_comment, version, versioned)".
-				" VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-				array('integer', 'integer', 'integer', 'integer', 'text', 'text', 'text', 'timestamp', 'integer', 'text', 'integer', 'integer', 'text', 'text', 'text',' integer', 'timestamp'),
+				"INSERT INTO exc_submission_version (id, returned_id, obj_id, user_id, filename, filetitle, mimetype, ts, ass_id, atext, late, team_id, status, status_time, mark, u_comment, version, versioned)".
+				" VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+				array('integer', 'integer', 'integer', 'integer', 'text', 'text', 'text', 'timestamp', 'integer', 'text', 'integer', 'integer', 'text', 'timestamp', 'text', 'text',' integer', 'timestamp'),
 				array(
 					$next_id,
 					$submission['returned_id'],
@@ -81,6 +81,7 @@ class ilExSubmissionRevision
 					$submission['late'],
 					$submission['team_id'],
 					$ass_mem_status->getStatus(),
+					$ass_mem_status->getStatusTime(),
 					$ass_mem_status->getMark(),
 					$ass_mem_status->getComment(),
 					$next_version,
