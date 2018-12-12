@@ -643,7 +643,7 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 				$actions->addItem(
 					$this->lng->txt("exc_tbl_freeze_version"),
 					"",
-					$ilCtrl->getLinkTargetByClass("ilExerciseManagementGUI", "freezeVersion")
+					$ilCtrl->getLinkTargetByClass("ilExerciseManagementGUI", "confirmFreezeSubmission")
 				);
 			}
 

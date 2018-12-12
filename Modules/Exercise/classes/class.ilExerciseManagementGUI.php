@@ -2224,7 +2224,7 @@ class ilExerciseManagementGUI
 	 */
 	public function freezeVersionObject()
 	{
-		$user_id = (int)$_GET['usr_id'];
+		$user_id = (int)$_POST['usr_id'];
 
 		$submission = new ilExSubmission($this->assignment, $user_id);
 		$revision = new ilExSubmissionRevision($submission);
@@ -2269,5 +2269,24 @@ class ilExerciseManagementGUI
 
 		$group_panels_tpl->setVariable('CONTENT', $report_html);
 		$this->tpl->setContent($group_panels_tpl->get());
+	}
+
+	/**
+	 * Confirm create a new version of the submission.
+	 */
+	function confirmFreezeSubmissionObject()
+	{
+		$user_id = (int)$_GET['usr_id'];
+
+		$cgui = new ilConfirmationGUI();
+		$cgui->setFormAction($this->ctrl->getFormAction($this));
+		$cgui->setHeaderText($this->lng->txt("exc_msg_sure_to_freeze_submission"));
+		$cgui->setCancel($this->lng->txt("cancel"), "members");
+		$cgui->setConfirm($this->lng->txt("confirm"), "freezeVersion");
+
+		$cgui->addItem("usr_id", $user_id,
+			ilUserUtil::getNamePresentation((int) $user_id, false, false, "", true));
+
+		$this->tpl->setContent($cgui->getHTML());
 	}
 }
