@@ -145,7 +145,7 @@ class ilExSubmissionRevision
 			" WHERE obj_id = ".$this->submission->getAssignment()->getExerciseId().
 			" AND ass_id = ".$this->ass_id.
 			" AND user_id = ".$this->usr_id.
-			" ORDER BY version ASC";
+			" ORDER BY version DESC";
 
 		$res = $this->db->query($sql);
 		while($row = $this->db->fetchAssoc($res))
