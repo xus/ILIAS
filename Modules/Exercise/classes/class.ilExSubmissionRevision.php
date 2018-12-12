@@ -154,4 +154,20 @@ class ilExSubmissionRevision
 		}
 		return $versions ? $versions : array();
 	}
+
+	public function sendNotification()
+	{
+		$get_ref = (int)$_GET['ref_id'];
+		$exc_id = $this->submission->getAssignment()->getExerciseId();
+
+		if(in_array($get_ref, ilObjExercise::_getAllReferences($exc_id)))
+		{
+			$not = new ilExerciseMailNotification();
+			$not->setType(ilExerciseMailNotification::TYPE_SUBMISSION_VERSIONED);
+			$not->setAssignmentId($this->ass_id);
+			$not->setRefId($get_ref);
+			$not->setRecipients(array($this->submission->getUserId()));
+			$not->send();
+		}
+	}
 }
