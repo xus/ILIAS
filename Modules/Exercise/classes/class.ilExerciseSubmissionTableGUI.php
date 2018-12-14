@@ -636,7 +636,8 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 		if($this->ass->isVersionable())
 		{
 			//TODO -> check this behavior with teams!
-			$ilCtrl->setParameterByClass("ilExerciseManagementGUI", "usr_id", $a_user_id);
+			$ilCtrl->setParameterByClass("ilExSubmissionPanelsHandlerGUI", "usr_id", $a_user_id);
+			$ilCtrl->setParameterByClass("ilExSubmissionPanelsHandlerGUI", "ass_id", $this->ass->getId());
 
 			if(!$is_submission_versioned)
 			{
@@ -649,10 +650,16 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 
 			if($number_of_revisions)
 			{
+				$panel_handler = new ilExSubmissionPanelsHandlerGUI($this->assignment);
+				$panel_handler->setSubmissionsData($submission_data);
+
+				$this->ctrl->setCmdClass("ilExSubmissionPanelsHandlerGUI");
+				$this->ctrl->forwardCommand($panel_handler);
+
 				$actions->addItem(
 					$this->lng->txt("exc_tbl_show_frozen_versions"),
 					"",
-					$ilCtrl->getLinkTargetByClass("ilExerciseManagementGUI", "showVersions")
+					$ilCtrl->getLinkTargetByClass("ilExSubmissionPanelsHandlerGUI", "showVersions")
 				);
 			}
 		}

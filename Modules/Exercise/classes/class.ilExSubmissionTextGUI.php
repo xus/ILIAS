@@ -6,7 +6,7 @@
  *
  * @author Jörg Lützenkirchen <luetzenkirchen@leifos.com>
  * 
- * @ilCtrl_Calls ilExSubmissionTextGUI: 
+ * @ilCtrl_Calls ilExSubmissionTextGUI: ilExerciseManagementGUI
  * @ingroup ModulesExercise 
  */
 class ilExSubmissionTextGUI extends ilExSubmissionBaseGUI
@@ -65,10 +65,11 @@ class ilExSubmissionTextGUI extends ilExSubmissionBaseGUI
 
 		if($a_submission->isVersioned())
 		{
-			//TODO provide link to submissions history
 			$btn_show = ilLinkButton::getInstance();
 			$btn_show->setCaption("exc_btn_show_submissions");
-			//$btn_show->setUrl($ilCtrl->getLinkTargetByClass("ilExSubmissionsHistoryGUI", "showSubmissionsHistory"));
+			$ilCtrl->setParameterByClass("ilObjExerciseGUI", 'ass_id', $a_submission->getAssignment()->getId());
+			$btn_show->setUrl($ilCtrl->getLinkTargetByClass(array("ilObjExerciseGUI","ilExSubmissionPanelsHandlerGUI"), "showVersions"));
+			$ilCtrl->setParameterByClass("ilExerciseManagementGUI", "ass_id", "");
 
 			$btn_revise = ilLinkButton::getInstance();
 			$btn_revise->setPrimary(true);
