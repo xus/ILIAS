@@ -11,7 +11,7 @@ include_once "Modules/Exercise/classes/class.ilExSubmissionBaseGUI.php";
 * 
 * @ilCtrl_Calls ilExerciseManagementGUI: ilFileSystemGUI, ilRepositorySearchGUI
 * @ilCtrl_Calls ilExerciseManagementGUI: ilExSubmissionTeamGUI, ilExSubmissionFileGUI
-* @ilCtrl_Calls ilExerciseManagementGUI: ilExSubmissionTextGUI, ilExPeerReviewGUI
+* @ilCtrl_Calls ilExerciseManagementGUI: ilExSubmissionTextGUI, ilExPeerReviewGUI, ilExSubmissionPanelsHandlerGUI
 * 
 * @ingroup ModulesExercise
 */
@@ -48,11 +48,6 @@ class ilExerciseManagementGUI
 	protected $ui_renderer;
 
 	/**
-	 * @var array
-	 */
-	protected $filter;
-
-	/**
 	 * @var ilToolbarGUI
 	 */
 	protected $toolbar;
@@ -66,12 +61,6 @@ class ilExerciseManagementGUI
 	const VIEW_PARTICIPANT = 2;	
 	const VIEW_GRADES = 3;
 
-	const FEEDBACK_ONLY_SUBMISSION = "submission_feedback";
-	const FEEDBACK_FULL_SUBMISSION = "submission_only";
-
-	const GRADE_NOT_GRADED = "notgraded";
-	const GRADE_PASSED = "passed";
-	const GRADE_FAILED = "failed";
 
 	/**
 	 * Constructor
@@ -211,7 +200,11 @@ class ilExerciseManagementGUI
 				$gui = new ilExPeerReviewGUI($this->assignment, $this->initSubmission());
 				$ilCtrl->forwardCommand($gui);				
 				break;
-			
+			case "ilexsubmissionpanelshandlergui":
+				$this->ctrl->setReturn($this, "members");
+				$gui = new ilExSubmissionPanelsHandlerGUI($this->assignment, (int)$_GET["member_id"]);
+				$ilCtrl->forwardCommand($gui);
+				break;
 			default:
 				$cmd = $ilCtrl->getCmd();
 				switch($cmd)
@@ -419,6 +412,7 @@ class ilExerciseManagementGUI
 				$ass_type = $this->assignment->getType();
 				//todo change addFormButton for addButtonInstance
 				if($ass_type == ilExAssignment::TYPE_TEXT) {
+					$ilToolbar->setFormAction($ilCtrl->getFormActionByClass(ilExSubmissionPanelsHandlerGUI::CLASS, "listTextAssignment"));
 					$ilToolbar->addFormButton($lng->txt("exc_list_text_assignment"), "listTextAssignment");
 				}
 				$ilToolbar->addFormButton($lng->txt("download_all_returned_files"), "downloadSubmissions");
@@ -508,247 +502,29 @@ class ilExerciseManagementGUI
 	
 	// TEXT ASSIGNMENT ?!
 
-	/**
-	 * todo: Pagination.
-	 */
-	function listTextAssignmentObject()
+	/*function listTextAssignmentObject()
 	{
-		$this->initFilter();
+		$panels_gui = new ilExSubmissionPanelsHandlerGUI($this->assignment);
+		$this->ctrl->redirect($panels_gui, "listTextAssignment");
+	}*/
 
-		//tabs
-		$this->tabs_gui->clearTargets();
-		$this->tabs_gui->setBackTarget($this->lng->txt("back"),
-			$this->ctrl->getLinkTarget($this, "members"));
-
-		$button_print = $this->ui_factory->button()->standard($this->lng->txt('print'), "#")
-			->withOnLoadCode(function($id) {
-				return "$('#{$id}').click(function() { window.print(); return false; });";
-			});
-		$this->toolbar->addSeparator();
-		$this->toolbar->addComponent($button_print);
-
-		//retrieve data
-		$peer_review = new ilExPeerReview($this->assignment);
-		$peer_data = $peer_review->getAllPeerReviews();
-
-		include_once "Services/User/classes/class.ilUserUtil.php";
-		include_once "Services/RTE/classes/class.ilRTE.php";
-
-		$report_html = "";
-		//TODO create proper title.
-		$report_title = $this->lng->txt("exc_list_text_assignment").": ".$this->assignment->getTitle();
-		$report_html .= "<h1>".$report_title."</h1>";
-		$total_reports = 0;
-		foreach(ilExSubmission::getAllAssignmentFiles($this->assignment->getExerciseId(), $this->assignment->getId()) as $file)
+	public function compareTextAssignmentsObject()
+	{
+		$participants = array_keys($this->getMultiActionUserIds());
+		foreach($participants as $participant_id)
 		{
-			if(trim($file["atext"]))
-			{
-				$user = new ilObjUser($file["user_id"]);
-				$uname = $user->getFirstname()." ".$user->getLastname();
-				$data = array(
-					"uid" => $file["user_id"],
-					"uname" => $uname,
-					"udate" => $file["ts"],
-					"utext" => ilRTE::_replaceMediaObjectImageSrc($file["atext"], 1) // mob id to mob src
-				);
-
-				if(isset($peer_data[$file["user_id"]]))
-				{
-					$data["peer"] = array_keys($peer_data[$file["user_id"]]);
-				}
-
-				$data["fb_received"] = count($data["peer"]);
-				$data["fb_given"] = $peer_review->countGivenFeedback(true, $file["user_id"]);
-
-				$submission_data = $this->assignment->getExerciseMemberAssignmentData($file["user_id"], $this->filter["status"]);
-
-				if(is_array($submission_data))
-				{
-					$data = array_merge($data, $submission_data);
-					$report_html .= $this->getReportPanel($data);
-					$total_reports++;
-
-				}
-			}
+			$submission = new ilExSubmission($this->assignment,$participant_id);
+			$file = reset($submission->getFiles());
+			$assignment_data = $this->assignment->getExerciseMemberAssignmentData($file["user_id"], $this->filter["status"]);
+			$submission_data[] = array_merge($file,$assignment_data);
 		}
-		if($total_reports == 0)
-		{
-			$mtpl = new ilTemplate("tpl.message.html", true, true, "Services/Utilities");
-			$mtpl->setCurrentBlock("info_message");
-			$mtpl->setVariable("TEXT", $this->lng->txt("fiter_no_results"));
-			$mtpl->parseCurrentBlock();
-			$report_html .= $mtpl->get();
-		}
+		$panel_handler = new ilExSubmissionPanelsHandlerGUI($this->assignment);
+		$panel_handler->setSubmissionsData($submission_data);
 
-		$this->tpl->setContent($report_html);
+		$this->ctrl->setCmdClass("ilExSubmissionPanelsHandlerGUI");
+		$this->ctrl->forwardCommand($panel_handler);
 	}
 
-	public function getReportPanel($a_data)
-	{
-		$modal = $this->getEvaluationModal($a_data);
-
-		$actions = $this->ui_factory->dropdown()->standard(array(
-			$this->ui_factory->button()->shy($this->lng->txt("grade_evaluate"), "#")->withOnClick($modal->getShowSignal()),
-		));
-
-		if($a_data['status'] == self::GRADE_NOT_GRADED) {
-			$str_status_key = $this->lng->txt('exc_tbl_status');
-			$str_status_value = $this->lng->txt('not_yet');
-		} else {
-			$str_status_key = $this->lng->txt('exc_tbl_status_time');
-			$str_status_value = ilDatePresentation::formatDate(new ilDateTime($a_data["status_time"], IL_CAL_DATETIME));
-		}
-
-		if($a_data['feedback_time']) {
-			$str_evaluation_key = $this->lng->txt('exc_tbl_feedback_time');
-			$str_evaluation_value = ilDatePresentation::formatDate(new ilDateTime($a_data["feedback_time"], IL_CAL_DATETIME));
-		} else {
-			$str_evaluation_key = $this->lng->txt('exc_settings_feedback');
-			$str_evaluation_value = $this->lng->txt('not_yet');
-		}
-
-		$card_content = array(
-			$this->lng->txt("exc_tbl_submission_date") => ilDatePresentation::formatDate(new ilDateTime($a_data["udate"], IL_CAL_DATETIME)),
-			$str_status_key => $str_status_value,
-			$str_evaluation_key => $str_evaluation_value,
-			$this->lng->txt('feedback_given') => $a_data['fb_given'],
-			$this->lng->txt('feedback_received') => $a_data['fb_received']
-		);
-		$card_tpl = new ilTemplate("tpl.exc_report_details_card.html", true, true, "Modules/Exercise");
-		foreach($card_content as $key => $value)
-		{
-			$card_tpl->setCurrentBlock("assingment_card");
-			$card_tpl->setVariable("ROW_KEY", $key);
-			$card_tpl->setVariable("ROW_VALUE", $value);
-			$card_tpl->parseCurrentBlock();
-		}
-
-		$main_panel = $this->ui_factory->panel()->sub($a_data['uname'], $this->ui_factory->legacy($a_data['utext']))
-			->withCard($this->ui_factory->card()->standard($this->lng->txt('text_assignment'))->withSections(array($this->ui_factory->legacy($card_tpl->get()))))->withActions($actions);
-
-		$feedback_tpl = new ilTemplate("tpl.exc_report_feedback.html", true, true, "Modules/Exercise");
-		if(array_key_exists("peer", $a_data) && $this->filter["feedback"] == "submission_feedback")
-		{
-			$feedback_tpl->setCurrentBlock("feedback");
-			foreach($a_data["peer"] as $peer_id)
-			{
-				$user = new ilObjUser($peer_id);
-				$peer_name =  $user->getFirstname()." ".$user->getLastname();
-
-				$feedback_tpl->setCurrentBlock("peer_feedback");
-				$feedback_tpl->setVariable("PEER_NAME", $peer_name);
-
-				$submission = new ilExSubmission($this->assignment, $a_data["uid"]);
-				$values = $submission->getPeerReview()->getPeerReviewValues($peer_id, $a_data["uid"]);
-
-				$review_html = "";
-				foreach($this->assignment->getPeerReviewCriteriaCatalogueItems() as $crit)
-				{
-					$crit_id = $crit->getId()
-						? $crit->getId()
-						: $crit->getType();
-					$crit->setPeerReviewContext($this->assignment, $peer_id, $a_data["uid"]);
-
-					$review_html .=
-						'<div class="ilBlockPropertyCaption">'.$crit->getTitle().'</div>'.
-						'<div style="margin:2px 0;">'.$crit->getHTML($values[$crit_id]).'</div>';
-
-				}
-				$feedback_tpl->setVariable("PEER_FEEDBACK", $review_html);
-				$feedback_tpl->parseCurrentBlock();
-			}
-			$feedback_tpl->parseCurrentBlock();
-		}
-		$feedback_tpl->setVariable("GRADE", $this->lng->txt('grade').": ".$this->lng->txt('exc_'.$a_data['status']));
-		$feedback_tpl->setVariable("COMMENT", $this->lng->txt('exc_comment')."<br>".$a_data['comment']);
-
-		$feedback_panel = $this->ui_factory->panel()->sub("",$this->ui_factory->legacy($feedback_tpl->get()));
-
-		$report = $this->ui_factory->panel()->report("", array($main_panel, $feedback_panel));
-
-		return $this->ui_renderer->render([$modal,$report]);
-	}
-
-	public function getEvaluationModal($a_data)
-	{
-		$modal_tpl = new ilTemplate("tpl.exc_report_evaluation_modal.html", true, true, "Modules/Exercise");
-		$modal_tpl->setVariable("USER_NAME",$a_data['uname']);
-
-		//TODO: CHECK ilias string utils. ilUtil shortenText with net blank.
-		$max_chars = 500;
-
-		$u_text = strip_tags($a_data["utext"]); //otherwise will get open P
-		$text = $u_text;
-		//show more
-		if(strlen($u_text) > $max_chars)
-		{
-			$text = "<input type='checkbox' class='read-more-state' id='post-1' />";
-			$text .= "<div class='read-more-wrap'>";
-			$text .= mb_substr($u_text, 0, $max_chars);
-			$text .= "<span class='read-more-target'>";
-			$text .= mb_substr($u_text, $max_chars);
-			$text .= "</span></div>";
-			$text .= "<label for='post-1' class='read-more-trigger'></label>";
-		}
-		$modal_tpl->setVariable("USER_TEXT",$text);
-
-		$form = new ilPropertyFormGUI();
-		$form->setFormAction($this->ctrl->getFormAction($this, "saveEvaluationFromModal"));
-		$form->setId(uniqid('form'));
-
-		//Grade
-		$options = array(
-			self::GRADE_NOT_GRADED => $this->lng->txt("exc_notgraded"),
-			self::GRADE_PASSED => $this->lng->txt("exc_passed"),
-			self::GRADE_FAILED => $this->lng->txt("exc_failed")
-		);
-		$si = new ilSelectInputGUI($this->lng->txt("exc_tbl_status"), "grade");
-		$si->setOptions($options);
-		$si->setValue($a_data['status']);
-		$form->addItem($si);
-
-		$item = new ilHiddenInputGUI('mem_id');
-		$item->setValue($a_data['uid']);
-		$form->addItem($item);
-
-		$ta = new ilTextAreaInputGUI($this->lng->txt("exc_comment"), 'comment');
-		$ta->setInfo($this->lng->txt("exc_comment_for_learner_info"));
-		$ta->setValue($a_data['comment']);
-		$ta->setRows(10);
-		$form->addItem($ta);
-
-		$modal_tpl->setVariable("FORM",$form->getHTML());
-
-		$form_id = 'form_' . $form->getId();
-		$submit_btn = $this->ui_factory->button()->primary($this->lng->txt("save"), '#')
-			->withOnLoadCode(function($id) use ($form_id) {
-				return "$('#{$id}').click(function() { $('#{$form_id}').submit(); return false; });";
-			});
-
-		return  $this->ui_factory->modal()->roundtrip(strtoupper($this->lng->txt("grade_evaluate")), $this->ui_factory->legacy($modal_tpl->get()))->withActionButtons([$submit_btn]);
-	}
-
-	/**
-	 * Save assignment submission grade(status) and comment from the roundtrip modal.
-	 */
-	public function saveEvaluationFromModalObject()
-	{
-		$comment = trim($_POST['comment']);
-		$user_id = (int)$_POST['mem_id'];
-		$grade = trim($_POST["grade"]);
-
-		if($this->assignment->getId() && $user_id) {
-			$member_status = $this->assignment->getMemberStatus($user_id);
-			$member_status->setComment(ilUtil::stripSlashes($comment));
-			$member_status->setStatus($grade);
-			if($comment != "") {
-				$member_status->setFeedback(true);
-			}
-			$member_status->update();
-		}
-		ilUtil::sendSuccess($this->lng->txt("exc_status_saved"), true);
-		$this->ctrl->redirect($this, "listTextAssignment");
-	}
 
 	/**
 	* Add user as member
@@ -2116,49 +1892,43 @@ class ilExerciseManagementGUI
 		}
 	}
 
-	function initFilter()
+	/**
+	 * Versioning
+	 */
+
+	/**
+	 * Freeze one submission, update and assign version number.
+	 * Example in: Exercise Submissions table. (Submissions and Grades -> Assignment View tab)
+	 */
+	public function freezeVersionObject()
 	{
-		if($_POST["filter_status"]) {
-			$this->filter["status"] = trim(ilUtil::stripSlashes($_POST["filter_status"]));
-		}
+		$user_id = (int)$_POST['usr_id'];
 
-		if($_POST["filter_feedback"]) {
-			$this->filter["feedback"] = trim(ilUtil::stripSlashes($_POST["filter_feedback"]));
-		} else {
-			$this->filter["feedback"] = "submission_feedback";
-		}
+		$submission = new ilExSubmission($this->assignment, $user_id);
+		$revision = new ilExSubmissionRevision($submission);
+		$revision->setVersion();
+		$revision->sendNotification();
+		ilUtil::sendSuccess($this->lng->txt("exc_submission_versioned_ok"), true);
+		$this->ctrl->redirect($this, "members");
+	}
 
-		$this->lng->loadLanguageModule("search");
+//TODO the confirmation can be moved to ilExerciseManagementGUI
+	/**
+	 * Confirm create a new version of the submission.
+	 */
+	function confirmFreezeSubmissionObject()
+	{
+		$user_id = (int)$_GET['member_id'];
 
-		$this->toolbar->setFormAction($this->ctrl->getFormAction($this, "listTextAssignment"));
+		$cgui = new ilConfirmationGUI();
+		$cgui->setFormAction($this->ctrl->getFormAction($this));
+		$cgui->setHeaderText($this->lng->txt("exc_msg_sure_to_freeze_submission"));
+		$cgui->setCancel($this->lng->txt("cancel"), "members");
+		$cgui->setConfirm($this->lng->txt("confirm"), "freezeVersion");
 
-		$si_status = new ilSelectInputGUI($this->lng->txt("exc_tbl_status"), "filter_status");
-		$options = array(
-			"" => $this->lng->txt("search_any"),
-			self::GRADE_NOT_GRADED => $this->lng->txt("exc_notgraded"),
-			self::GRADE_PASSED => $this->lng->txt("exc_passed"),
-			self::GRADE_FAILED => $this->lng->txt("exc_failed")
-		);
-		$si_status->setOptions($options);
-		$si_status->setValue($this->filter["status"]);
+		$cgui->addItem("usr_id", $user_id,
+			ilUserUtil::getNamePresentation((int) $user_id, false, false, "", true));
 
-		$si_feedback = new ilSelectInputGUI($this->lng->txt("feedback"), "filter_feedback");
-		$options = array(
-			"submission_feedback" => $this->lng->txt("submissions_feedback"),
-			"submission_only" => $this->lng->txt("submissions_only")
-		);
-		$si_feedback->setOptions($options);
-		$si_feedback->setValue($this->filter["feedback"]);
-
-		$this->toolbar->addInputItem($si_status, true);
-		$this->toolbar->addInputItem($si_feedback, true);
-
-		//todo: old school here.
-		include_once "Services/UIComponent/Button/classes/class.ilSubmitButton.php";
-		$submit = ilSubmitButton::getInstance();
-		$submit->setCaption("filter");
-		$submit->setCommand("listTextAssignment");
-		$this->toolbar->addButtonInstance($submit);
+		$this->tpl->setContent($cgui->getHTML());
 	}
 }
-

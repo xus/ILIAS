@@ -16,7 +16,7 @@ require_once "./Services/Object/classes/class.ilObjectGUI.php";
 * @ilCtrl_Calls ilObjExerciseGUI: ilObjectCopyGUI, ilExportGUI
 * @ilCtrl_Calls ilObjExerciseGUI: ilCommonActionDispatcherGUI, ilCertificateGUI 
 * @ilCtrl_Calls ilObjExerciseGUI: ilExAssignmentEditorGUI, ilExSubmissionGUI
-* @ilCtrl_Calls ilObjExerciseGUI: ilExerciseManagementGUI, ilExcCriteriaCatalogueGUI
+* @ilCtrl_Calls ilObjExerciseGUI: ilExerciseManagementGUI, ilExcCriteriaCatalogueGUI, ilExSubmissionPanelsHandlerGUI
 * 
 * @ingroup ModulesExercise
 */
@@ -185,7 +185,7 @@ class ilObjExerciseGUI extends ilObjectGUI
 				$crit_gui = new ilExcCriteriaCatalogueGUI($this->object);
 				$this->ctrl->forwardCommand($crit_gui);
 				break;
-				
+
 			default:						
 				if(!$cmd)
 				{

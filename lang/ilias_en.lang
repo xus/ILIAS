@@ -14957,3 +14957,30 @@ rbac#:#mcst_edit_learning_progress#:#User can edit learning progress settings
 dateplaner#:#btn_ical#:#iCal
 style#:#sty_type_code_block#:#Code (Block)
 style#:#sty_type_code_inline#:#Code (Inline)
+exc#:#exc_compare_submissions#:#Compare submissions
+exc#:#exc_compare_selected_submissions#:#Compare selected submissions
+wiki#:#wiki_notification_comment_subject#:#A comment was added to %s: %s
+wiki#:#wiki_notification_comment#:#the following Wiki Page has been commented.
+wiki#:#wiki_commented_by#:#Commented by
+content#:#cont_notification_activated#:#Notification Activated (Whole LM)
+content#:#cont_page_notification_activated#:#Notification Activated (Single Page)
+content#:#cont_notification_deactivate_lm#:#Deactivate Notification for Learning Module
+content#:#cont_notification_deactivate_page#:#Deactivate Notification for Page
+content#:#cont_notification_activate_lm#:#Activate Notification for Learning Module
+content#:#cont_notification_activate_page#:#Activate Notification for Page
+content#:#cont_notification_deactivated#:#Notification Deactivated
+content#:#cont_notification_comment_subject#:#A comment was added to %s: %s
+content#:#cont_change_notification_salutation#:#Hello %s,
+content#:#cont_notification_comment#:#the following Learning Module Page has been commented
+content#:#cont_commented_by#:#Commented by
+exercise#:#exc_enable_versioning#:#Enable versioning
+exercise#:#exc_enable_versioning_info#:#Allow tutors and participants to create different versions of a submission
+exercise#:#exc_tbl_freeze_version#:#Freeze version of Submission
+exercise#:#exc_tbl_show_frozen_versions#:#Show Frozen versions
+exercise#:#exc_btn_show_submissions#:#Show Submission History
+exercise#:#exc_btn_revise_submission#:#Revise Submission
+exercise#:#exc_submission_versioned_ok#:#Submission successfully frozen
+exercise#:#exc_submission_list_versions#:#List of Versions
+exercise#:#exc_msg_sure_to_freeze_submission#:#Are you sure you want to freeze the submission for this user?
+exc#:#exc_notification_submission_versioned#:#Submission versioned
+exc#:#exc_notification_submission_can_resend#:#The following submission has been versioned. You are allowed to revise your submission.

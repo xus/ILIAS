@@ -1802,11 +1802,13 @@ $ilCtrl->redirect($this, "showNotes", "notes_top", $this->ajax);
 		{
 			foreach($this->observer as $item)
 			{
-				$param = $a_note->getObject();			
+				$param = $a_note->getObject();
+				//TODO refactor this, check what is this news_id from getObject
+				unset($param['news_id']);
 				$param["action"] = $a_action;
 				$param["note_id"] = $a_note->getId();
-				
-				call_user_func_array($item, $param);				
+
+				call_user_func_array($item, $param);
 			}
 		}
 	}	

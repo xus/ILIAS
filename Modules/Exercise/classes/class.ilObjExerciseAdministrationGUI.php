@@ -124,6 +124,7 @@ class ilObjExerciseAdministrationGUI extends ilObjectGUI
 		{			
 			$exc_set = new ilSetting("excs");
 			$exc_set->set("add_to_pd", (bool)$form->getInput("pd"));
+			$exc_set->set("enable_versioning", (bool)$form->getInput("ev"));
 			
 			ilUtil::sendSuccess($this->lng->txt("settings_saved"),true);
 			$ilCtrl->redirect($this, "editSettings");
@@ -151,7 +152,6 @@ class ilObjExerciseAdministrationGUI extends ilObjectGUI
 	protected function initFormSettings()
 	{
 		$lng = $this->lng;
-		$ilAccess = $this->access;
 		
 		include_once('Services/Form/classes/class.ilPropertyFormGUI.php');
 		$form = new ilPropertyFormGUI();
@@ -169,6 +169,11 @@ class ilObjExerciseAdministrationGUI extends ilObjectGUI
 		$pd = new ilCheckboxInputGUI($lng->txt("to_desktop"), "pd");
 		$pd->setInfo($lng->txt("exc_to_desktop_info"));
 		$pd->setChecked($exc_set->get("add_to_pd", true));
+		$form->addItem($pd);
+
+		$pd = new ilCheckboxInputGUI($lng->txt("exc_enable_versioning"), "ev");
+		$pd->setInfo($lng->txt("exc_enable_versioning_info"));
+		$pd->setChecked($exc_set->get("enable_versioning", false));
 		$form->addItem($pd);
 
 		return $form;

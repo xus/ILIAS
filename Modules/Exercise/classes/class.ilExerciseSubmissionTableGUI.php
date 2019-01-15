@@ -32,7 +32,7 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 	// needs PH P5.6 for array support
 	protected $cols_mandatory = array("name", "status");
 	protected $cols_default = array("login", "submission_date", "idl", "calc_deadline");
- 	protected $cols_order = array("image", "name", "login", "team_members",
+ 	protected $cols_order = array("image", "name", "login", "team_members", "version",
 			"sent_time", "submission", "calc_deadline", "idl", "status", "mark", "status_time",
 			"feedback_time", "comment", "notice");
 	
@@ -53,8 +53,6 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 		$this->access = $DIC->access();
 		$this->tpl = $DIC["tpl"];
 		$this->lng = $DIC->language();
-
-
 		$ilCtrl = $DIC->ctrl();
 		
 		$this->exc = $a_exc;
@@ -97,6 +95,11 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 		// multi actions
 		
 		$this->addMultiCommand("saveStatusSelected", $this->lng->txt("exc_save_selected"));
+
+		if($this->mode == self::MODE_BY_ASSIGNMENT && $this->ass->getType() == ilExAssignment::TYPE_TEXT)
+		{
+			$this->addMultiCommand("compareTextAssignments",$this->lng->txt("exc_compare_submissions"));
+		}
 			
 		$this->setFormName("ilExcIDlForm");
 
@@ -203,8 +206,7 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 	{
 		$cols = $this->parseModeColumns();
 				
-		$cols["submission"] = array($this->lng->txt("exc_tbl_submission_date"), "submission");			
-		
+		$cols["submission"] = array($this->lng->txt("exc_tbl_submission_date"), "submission");
 		$cols["status"] = array($this->lng->txt("exc_tbl_status"), "status"); 
 		$cols["mark"] = array($this->lng->txt("exc_tbl_mark"), "mark");			
 		$cols["status_time"] = array($this->lng->txt("exc_tbl_status_time"), "status_time");	
@@ -223,7 +225,13 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 			$cols["comment"] = array($this->lng->txt("exc_tbl_comment"), "comment");		
 		}
 		
-		$cols["notice"] = array($this->lng->txt("exc_tbl_notice"), "note");	
+		$cols["notice"] = array($this->lng->txt("exc_tbl_notice"), "note");
+
+		if($this->ass->isVersionable())
+		{
+			$cols["version"] = array($this->lng->txt("version"), "version");
+			$this->cols_mandatory[] = "version";
+		}
 		
 		return $cols;
 	}	
@@ -235,8 +243,15 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 		
 		$has_no_team_yet = ($a_ass->hasTeam() &&
 			!ilExAssignmentTeam::getTeamId($a_ass->getId(), $a_user_id));
-		
-		
+
+		//revisions data
+		if($this->ass->isVersionable())
+		{
+			$revision = new ilExSubmissionRevision($a_row['submission_obj']);
+			$number_of_revisions = $revision->getLastVersionNumber();
+			$is_submission_versioned = $revision->isVersioned();
+		}
+
 		// static columns
 
 		if($this->mode == self::MODE_BY_ASSIGNMENT)
@@ -357,7 +372,7 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 						
 		
 		// selectable columns
-			
+
 		foreach($this->getSelectedColumns() as $col)
 		{								
 			switch($col)
@@ -470,7 +485,15 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 					break;
 			}			
 		}
-		
+
+		if($this->ass->isVersionable())
+		{
+			if($number_of_revisions) {
+				$this->tpl->setVariable("VAL_VERSION", $number_of_revisions);
+			} else {
+				$this->tpl->setVariable("VAL_VERSION", "");
+			}
+		}
 		
 		// actions
 		
@@ -608,7 +631,31 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 				"",
 				$ilCtrl->getLinkTargetByClass("ilExSubmissionTeamGUI", "showTeamLog")
 			);	
-		}									
+		}
+
+		if($this->ass->isVersionable())
+		{
+			//TODO -> check this behavior with teams!
+			$ilCtrl->setParameterByClass("ilExSubmissionPanelsHandlerGUI", "ass_id", $this->ass->getId());
+
+			if(!$is_submission_versioned)
+			{
+				$actions->addItem(
+					$this->lng->txt("exc_tbl_freeze_version"),
+					"",
+					$ilCtrl->getLinkTargetByClass("ilExerciseManagementGUI", "confirmFreezeSubmission")
+				);
+			}
+
+			if($number_of_revisions)
+			{
+				$actions->addItem(
+					$this->lng->txt("exc_tbl_show_frozen_versions"),
+					"",
+					$ilCtrl->getLinkTargetByClass("ilExSubmissionPanelsHandlerGUI", "showVersions")
+				);
+			}
+		}
 		
 		$this->tpl->setVariable("ACTIONS", $actions->getHTML());
 	}
@@ -627,4 +674,5 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 		return parent::render().
 			implode("\n", $this->comment_modals);
 	}
+
 }

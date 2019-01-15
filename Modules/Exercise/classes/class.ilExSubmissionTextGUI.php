@@ -6,7 +6,7 @@
  *
  * @author Jörg Lützenkirchen <luetzenkirchen@leifos.com>
  * 
- * @ilCtrl_Calls ilExSubmissionTextGUI: 
+ * @ilCtrl_Calls ilExSubmissionTextGUI: ilExerciseManagementGUI
  * @ingroup ModulesExercise 
  */
 class ilExSubmissionTextGUI extends ilExSubmissionBaseGUI
@@ -62,8 +62,22 @@ class ilExSubmissionTextGUI extends ilExSubmissionBaseGUI
 
 		$lng = $DIC->language();
 		$ilCtrl = $DIC->ctrl();
-		
-		if($a_submission->canSubmit())
+
+		if($a_submission->isVersioned())
+		{
+			$btn_show = ilLinkButton::getInstance();
+			$btn_show->setCaption("exc_btn_show_submissions");
+			$ilCtrl->setParameterByClass("ilObjExerciseGUI", 'ass_id', $a_submission->getAssignment()->getId());
+			$btn_show->setUrl($ilCtrl->getLinkTargetByClass(array("ilObjExerciseGUI","ilExSubmissionPanelsHandlerGUI"), "showVersions"));
+			$ilCtrl->setParameterByClass("ilExerciseManagementGUI", "ass_id", "");
+
+			$btn_revise = ilLinkButton::getInstance();
+			$btn_revise->setPrimary(true);
+			$btn_revise->setCaption("exc_btn_revise_submission");
+			$btn_revise->setUrl($ilCtrl->getLinkTargetByClass(array("ilExSubmissionGUI", "ilExSubmissionTextGUI"), "editAssignmentText"));
+			$files_str = $btn_show->render()." ".$btn_revise->render();
+		}
+		elseif($a_submission->canSubmit())
 		{
 			$button = ilLinkButton::getInstance();
 			$button->setPrimary(true);
@@ -199,6 +213,7 @@ class ilExSubmissionTextGUI extends ilExSubmissionBaseGUI
 		{
 			$a_form = $this->initAssignmentTextForm();		
 
+			//TODO get last revision/submission files.
 			$files = $this->submission->getFiles();
 			if($files)
 			{
@@ -243,11 +258,19 @@ class ilExSubmissionTextGUI extends ilExSubmissionBaseGUI
 			$text = trim($form->getInput("atxt"));	
 									
 			$existing = $this->submission->getFiles();
-												
-			$returned_id = $this->submission->updateTextSubmission(
+
+			//If versioned, new DB entry
+			if($this->submission->isVersioned() && $existing[0]['versioned'])
+			{
+				$returned_id = $this->submission->addResourceObject("TEXT", $text);
+			}
+			else
+			{
+				$returned_id = $this->submission->updateTextSubmission(
 				// mob src to mob id
-				ilRTE::_replaceMediaObjectImageSrc($text, 0));	
-			
+					ilRTE::_replaceMediaObjectImageSrc($text, 0));
+			}
+
 			// no empty text
 			if($returned_id)
 			{

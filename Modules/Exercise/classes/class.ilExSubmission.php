@@ -14,8 +14,6 @@ class ilExSubmission
 	const TYPE_TEXT = "Text";
 	const TYPE_REPO_OBJECT = "RepoObject";	// Wikis
 
-
-
 	/**
 	 * @var ilObjUser
 	 */
@@ -201,7 +199,8 @@ class ilExSubmission
 	public function canSubmit()
 	{
 		return ($this->isOwner() &&
-			$this->state->isSubmissionAllowed());
+			$this->state->isSubmissionAllowed() ||
+			$this->isVersioned());
 	}
 	
 	public function canView()
@@ -523,8 +522,13 @@ class ilExSubmission
 		if($a_min_timestamp)
 		{
 			$sql .= " AND ts > ".$ilDB->quote($a_min_timestamp, "timestamp");
-		}	
-		
+		}
+
+		if($this->isVersioned())
+		{
+			$sql .= " ORDER BY returned_id DESC LIMIT 1";
+		}
+
 		$result = $ilDB->query($sql);
 		
 		$delivered_files = array();
@@ -652,6 +656,30 @@ class ilExSubmission
 		{
 			$res[$row["ass_id"]] = $row;
 		}
+		return $res;
+	}
+
+	/**
+	 * Return the submission ids related to the specific user and assignment
+	 * @param $a_user_id
+	 * @param $a_filetitle
+	 * @return array
+	 */
+	public function getSubmissionsByUser() : array
+	{
+		$sql = "SELECT *".
+			" FROM exc_returned".
+			" WHERE user_id = ".$this->db->quote($this->user_id, "integer").
+			" AND ass_id = ".$this->db->quote($this->assignment->getId(), "integer");
+
+		$set = $this->db->query($sql);
+
+		$res = array();
+		while($row = $this->db->fetchAssoc($set))
+		{
+			$res[] = $row;
+		}
+
 		return $res;
 	}
 	
@@ -1665,6 +1693,16 @@ class ilExSubmission
 		);
 
 		return $targetdir;
+	}
+
+	/**
+	 * Check if the submission has been versioned by tutor/admin
+	 * @return bool
+	 */
+	public function isVersioned() : bool
+	{
+		$revision = new ilExSubmissionRevision($this);
+		return $revision->isVersioned();
 	}
 }
 
