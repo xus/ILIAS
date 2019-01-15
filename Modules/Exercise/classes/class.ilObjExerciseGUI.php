@@ -186,28 +186,6 @@ class ilObjExerciseGUI extends ilObjectGUI
 				$this->ctrl->forwardCommand($crit_gui);
 				break;
 
-			case "ilexsubmissionpanelshandlergui":
-				//TODO check if this checkRbackOrPositionPermissionAccess is needed or not.
-				/*
-				$GLOBALS['DIC']->access()->checkRbacOrPositionPermissionAccess(
-					'edit_submissions_grades',
-					'edit_submissions_grades',
-					$this->object->getRefId()
-				);
-				*/
-				$ass = new ilExAssignment((int)$_REQUEST["ass_id"]);
-				/*if(ilObjUser::_exists((int)$_REQUEST["usr_id"]))
-				{
-					$sub_gui = new ilExSubmissionPanelsHandlerGUI($ass,(int)$_REQUEST["usr_id"]);
-					$this->ctrl->forwardCommand($sub_gui);
-				}
-				$sub_gui = new ilExSubmissionPanelsHandlerGUI($ass);
-				*/
-				$sub_gui = new ilExSubmissionPanelsHandlerGUI($ass,$ilUser->getId());
-				$this->ctrl->setReturn($this, "showOverview");
-				$this->ctrl->forwardCommand($sub_gui);
-				break;
-				
 			default:						
 				if(!$cmd)
 				{

@@ -202,7 +202,7 @@ class ilExerciseManagementGUI
 				break;
 			case "ilexsubmissionpanelshandlergui":
 				$this->ctrl->setReturn($this, "members");
-				$gui = new ilExSubmissionPanelsHandlerGUI($this->assignment);
+				$gui = new ilExSubmissionPanelsHandlerGUI($this->assignment, (int)$_GET["member_id"]);
 				$ilCtrl->forwardCommand($gui);
 				break;
 			default:
