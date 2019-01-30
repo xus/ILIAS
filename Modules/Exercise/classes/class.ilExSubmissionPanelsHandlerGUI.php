@@ -92,13 +92,13 @@ class ilExSubmissionPanelsHandlerGUI
 		$this->toolbar = $DIC->toolbar();
 		$this->assignment = $a_assignment;
 
-		$this->submission = null;
-		if($a_user_id)
-		{
+		if($a_user_id) {
 			$this->submission = new ilExSubmission($a_assignment, $a_user_id);
+		} else {
+			$this->submission = new ilExSubmission($a_assignment, $DIC->user()->getId());
 		}
-
 	}
+
 
 	public function executeCommand()
 	{
@@ -113,11 +113,6 @@ class ilExSubmissionPanelsHandlerGUI
 		$this->submissions_data = $a_data;
 	}
 
-	//I do not need this
-	/*public function getSubmissionsData()
-	{
-		return $this->submissions_data;
-	}*/
 
 	/**
 	 * Display a list of panels with all versioned submissions.
@@ -161,6 +156,7 @@ class ilExSubmissionPanelsHandlerGUI
 
 	/**
 	 * Add the Back link to the tabs. (used in submission list and submission compare)
+	 * TODO -> Can we move this to ilExerciseManagementGUI? it will be better
 	 */
 	protected function setBackLink()
 	{
@@ -254,7 +250,7 @@ class ilExSubmissionPanelsHandlerGUI
 			$mtpl->setCurrentBlock("info_message");
 			$mtpl->setVariable("TEXT", $this->lng->txt("fiter_no_results"));
 			$mtpl->parseCurrentBlock();
-			$report_html .= $mtpl->get();
+			$report_html = $mtpl->get();
 
 			$group_panels_tpl->setVariable('CONTENT', $report_html);
 			$this->tpl->setContent($group_panels_tpl->get());
