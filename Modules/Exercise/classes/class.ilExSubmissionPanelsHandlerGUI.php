@@ -75,6 +75,11 @@ class ilExSubmissionPanelsHandlerGUI
 	protected $submissions_data;
 
 	/**
+	 * @var int
+	 */
+	protected $back_link;
+
+	/**
 	 * Constructor
 	 * @param ilExAssignment $a_assignment
 	 * @param integer $a_user_id
@@ -92,10 +97,21 @@ class ilExSubmissionPanelsHandlerGUI
 		$this->toolbar = $DIC->toolbar();
 		$this->assignment = $a_assignment;
 
-		if($a_user_id) {
+		//going back to submissions and grades tab as default behavior
+		$this->back_link = $this->ctrl->getParentReturn($this);
+
+		if($a_user_id)
+		{
 			$this->submission = new ilExSubmission($a_assignment, $a_user_id);
-		} else {
+		}
+		else
+		{
 			$this->submission = new ilExSubmission($a_assignment, $DIC->user()->getId());
+
+			//going back to exercise assignments tab
+			if($_GET['vw'] != ilExerciseManagementGUI::VIEW_GRADES) {
+				$this->back_link = $this->ctrl->getLinkTargetByClass("ilObjExerciseGUI", "showOverview");
+			}
 		}
 	}
 
@@ -161,8 +177,7 @@ class ilExSubmissionPanelsHandlerGUI
 	protected function setBackLink()
 	{
 		$this->tabs->clearTargets();
-		$this->tabs->setBackTarget($this->lng->txt("back"),
-			$this->ctrl->getParentReturn($this));
+		$this->tabs->setBackTarget($this->lng->txt("back"),$this->back_link);
 	}
 
 

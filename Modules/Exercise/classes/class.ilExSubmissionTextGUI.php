@@ -68,8 +68,11 @@ class ilExSubmissionTextGUI extends ilExSubmissionBaseGUI
 			$btn_show = ilLinkButton::getInstance();
 			$btn_show->setCaption("exc_btn_show_submissions");
 			$ilCtrl->setParameterByClass("ilObjExerciseGUI", 'ass_id', $a_submission->getAssignment()->getId());
+			$ilCtrl->setParameterByClass("ilObjExerciseGUI", "vw", ilExerciseManagementGUI::VIEW_ASSIGNMENT);
 			$btn_show->setUrl($ilCtrl->getLinkTargetByClass(array("ilExerciseHandlerGUI", "ilObjExerciseGUI", "ilExerciseManagementGUI", "ilExSubmissionPanelsHandlerGUI"), "showVersions"));
 			$ilCtrl->setParameterByClass("ilObjExerciseGUI", 'ass_id', "");
+			$ilCtrl->setParameterByClass("ilObjExerciseGUI", "vw", "");
+
 
 			$btn_revise = ilLinkButton::getInstance();
 			$btn_revise->setPrimary(true);

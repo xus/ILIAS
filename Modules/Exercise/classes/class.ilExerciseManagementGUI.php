@@ -411,10 +411,12 @@ class ilExerciseManagementGUI
 			{
 				$ass_type = $this->assignment->getType();
 				//todo change addFormButton for addButtonInstance
+				$this->ctrl->setParameterByClass("ilExSubmissionPanelsHandlerGUI", "vw", self::VIEW_GRADES);
 				if($ass_type == ilExAssignment::TYPE_TEXT) {
 					$ilToolbar->addButton($this->lng->txt("exc_list_text_assignment"),
 						$this->ctrl->getLinkTargetByClass("ilExSubmissionPanelsHandlerGUI", "listTextAssignment"));
 				}
+				$this->ctrl->setParameterByClass("ilExSubmissionPanelsHandlerGUI", "vw", "");
 				$ilToolbar->addFormButton($lng->txt("download_all_returned_files"), "downloadSubmissions");
 			}
 			$this->ctrl->setParameter($this, "vw", self::VIEW_ASSIGNMENT);
