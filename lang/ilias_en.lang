@@ -14971,8 +14971,9 @@ content#:#cont_notification_activate_page#:#Activate Notification for Page
 content#:#cont_notification_deactivated#:#Notification Deactivated
 content#:#cont_notification_comment_subject#:#A comment was added to %s: %s
 content#:#cont_change_notification_salutation#:#Hello %s,
-content#:#cont_notification_comment#:#the following Learning Module Page has been commented
+content#:#cont_notification_comment_lm#:#the following Learning Module Page has been commented
 content#:#cont_commented_by#:#Commented by
+content#:#cont_change_notification_subject_lm#:#Learning Module "%1$s" has been changed: %2$s
 exercise#:#exc_enable_versioning#:#Enable versioning
 exercise#:#exc_enable_versioning_info#:#Allow tutors and participants to create different versions of a submission
 exercise#:#exc_tbl_freeze_version#:#Freeze version of Submission
