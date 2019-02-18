@@ -226,12 +226,6 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 		}
 		
 		$cols["notice"] = array($this->lng->txt("exc_tbl_notice"), "note");
-
-		if($this->ass->isVersionable())
-		{
-			$cols["version"] = array($this->lng->txt("version"), "version");
-			$this->cols_mandatory[] = "version";
-		}
 		
 		return $cols;
 	}	
@@ -244,18 +238,10 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 		$has_no_team_yet = ($a_ass->hasTeam() &&
 			!ilExAssignmentTeam::getTeamId($a_ass->getId(), $a_user_id));
 
-		//revisions data
-		if($this->ass->isVersionable())
-		{
-			$revision = new ilExSubmissionRevision($a_row['submission_obj']);
-			$number_of_revisions = $revision->getLastVersionNumber();
-			$is_submission_versioned = $revision->isVersioned();
-		}
-
 		// static columns
 
 		if($this->mode == self::MODE_BY_ASSIGNMENT)
-		{								
+		{
 			if(!$a_ass->hasTeam())
 			{
 				$this->tpl->setVariable("VAL_NAME",	$a_row["name"]);
@@ -267,6 +253,7 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 					$this->tpl->setCurrentBlock('access_warning');
 					$this->tpl->setVariable('PARENT_ACCESS', $info[0]["text"]);
 					$this->tpl->parseCurrentBlock();
+
 				}			
 			}
 			else
@@ -313,6 +300,19 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 				{
 					$this->tpl->setCurrentBlock("team_info");
 					$this->tpl->setVariable("TXT_TEAM_INFO", "(".$a_row["submission_obj"]->getTeam()->getId().")");
+				}
+			}
+			//revisions data
+			if($a_ass->isVersionable())
+			{
+				$revision = new ilExSubmissionRevision($a_row['submission_obj']);
+				$number_of_revisions = $revision->getLastVersionNumber();
+				$is_submission_versioned = $revision->isVersioned();
+
+				if($number_of_revisions) {
+					$this->tpl->setVariable("VAL_VERSION", $number_of_revisions);
+				} else {
+					$this->tpl->setVariable("VAL_VERSION", "");
 				}
 			}
 		}
@@ -485,18 +485,8 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 					break;
 			}			
 		}
-
-		if($this->ass->isVersionable())
-		{
-			if($number_of_revisions) {
-				$this->tpl->setVariable("VAL_VERSION", $number_of_revisions);
-			} else {
-				$this->tpl->setVariable("VAL_VERSION", "");
-			}
-		}
 		
 		// actions
-		
 		include_once "Services/UIComponent/AdvancedSelectionList/classes/class.ilAdvancedSelectionListGUI.php";
 		$actions = new ilAdvancedSelectionListGUI();
 		$actions->setId($a_ass->getId()."_".$a_user_id);
@@ -633,10 +623,20 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 			);	
 		}
 
-		if($this->ass->isVersionable())
+		//TODO Extract this from here.
+		if($a_ass->isVersionable() && $this->mode == self::MODE_BY_ASSIGNMENT)
 		{
-			//TODO -> check this behavior with teams!
-			$ilCtrl->setParameterByClass("ilExSubmissionPanelsHandlerGUI", "ass_id", $this->ass->getId());
+			$revision = new ilExSubmissionRevision($a_row['submission_obj']);
+			$number_of_revisions = $revision->getLastVersionNumber();
+			$is_submission_versioned = $revision->isVersioned();
+
+			if($number_of_revisions) {
+				$this->tpl->setVariable("VAL_VERSION", $number_of_revisions);
+			} else {
+				$this->tpl->setVariable("VAL_VERSION", "");
+			}
+
+			$ilCtrl->setParameterByClass("ilExSubmissionPanelsHandlerGUI", "ass_id", $a_ass->getId());
 
 			if(!$is_submission_versioned)
 			{

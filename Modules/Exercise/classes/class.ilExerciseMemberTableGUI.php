@@ -267,6 +267,12 @@ class ilExerciseMemberTableGUI extends ilExerciseSubmissionTableGUI
 			$cols["calc_deadline"] = array($this->lng->txt("exc_tbl_calculated_deadline"), "calc_deadline");
 		}
 
+		if($this->ass->isVersionable())
+		{
+			$cols["version"] = array($this->lng->txt("version"), "version");
+			$this->cols_mandatory[] = "version";
+		}
+
 		return $cols;
 	}
 	
