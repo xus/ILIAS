@@ -98,3 +98,14 @@ if (!$ilDB->tableExists("exc_submission_version"))
 <?php
 $ilCtrlStructureReader->getStructure();
 ?>
+<#3>
+<?php
+if (!$ilDB->tableColumnExists("exc_submission_version","feedback_time"))
+{
+	$atts = array(
+		'type' => 'timestamp',
+		'notnull' => false,
+	);
+	$ilDB->addTableColumn("exc_submission_version","feedback_time",$atts);
+}
+?>

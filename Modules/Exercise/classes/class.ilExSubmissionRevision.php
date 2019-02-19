@@ -156,6 +156,7 @@ class ilExSubmissionRevision
 			$data['user_id'] = $row['user_id'];
 			$data['udate'] = $row['ts'];
 			$data['status_time'] = $row['status_time'];
+			$data['feedback_time'] = $row['feedback_time'];
 			$data['utext'] = $row['atext'];
 			$data['ass_id'] = $row['ass_id'];
 			$data['status'] = $row['status'];
@@ -196,7 +197,7 @@ class ilExSubmissionRevision
 			" WHERE obj_id = ".$this->submission->getAssignment()->getExerciseId().
 			" AND ass_id = ".$this->ass_id.
 			" AND user_id = ".$this->usr_id.
-			" AND revision = ".$id;
+			" AND version = ".$id;
 
 		$res = $this->db->query($sql);
 		while($row = $this->db->fetchAssoc($res))
@@ -214,11 +215,11 @@ class ilExSubmissionRevision
 	{
 		$comment = null;
 
-		$sql = "SELECT ucomment FROM exc_submission_version".
+		$sql = "SELECT u_comment FROM exc_submission_version".
 			" WHERE obj_id = ".$this->submission->getAssignment()->getExerciseId().
 			" AND ass_id = ".$this->ass_id.
 			" AND user_id = ".$this->usr_id.
-			" AND revision = ".$id;
+			" AND version = ".$id;
 
 		$res = $this->db->query($sql);
 		while($row = $this->db->fetchAssoc($res))
@@ -235,13 +236,13 @@ class ilExSubmissionRevision
 	public function updateRevisionComment(int $id, string $comment): void
 	{
 		$query = "UPDATE exc_submission_version".
-			" SET u_comment = ".$this->db->quote($comment, 'text').
-			//"feedback_time = ".$this->db->quote(ilUtil::now(), 'timestamp').
+			" SET u_comment = ".$this->db->quote($comment, 'text').", ".
+			"feedback_time = ".$this->db->quote(ilUtil::now(), 'timestamp').
 			" WHERE obj_id = ".$this->submission->getAssignment()->getExerciseId().
 			" AND ass_id = ".$this->ass_id.
 			" AND user_id = ".$this->usr_id.
 			" AND version = ".$id;
-
+		
 		$res = $this->db->manipulate($query);
 	}
 

@@ -408,8 +408,15 @@ class ilExSubmissionPanelsHandlerGUI
 		{
 			//update version
 			$revision = new ilExSubmissionRevision($this->submission);
-			$revision->updateRevisionStatus($version_id, $grade);
-			$revision->updateRevisionComment($version_id, $comment);
+			$db_grade = $revision->getRevisionStatus($version_id);
+			$db_comment = $revision->getRevisionComment($version_id);
+
+			if($db_grade !== $grade) {
+				$revision->updateRevisionStatus($version_id, $grade);
+			}
+			if($db_comment !== $comment) {
+				$revision->updateRevisionComment($version_id, $comment);
+			}
 
 			ilUtil::sendSuccess($this->lng->txt("exc_revision_updated"), true);
 			$this->ctrl->redirect($this, "showVersions");
