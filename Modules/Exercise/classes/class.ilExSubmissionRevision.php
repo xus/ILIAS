@@ -189,7 +189,7 @@ class ilExSubmissionRevision
 	 * @param integer $id
 	 * @return string|null
 	 */
-	public function getRevisionStatus(int $id) : string
+	public function getRevisionStatus(int $id)
 	{
 		$status = null;
 
@@ -211,7 +211,7 @@ class ilExSubmissionRevision
 	 * @param int $id
 	 * @return string|null
 	 */
-	public function getRevisionComment(int $id): string
+	public function getRevisionComment(int $id)
 	{
 		$comment = null;
 
