@@ -160,6 +160,7 @@ class ilExSubmissionPanelsHandlerGUI
 
 		foreach($a_submissions_data as $submission_data)
 		{
+			//TODO : feedback data in the list of versions?? should I filter here? Feedback is not showed for versions
 			$feedback_data = $this->collectFeedbackDataFromPeer($submission_data);
 			$data = array_merge($feedback_data, $submission_data);
 			$report_html .= $this->getReportPanel($a_type, $data);
@@ -293,15 +294,6 @@ class ilExSubmissionPanelsHandlerGUI
 	 */
 	public function getReportPanel(int $a_type, array $a_data)
 	{
-		if($a_type == self::PANEL_TYPE_SUBMISSION)
-		{
-			$modal = $this->getEvaluationModal($a_data);
-
-			$actions = $this->ui_factory->dropdown()->standard(array(
-				$this->ui_factory->button()->shy($this->lng->txt("grade_evaluate"), "#")->withOnClick($modal->getShowSignal()),
-			));
-		}
-
 		if($a_data['status'] == self::GRADE_NOT_GRADED) {
 			$str_status_key = $this->lng->txt('exc_tbl_status');
 			$str_status_value = $this->lng->txt('not_yet');
@@ -323,7 +315,7 @@ class ilExSubmissionPanelsHandlerGUI
 			$str_status_key => $str_status_value,
 			$str_evaluation_key => $str_evaluation_value
 		);
-		if($a_type == self::PANEL_TYPE_SUBMISSION)
+		if($this->displayFeedback($a_type))
 		{
 			$card_content[$this->lng->txt('feedback_given')] = $a_data['fb_given'];
 			$card_content[$this->lng->txt('feedback_received')] = $a_data['fb_received'];
@@ -340,8 +332,14 @@ class ilExSubmissionPanelsHandlerGUI
 		$main_panel = $this->ui_factory->panel()->sub($a_data['uname'], $this->ui_factory->legacy($a_data['utext']))
 			->withCard($this->ui_factory->card()->standard($this->lng->txt('text_assignment'))->withSections(array($this->ui_factory->legacy($card_tpl->get()))));
 
-		if($a_type == self::PANEL_TYPE_SUBMISSION)
+		if($this->displayCardActions($a_type))
 		{
+			$modal = $this->getEvaluationModal($a_data);
+
+			$actions = $this->ui_factory->dropdown()->standard(array(
+				$this->ui_factory->button()->shy($this->lng->txt("grade_evaluate"), "#")->withOnClick($modal->getShowSignal()),
+			));
+
 			$main_panel = $main_panel->withActions($actions);
 		}
 
@@ -386,7 +384,7 @@ class ilExSubmissionPanelsHandlerGUI
 
 		$report = $this->ui_factory->panel()->report("", array($main_panel, $feedback_panel));
 
-		if($a_type == self::PANEL_TYPE_SUBMISSION)
+		if($this->displayCardActions($a_type))
 		{
 			return $this->ui_renderer->render([$modal,$report]);
 		}
@@ -465,6 +463,10 @@ class ilExSubmissionPanelsHandlerGUI
 		$item->setValue($a_data['uid']);
 		$form->addItem($item);
 
+		$version = new ilHiddenInputGUI('version_id');
+		$version->setValue($a_data['version']);
+		$form->addItem($version);
+
 		$ta = new ilTextAreaInputGUI($this->lng->txt("exc_comment"), 'comment');
 		$ta->setInfo($this->lng->txt("exc_comment_for_learner_info"));
 		$ta->setValue($a_data['comment']);
@@ -533,5 +535,33 @@ class ilExSubmissionPanelsHandlerGUI
 			ilUserUtil::getNamePresentation((int) $user_id, false, false, "", true));
 
 		$this->tpl->setContent($cgui->getHTML());
+	}
+
+	/**
+	 * @param $type
+	 * @return bool
+	 */
+	function displayCardActions(int $type): bool
+	{
+		if($type == self::PANEL_TYPE_SUBMISSION || $type == self::PANEL_TYPE_REVISION)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param int $type
+	 * @return bool
+	 */
+	function displayFeedback(int $type): bool
+	{
+		if($type == self::PANEL_TYPE_SUBMISSION)
+		{
+			return true;
+		}
+
+		return false;
 	}
 }
