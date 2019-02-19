@@ -148,9 +148,21 @@ class ilExSubmissionRevision
 			" ORDER BY version DESC";
 
 		$res = $this->db->query($sql);
+		$data = array();
 		while($row = $this->db->fetchAssoc($res))
 		{
-			$versions[] = $row;
+			$data['id'] = $row['id'];
+			$data['obj_id'] = $row['obj_id'];
+			$data['user_id'] = $row['user_id'];
+			$data['udate'] = $row['ts'];
+			$data['status_time'] = $row['status_time'];
+			$data['utext'] = $row['atext'];
+			$data['ass_id'] = $row['ass_id'];
+			$data['status'] = $row['status'];
+			$data['comment'] = $row['u_comment'];
+			$data['version'] = $row['version'];
+			$data['versioned'] = $row['versioned'];
+			$versions[] = $data;
 		}
 		return $versions ? $versions : array();
 	}
@@ -169,5 +181,84 @@ class ilExSubmissionRevision
 			$not->setRecipients(array($this->submission->getUserId()));
 			$not->send();
 		}
+	}
+
+	/**
+	 * Get data from specific revision
+	 * @param integer $id
+	 * @return string|null
+	 */
+	public function getRevisionStatus(int $id) : string
+	{
+		$status = null;
+
+		$sql = "SELECT status FROM exc_submission_version".
+			" WHERE obj_id = ".$this->submission->getAssignment()->getExerciseId().
+			" AND ass_id = ".$this->ass_id.
+			" AND user_id = ".$this->usr_id.
+			" AND revision = ".$id;
+
+		$res = $this->db->query($sql);
+		while($row = $this->db->fetchAssoc($res))
+		{
+			$status = $row['status'];
+		}
+		return $status;
+	}
+
+	/**
+	 * @param int $id
+	 * @return string|null
+	 */
+	public function getRevisionComment(int $id): string
+	{
+		$comment = null;
+
+		$sql = "SELECT ucomment FROM exc_submission_version".
+			" WHERE obj_id = ".$this->submission->getAssignment()->getExerciseId().
+			" AND ass_id = ".$this->ass_id.
+			" AND user_id = ".$this->usr_id.
+			" AND revision = ".$id;
+
+		$res = $this->db->query($sql);
+		while($row = $this->db->fetchAssoc($res))
+		{
+			$comment = $row['u_comment'];
+		}
+		return $comment;
+	}
+
+	/**
+	 * @param int $id
+	 * @param string $comment
+	 */
+	public function updateRevisionComment(int $id, string $comment): void
+	{
+		$query = "UPDATE exc_submission_version".
+			" SET u_comment = ".$this->db->quote($comment, 'text').
+			//"feedback_time = ".$this->db->quote(ilUtil::now(), 'timestamp').
+			" WHERE obj_id = ".$this->submission->getAssignment()->getExerciseId().
+			" AND ass_id = ".$this->ass_id.
+			" AND user_id = ".$this->usr_id.
+			" AND version = ".$id;
+
+		$res = $this->db->manipulate($query);
+	}
+
+	/**
+	 * @param int $id
+	 * @param string $status
+	 */
+	public function updateRevisionStatus(int $id, string $status): void
+	{
+		$query = "UPDATE exc_submission_version".
+			" SET status = ".$this->db->quote($status, 'text').", ".
+			"status_time = ".$this->db->quote(ilUtil::now(), 'timestamp').
+			" WHERE obj_id = ".$this->submission->getAssignment()->getExerciseId().
+			" AND ass_id = ".$this->ass_id.
+			" AND user_id = ".$this->usr_id.
+			" AND version = ".$id;
+
+		$res = $this->db->manipulate($query);
 	}
 }

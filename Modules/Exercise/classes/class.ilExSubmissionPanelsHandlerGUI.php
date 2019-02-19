@@ -401,18 +401,35 @@ class ilExSubmissionPanelsHandlerGUI
 		$comment = trim($_POST['comment']);
 		$user_id = (int)$_POST['mem_id'];
 		$grade = trim($_POST["grade"]);
+		$version_id = (int)$_POST['version_id'];
 
-		if($this->assignment->getId() && $user_id) {
-			$member_status = $this->assignment->getMemberStatus($user_id);
-			$member_status->setComment(ilUtil::stripSlashes($comment));
-			$member_status->setStatus($grade);
-			if($comment != "") {
-				$member_status->setFeedback(true);
-			}
-			$member_status->update();
+		// versioned/frozen submissions
+		if ($version_id)
+		{
+			//update version
+			$revision = new ilExSubmissionRevision($this->submission);
+			$revision->updateRevisionStatus($version_id, $grade);
+			$revision->updateRevisionComment($version_id, $comment);
+
+			ilUtil::sendSuccess($this->lng->txt("exc_revision_updated"), true);
+			$this->ctrl->redirect($this, "showVersions");
 		}
-		ilUtil::sendSuccess($this->lng->txt("exc_status_saved"), true);
-		$this->ctrl->redirect($this, "listTextAssignment");
+		// last/current submission
+		else
+		{
+			if ($this->assignment->getId() && $user_id)
+			{
+				$member_status = $this->assignment->getMemberStatus($user_id);
+				$member_status->setComment(ilUtil::stripSlashes($comment));
+				$member_status->setStatus($grade);
+				if ($comment != "") {
+					$member_status->setFeedback(true);
+				}
+				$member_status->update();
+			}
+			ilUtil::sendSuccess($this->lng->txt("exc_status_saved"), true);
+			$this->ctrl->redirect($this, "listTextAssignment");
+		}
 	}
 
 
@@ -428,6 +445,9 @@ class ilExSubmissionPanelsHandlerGUI
 
 		//TODO: CHECK ilias string utils. ilUtil shortenText with net blank.
 		$max_chars = 500;
+
+		//TODO the following show more text does not work properly
+
 
 		$u_text = strip_tags($a_data["utext"]); //otherwise will get open P
 		$text = $u_text;
