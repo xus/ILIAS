@@ -233,7 +233,7 @@ class ilExSubmissionRevision
 	 * @param int $id
 	 * @param string $comment
 	 */
-	public function updateRevisionComment(int $id, string $comment): void
+	public function updateRevisionComment(int $id, string $comment)
 	{
 		$query = "UPDATE exc_submission_version".
 			" SET u_comment = ".$this->db->quote($comment, 'text').", ".
@@ -250,7 +250,7 @@ class ilExSubmissionRevision
 	 * @param int $id
 	 * @param string $status
 	 */
-	public function updateRevisionStatus(int $id, string $status): void
+	public function updateRevisionStatus(int $id, string $status)
 	{
 		$query = "UPDATE exc_submission_version".
 			" SET status = ".$this->db->quote($status, 'text').", ".
