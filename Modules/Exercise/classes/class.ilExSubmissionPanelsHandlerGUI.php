@@ -418,7 +418,7 @@ class ilExSubmissionPanelsHandlerGUI
 				$revision->updateRevisionComment($version_id, $comment);
 			}
 
-			ilUtil::sendSuccess($this->lng->txt("exc_revision_updated"), true);
+			ilUtil::sendSuccess($this->lng->txt("exc_version_updated"), true);
 			$this->ctrl->redirect($this, "showVersions");
 		}
 		// last/current submission

@@ -14986,3 +14986,4 @@ exercise#:#exc_submission_list_versions#:#List of Versions
 exercise#:#exc_msg_sure_to_freeze_submission#:#Are you sure you want to freeze the submission for this user?
 exc#:#exc_notification_submission_versioned#:#Submission versioned
 exc#:#exc_notification_submission_can_resend#:#The following submission has been versioned. You are allowed to revise your submission.
+exc#:#exc_version_updated#:#Version updated.
