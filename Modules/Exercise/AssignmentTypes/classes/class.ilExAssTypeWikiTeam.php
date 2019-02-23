@@ -175,5 +175,12 @@ class ilExAssTypeWikiTeam implements ilExAssignmentTypeInterface
 		$target_ar->save();
 	}
 
+	/**
+	 * @inheritdoc
+	 */
+	public function supportsWebAccessDirectory(): bool
+	{
+		return false;
+	}
 
 }

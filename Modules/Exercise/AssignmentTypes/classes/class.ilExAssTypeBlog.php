@@ -103,4 +103,12 @@ class ilExAssTypeBlog implements ilExAssignmentTypeInterface
 
 	}
 
+	/**
+	 *  @inheritdoc
+	 */
+	public function supportsWebAccessDirectory(): bool
+	{
+		return false;
+	}
+
 }

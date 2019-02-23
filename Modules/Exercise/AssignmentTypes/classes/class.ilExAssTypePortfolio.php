@@ -102,4 +102,12 @@ class ilExAssTypePortfolio implements ilExAssignmentTypeInterface
 
 	}
 
+	/**
+	 * @inheritdoc
+	 */
+	public function supportsWebAccessDirectory() : bool
+	{
+		return true;
+	}
+
 }
