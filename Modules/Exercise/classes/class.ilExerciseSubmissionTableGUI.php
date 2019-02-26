@@ -27,15 +27,25 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 	protected $comment_modals = array(); // [array]
 	
 	const MODE_BY_ASSIGNMENT = 1;
-	const MODE_BY_USER = 2;	
-	
-	// needs PH P5.6 for array support
+	const MODE_BY_USER = 2;
+
 	protected $cols_mandatory = array("name", "status");
 	protected $cols_default = array("login", "submission_date", "idl", "calc_deadline");
  	protected $cols_order = array("image", "name", "login", "team_members",
 			"sent_time", "submission", "calc_deadline", "idl", "status", "mark", "status_time",
 			"feedback_time", "comment", "notice");
-	
+
+	/**
+	 * @var ilExAssignmentTypes
+	 */
+	protected $ass_types;
+
+	/**
+	 * ilExAssignment type.
+	 * @var integer
+	 */
+	protected $ass_type;
+
 	/**
 	 * Constructor
 	 * 
@@ -58,6 +68,9 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 		$ilCtrl = $DIC->ctrl();
 		
 		$this->exc = $a_exc;
+
+		$this->ass_types = ilExAssignmentTypes::getInstance();
+		$this->ass_type = $this->ass_types->getById($a_item_id);
 		
 		$this->initMode($a_item_id);		
 		
@@ -501,7 +514,19 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 					$file_info["files"]["download_new_url"]
 				);				
 			}
+
 		}
+
+		if($this->ass_type->supportsWebAccessDirectory())
+		{
+			//todo check params here
+			$actions->addItem(
+				$this->lng->txt("exc_tbl_action_open_submission").$counter,
+				"",
+				$ilCtrl->getLinkTargetByClass("ilexsubmissionportfoliogui", "showAssignmentPortfolioObject")
+			);
+		}
+
 		
 		if(!$has_no_team_yet &&
 			$a_ass->hasActiveIDl() &&
