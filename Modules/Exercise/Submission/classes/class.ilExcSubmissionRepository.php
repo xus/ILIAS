@@ -62,10 +62,31 @@ class ilExSubmissionRepository implements ilExcSubmissionRepositoryInterface
 			" AND ".$extra_where.
 			" ORDER BY ts DESC";
 
-		$usr_set = $this->db->query($q);
+		$res = $this->db->query($q);
 
-		$array = $this->db->fetchAssoc($usr_set);
+		$data = $this->db->fetchAssoc($res);
 
-		return ilUtil::getMySQLTimestamp($array["ts"]);
+		return ilUtil::getMySQLTimestamp($data["ts"]);
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function getLastOpeningHTMLView(int $assignment_id, string $extra_where): string
+	{
+		$this->db->setLimit(1);
+
+		$q = "SELECT web_dir_access_time FROM exc_returned".
+			" WHERE ass_id = ".$this->db->quote($assignment_id, "integer").
+			" AND (filename IS NOT NULL OR atext IS NOT NULL)".
+			" AND web_dir_access_time IS NOT NULL".
+			" AND ".$extra_where.
+			" ORDER BY web_dir_access_time DESC";
+
+		$res = $this->db->query($q);
+
+		$data = $this->db->fetchAssoc($res);
+
+		return ilUtil::getMySQLTimestamp($data["web_dir_access_time"]);
 	}
 }

@@ -30,4 +30,10 @@ interface ilExcSubmissionRepositoryInterface
 	 */
 	public function getLastSubmission(int $assignment_id, string $extra_where): string;
 
+	/**
+	 * @param int $assignment_id
+	 * @param string $extra_where
+	 * @return string
+	 */
+	public function getLastOpeningHTMLView(int $assignment_id, string $extra_where): string;
 }
