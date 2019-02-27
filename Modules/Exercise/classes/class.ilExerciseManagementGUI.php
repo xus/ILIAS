@@ -12,7 +12,7 @@ include_once "Modules/Exercise/classes/class.ilExSubmissionBaseGUI.php";
 * @ilCtrl_Calls ilExerciseManagementGUI: ilFileSystemGUI, ilRepositorySearchGUI
 * @ilCtrl_Calls ilExerciseManagementGUI: ilExSubmissionTeamGUI, ilExSubmissionFileGUI
 * @ilCtrl_Calls ilExerciseManagementGUI: ilExSubmissionTextGUI, ilExPeerReviewGUI
-* 
+*
 * @ingroup ModulesExercise
 */
 class ilExerciseManagementGUI
@@ -2222,6 +2222,76 @@ class ilExerciseManagementGUI
 		$submit->setCaption("filter");
 		$submit->setCommand("listTextAssignment");
 		$this->toolbar->addButtonInstance($submit);
+	}
+
+	public function openSubmissionViewObject()
+	{
+		$member_id = (int)$_GET['member_id'];
+
+		if(ilObjUser::_exists($member_id, false, 'usr'))
+		{
+
+			/**
+			 * 1- Check exc_returned table the time of last "opened" view if any
+			 * 2- If no timestamp in database then copy files
+			 * 3- If opened timestamp check last user submission
+			 * 4- If submission data es bigger than opened data COPY again the zip file
+			 * 5- If opened data is bigger than submission data the files should be in place.
+			 * 		5.1 Check if the files are in place and display the view
+			 * 		5.2 If the files are not in place COPY again the zip file and diplay the view.
+			 */
+
+
+
+
+
+
+			$file_data = $this->getSubmissionZipNameAndTitle($member_id);
+
+			if(is_array($file_data) && count($file_data) > 0)
+			{
+				die("file path = ".$file_data['filename']);
+				//if filename exists
+				//
+			}
+		}
+	}
+
+	/**
+	 * TODO find better name for this method.
+	 * TODO during the upcoming refactoring centralize this action. deliverSingleFile uses similar code.
+	 * Returns the file path and the title for submission zip files.
+	 * @param int user who created the submission
+	 * @return array|null
+	 */
+	protected function getSubmissionZipNameAndTitle(int $a_member_id)
+	{
+		$ass = new ilExAssignment($this->ass_id);
+		$submission = new ilExSubmission($ass, $a_member_id);
+		$submitted = $submission->getFiles();
+		if (count($submitted) > 0) {
+			$submitted = array_pop($submitted);
+
+			$user_data = ilObjUser::_lookupName($submitted["user_id"]);
+			$title = ilObject::_lookupTitle($submitted["obj_id"]) . " - " .
+				$ass->getTitle() . " - " .
+				$user_data["firstname"] . " " .
+				$user_data["lastname"] . " (" .
+				$user_data["login"] . ").zip";
+
+			return array(
+				'filename' => $submitted['filename'],
+				'title' => $title
+			);
+		}
+
+		return null;
+	}
+
+	//TODO find a better name for this method.
+	protected function moveFilesToWebDir()
+	{
+
 	}
 }
 

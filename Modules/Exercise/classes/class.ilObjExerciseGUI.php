@@ -16,7 +16,7 @@ require_once "./Services/Object/classes/class.ilObjectGUI.php";
 * @ilCtrl_Calls ilObjExerciseGUI: ilObjectCopyGUI, ilExportGUI
 * @ilCtrl_Calls ilObjExerciseGUI: ilCommonActionDispatcherGUI, ilCertificateGUI 
 * @ilCtrl_Calls ilObjExerciseGUI: ilExAssignmentEditorGUI, ilExSubmissionGUI
-* @ilCtrl_Calls ilObjExerciseGUI: ilExerciseManagementGUI, ilExcCriteriaCatalogueGUI, ilExSubmissionPortfolioGUI
+* @ilCtrl_Calls ilObjExerciseGUI: ilExerciseManagementGUI, ilExcCriteriaCatalogueGUI, ilPortfolioExerciseGUI
 * 
 * @ingroup ModulesExercise
 */
@@ -199,10 +199,10 @@ class ilObjExerciseGUI extends ilObjectGUI
 				$this->ctrl->forwardCommand($crit_gui);
 				break;
 
-			case "ilexsubmissionportfoliogui":
+			case "ilportfolioexercisegui":
 				$this->ctrl->saveParameter($this, array("part_id"));
-				include_once "Modules/Exercise/classes/class.ilExSubmissionPortfolioGUI.php";
-				$gui = new ilExSubmissionPortfolioGUI($this->object, $this->initSubmission());
+				include_once "Modules/Exercise/classes/class.ilPortfolioExerciseGUI.php";
+				$gui = new ilPortfolioExerciseGUI($this->object, $this->initSubmission());
 				$ilCtrl->forwardCommand($gui);
 				break;
 				

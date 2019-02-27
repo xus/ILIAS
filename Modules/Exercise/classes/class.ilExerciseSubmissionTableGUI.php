@@ -64,14 +64,14 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 		$this->tpl = $DIC["tpl"];
 		$this->lng = $DIC->language();
 
-
 		$ilCtrl = $DIC->ctrl();
 		
 		$this->exc = $a_exc;
 
 		$this->ass_types = ilExAssignmentTypes::getInstance();
-		$this->ass_type = $this->ass_types->getById($a_item_id);
-		
+
+		$this->ass_type = 	$this->ass_types->getById(ilExAssignment::lookupType($a_item_id));
+
 		$this->initMode($a_item_id);		
 		
 		parent::__construct($a_parent_obj, $a_parent_cmd);		
@@ -523,7 +523,7 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 			$actions->addItem(
 				$this->lng->txt("exc_tbl_action_open_submission").$counter,
 				"",
-				$ilCtrl->getLinkTargetByClass("ilexsubmissionportfoliogui", "showAssignmentPortfolioObject")
+				$ilCtrl->getLinkTargetByClass(get_class($this->parent_obj), "openSubmissionView")
 			);
 		}
 

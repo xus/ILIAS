@@ -271,23 +271,13 @@ class ilPortfolioExerciseGUI
 	}
 	
 	function downloadExcSubFile()
-	{		
-		$ass = new ilExAssignment($this->ass_id);
-		$submission = new ilExSubmission($ass, $this->user_id);
-		$submitted = $submission->getFiles();				
-		if (count($submitted) > 0)
+	{
+		$file_data = $this->getFileNameAndTitle();
+
+		if(is_array($file_data) && count($file_data) > 0)
 		{
-			$submitted = array_pop($submitted);			
-
-			$user_data = ilObjUser::_lookupName($submitted["user_id"]);
-			$title = ilObject::_lookupTitle($submitted["obj_id"])." - ".
-				$ass->getTitle()." - ".
-				$user_data["firstname"]." ".
-				$user_data["lastname"]." (".
-				$user_data["login"].").zip";
-
-			ilUtil::deliverFile($submitted["filename"], $title);																	
-		}							
+			ilUtil::deliverFile($file_data["filename"], $file_data['title']);
+		}
 	}
 		
 	/**
@@ -305,6 +295,46 @@ class ilPortfolioExerciseGUI
 		
 		ilUtil::sendSuccess($lng->txt("prtf_finalized"), true);
 		$ilCtrl->returnToParent($this);
+	}
+
+
+	public function openSubmissionView()
+	{
+		//TODO
+		die("TODO");
+		//move the zip file
+		//unzip it
+		//update exc_returned ??? the new value does not have sense now.
+
+	}
+
+
+	/**
+	 * Returns the file path and the title for submission zip files.
+	 * @return array|null
+	 */
+	protected function getFileNameAndTitle()
+	{
+		$ass = new ilExAssignment($this->ass_id);
+		$submission = new ilExSubmission($ass, $this->user_id);
+		$submitted = $submission->getFiles();
+		if (count($submitted) > 0) {
+			$submitted = array_pop($submitted);
+
+			$user_data = ilObjUser::_lookupName($submitted["user_id"]);
+			$title = ilObject::_lookupTitle($submitted["obj_id"]) . " - " .
+				$ass->getTitle() . " - " .
+				$user_data["firstname"] . " " .
+				$user_data["lastname"] . " (" .
+				$user_data["login"] . ").zip";
+
+			return array(
+				'filename' => $submitted['filename'],
+				'title' => $title
+			);
+		}
+
+		return null;
 	}
 }	
 	
