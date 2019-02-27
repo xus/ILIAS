@@ -1297,7 +1297,7 @@ class ilExSubmission
 	 * @param
 	 * @return
 	 */
-	protected function getTableUserWhere($a_team_mode = false)
+	public function getTableUserWhere($a_team_mode = false)
 	{
 		$ilDB = $this->db;
 
