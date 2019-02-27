@@ -2224,12 +2224,28 @@ class ilExerciseManagementGUI
 		$this->toolbar->addButtonInstance($submit);
 	}
 
+	/**
+	 * Open HTML view for portfolio submissions
+	 */
 	public function openSubmissionViewObject()
 	{
 		$member_id = (int)$_GET['member_id'];
 
 		if(ilObjUser::_exists($member_id, false, 'usr'))
 		{
+			//todo teams?
+			$submission = new ilExSubmission($this->assignment, $member_id);
+
+			//todo add the repo to map class autoloader
+			include_once "Modules/Exercise/Submission/classes/class.ilExcSubmissionRepository.php";
+
+			$submission_repository = new ilExSubmissionRepository();
+			$submission_time = $submission_repository->getLastSubmission($this->ass_id,$submission->getTableUserWhere(true));
+
+			die("submission time => ".$submission_time);
+
+			
+
 
 			/**
 			 * 1- Check exc_returned table the time of last "opened" view if any
