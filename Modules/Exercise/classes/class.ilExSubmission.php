@@ -1458,6 +1458,11 @@ class ilExSubmission
 			}
 		}
 	}
+
+
+	public function updateWebDirAccessTime()
+	{
+	}
 	
 	
 	//

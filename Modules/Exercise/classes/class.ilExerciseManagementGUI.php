@@ -2258,13 +2258,16 @@ class ilExerciseManagementGUI
 				if(is_array($file_data) && count($file_data) > 0)
 				{
 					$origin_path_filename = $file_data['filename'];
-					//todo maybe zip_title is unnecessary.
-					$zip_title = $file_data['title'];
 
-					if($this->copyFilesToWebDir($origin_path_filename))
+					$file_copied = $this->copyFileToWebDir($origin_path_filename);
+
+					if($file_copied)
 					{
-							die("Files copied!");
-							//update exc_returned web_dir_access_time
+						ilUtil::unzip($file_copied);
+						//TODO delete zip file?
+						$submission->updateWebDirAccessTime();
+
+						die("Files copied!");
 					}
 					else
 					{
@@ -2314,11 +2317,11 @@ class ilExerciseManagementGUI
 	}
 
 	/**
-	 * Generate the directories and copy the file fi necessary. Returns true if the file copied.
+	 * Generate the directories and copy the file fi necessary. Returns the file copied path.
 	 * @param string $external_file
-	 * @return bool
+	 * @return bool |string
 	 */
-	protected function copyFilesToWebDir(string $origin_path_filename)
+	protected function copyFileToWebDir(string $origin_path_filename)
 	{
 		list($external_path, $internal_file_path) = explode(CLIENT_ID."/",$origin_path_filename);
 		$internal_dirs = explode("/",$internal_file_path);
@@ -2329,10 +2332,13 @@ class ilExerciseManagementGUI
 		{
 			shell_exec("mkdir -p ".ILIAS_ABSOLUTE_PATH."/".ILIAS_WEB_DIR."/".CLIENT_ID."/".$internal_path);
 		}
-		if (!file_exists("'".ILIAS_ABSOLUTE_PATH."/".ILIAS_WEB_DIR."/".CLIENT_ID."/".$internal_path."/".$zip_file."'"))
+
+		$file = ILIAS_ABSOLUTE_PATH."/".ILIAS_WEB_DIR."/".CLIENT_ID."/".$internal_path."/".$zip_file;
+		if (!file_exists($file))
 		{
-			shell_exec("cp '".$origin_path_filename."' '".ILIAS_ABSOLUTE_PATH."/".ILIAS_WEB_DIR."/".CLIENT_ID."/".$internal_path."/".$zip_file."'");
-			return true;
+			shell_exec("cp ".$origin_path_filename." ".$file);
+
+			return $file;
 		}
 
 		return false;
