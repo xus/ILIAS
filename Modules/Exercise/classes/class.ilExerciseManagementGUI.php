@@ -2225,6 +2225,7 @@ class ilExerciseManagementGUI
 	}
 
 	/**
+	 * TODO use web access checker and refactor this method to split responsabilities.
 	 * Open HTML view for portfolio submissions
 	 */
 	public function openSubmissionViewObject()
@@ -2238,38 +2239,46 @@ class ilExerciseManagementGUI
 
 			//todo add the repo to map class autoloader
 			include_once "Modules/Exercise/Submission/classes/class.ilExcSubmissionRepository.php";
-
 			$submission_repository = new ilExSubmissionRepository();
+
+			//last opening time
+			$last_opening = $submission_repository->getLastOpeningHTMLView($this->ass_id, $submission->getTableUserWhere(true));
+
+			//last submission time
 			$submission_time = $submission_repository->getLastSubmission($this->ass_id,$submission->getTableUserWhere(true));
 
-			die("submission time => ".$submission_time);
-
-			
-
-
-			/**
-			 * 1- Check exc_returned table the time of last "opened" view if any
-			 * 2- If no timestamp in database then copy files
-			 * 3- If opened timestamp check last user submission
-			 * 4- If submission data es bigger than opened data COPY again the zip file
-			 * 5- If opened data is bigger than submission data the files should be in place.
-			 * 		5.1 Check if the files are in place and display the view
-			 * 		5.2 If the files are not in place COPY again the zip file and diplay the view.
-			 */
-
-
-
-
-
-
-			$file_data = $this->getSubmissionZipNameAndTitle($member_id);
-
-			if(is_array($file_data) && count($file_data) > 0)
+			if($last_opening > $submission_time)
 			{
-				die("file path = ".$file_data['filename']);
-				//if filename exists
-				//
+				die("Just display the view. Nothing to do with files. Submission time => ".$submission_time. " Last Opening = ".$opening_time);
 			}
+			else
+			{
+				$file_data = $this->getSubmissionZipNameAndTitle($member_id);
+
+				if(is_array($file_data) && count($file_data) > 0)
+				{
+					$origin_path_filename = $file_data['filename'];
+					//todo maybe zip_title is unnecessary.
+					$zip_title = $file_data['title'];
+
+					if($this->copyFilesToWebDir($origin_path_filename))
+					{
+							die("Files copied!");
+							//update exc_returned web_dir_access_time
+					}
+					else
+					{
+						die("Files not copied");
+						//TODO ilUtil send message, files cant be copied
+					}
+				}
+				else
+				{
+					//TODO ilUtil send message nothing to show
+				}
+
+			}
+
 		}
 	}
 
@@ -2304,10 +2313,29 @@ class ilExerciseManagementGUI
 		return null;
 	}
 
-	//TODO find a better name for this method.
-	protected function moveFilesToWebDir()
+	/**
+	 * Generate the directories and copy the file fi necessary. Returns true if the file copied.
+	 * @param string $external_file
+	 * @return bool
+	 */
+	protected function copyFilesToWebDir(string $origin_path_filename)
 	{
+		list($external_path, $internal_file_path) = explode(CLIENT_ID."/",$origin_path_filename);
+		$internal_dirs = explode("/",$internal_file_path);
+		$zip_file = array_pop($internal_dirs);
+		$internal_path = implode("/", $internal_dirs);
+		//TODO permissions
+		if (!is_dir(ILIAS_ABSOLUTE_PATH."/".ILIAS_WEB_DIR."/".CLIENT_ID."/".$internal_path))
+		{
+			shell_exec("mkdir -p ".ILIAS_ABSOLUTE_PATH."/".ILIAS_WEB_DIR."/".CLIENT_ID."/".$internal_path);
+		}
+		if (!file_exists("'".ILIAS_ABSOLUTE_PATH."/".ILIAS_WEB_DIR."/".CLIENT_ID."/".$internal_path."/".$zip_file."'"))
+		{
+			shell_exec("cp '".$origin_path_filename."' '".ILIAS_ABSOLUTE_PATH."/".ILIAS_WEB_DIR."/".CLIENT_ID."/".$internal_path."/".$zip_file."'");
+			return true;
+		}
 
+		return false;
 	}
 }
 

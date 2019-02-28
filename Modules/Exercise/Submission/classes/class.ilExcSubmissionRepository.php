@@ -72,7 +72,7 @@ class ilExSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	/**
 	 * @inheritdoc
 	 */
-	public function getLastOpeningHTMLView(int $assignment_id, string $extra_where): string
+	public function getLastOpeningHTMLView(int $assignment_id, string $extra_where)
 	{
 		$this->db->setLimit(1);
 

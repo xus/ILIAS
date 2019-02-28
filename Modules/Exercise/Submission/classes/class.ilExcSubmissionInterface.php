@@ -35,5 +35,5 @@ interface ilExcSubmissionRepositoryInterface
 	 * @param string $extra_where
 	 * @return string
 	 */
-	public function getLastOpeningHTMLView(int $assignment_id, string $extra_where): string;
+	public function getLastOpeningHTMLView(int $assignment_id, string $extra_where);
 }
