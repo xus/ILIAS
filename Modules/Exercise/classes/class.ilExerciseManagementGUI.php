@@ -2249,16 +2249,15 @@ class ilExerciseManagementGUI
 
 			if($last_opening > $submission_time)
 			{
-				die("Just display the view. Nothing to do with files. Submission time => ".$submission_time. " Last Opening = ".$opening_time);
+				//TODO check if files are in place.
+				die("Just display the view. Nothing to do with files. Submission time => ".$submission_time. " Last Opening = ".$last_opening);
 			}
 			else
 			{
-				$file_data = $this->getSubmissionZipNameAndTitle($member_id);
+				$origin_path_filename = $this->getSubmissionZipFile($member_id);
 
-				if(is_array($file_data) && count($file_data) > 0)
+				if($origin_path_filename)
 				{
-					$origin_path_filename = $file_data['filename'];
-
 					$file_copied = $this->copyFileToWebDir($origin_path_filename);
 
 					if($file_copied)
@@ -2286,31 +2285,23 @@ class ilExerciseManagementGUI
 	}
 
 	/**
-	 * TODO find better name for this method.
-	 * TODO during the upcoming refactoring centralize this action. deliverSingleFile uses similar code.
-	 * Returns the file path and the title for submission zip files.
+	 * Returns the ZIP file path
 	 * @param int user who created the submission
-	 * @return array|null
+	 * @return string|null
 	 */
-	protected function getSubmissionZipNameAndTitle(int $a_member_id)
+	protected function getSubmissionZipFile(int $a_member_id)
 	{
 		$ass = new ilExAssignment($this->ass_id);
+
 		$submission = new ilExSubmission($ass, $a_member_id);
+
 		$submitted = $submission->getFiles();
-		if (count($submitted) > 0) {
+
+		if (count($submitted) > 0)
+		{
 			$submitted = array_pop($submitted);
 
-			$user_data = ilObjUser::_lookupName($submitted["user_id"]);
-			$title = ilObject::_lookupTitle($submitted["obj_id"]) . " - " .
-				$ass->getTitle() . " - " .
-				$user_data["firstname"] . " " .
-				$user_data["lastname"] . " (" .
-				$user_data["login"] . ").zip";
-
-			return array(
-				'filename' => $submitted['filename'],
-				'title' => $title
-			);
+			return $submitted['filename'];
 		}
 
 		return null;
