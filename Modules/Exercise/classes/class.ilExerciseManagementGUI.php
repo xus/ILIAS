@@ -2262,7 +2262,7 @@ class ilExerciseManagementGUI
 
 					if($file_copied)
 					{
-						ilUtil::unzip($file_copied);
+						ilUtil::unzip($file_copied, true);
 						//TODO delete zip file?
 						$submission->updateWebDirAccessTime();
 
