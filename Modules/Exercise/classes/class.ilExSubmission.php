@@ -1462,6 +1462,13 @@ class ilExSubmission
 
 	public function updateWebDirAccessTime()
 	{
+		$ilDB = $this->db;
+
+		$ilDB->manipulate("UPDATE exc_returned".
+			" SET web_dir_access_time = ".$ilDB->quote(ilUtil::now(), "timestamp").
+			" WHERE ass_id = ".$ilDB->quote($this->assignment->getId(), "integer").
+			" AND user_id = ".$ilDB->quote($this->user_id, "integer"));
+		return $id;
 	}
 	
 	
