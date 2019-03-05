@@ -520,10 +520,26 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 		if($this->ass_type->supportsWebAccessDirectory())
 		{
 			//todo check params here
+
+			global $DIC;
+			$tpl = $DIC->ui()->mainTemplate();
+			$tpl->addJavaScript("Modules/Exercise/js/ilExcManagement.js");
+
+			/**
+			 * TODO
+			 * Check the WAC
+			 */
+			$url = $ilCtrl->getLinkTarget($this->getParentObject(), "openSubmissionView", "", true, false);
 			$actions->addItem(
 				$this->lng->txt("exc_tbl_action_open_submission").$counter,
 				"",
-				$ilCtrl->getLinkTargetByClass(get_class($this->parent_obj), "openSubmissionView")
+				"#",
+				"",
+				"",
+				"",
+				"",
+				false,
+				"il.ExcManagement.openSubmissionHTML('".$url."');"
 			);
 		}
 

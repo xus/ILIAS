@@ -2226,66 +2226,95 @@ class ilExerciseManagementGUI
 
 	/**
 	 * TODO use web access checker and refactor this method to split responsabilities.
+	 * TODO ajax msg strings hardcoded and not defined.
 	 * Open HTML view for portfolio submissions
 	 */
 	public function openSubmissionViewObject()
 	{
-		$member_id = (int)$_GET['member_id'];
+		$res = array("result" => false);
 
-		if(ilObjUser::_exists($member_id, false, 'usr'))
+		if($this->ctrl->isAsynch())
 		{
-			//todo teams?
-			$submission = new ilExSubmission($this->assignment, $member_id);
+			$ass_id = (int)$_POST["ass_id"];
+			$member_id = (int)$_POST["member_id"];
 
-			//todo add the repo to map class autoloader
-			include_once "Modules/Exercise/Submission/classes/class.ilExcSubmissionRepository.php";
-			$submission_repository = new ilExSubmissionRepository();
-
-			//last opening time
-			$last_opening = $submission_repository->getLastOpeningHTMLView($this->ass_id, $submission->getTableUserWhere(true));
-
-			//last submission time
-			$submission_time = $submission_repository->getLastSubmission($this->ass_id,$submission->getTableUserWhere(true));
-
-			if($last_opening > $submission_time)
+			if(ilObjUser::_exists($member_id, false, 'usr'))
 			{
-				//TODO check if files are in place.
-				die("Just display the view. Nothing to do with files. Submission time => ".$submission_time. " Last Opening = ".$last_opening);
-			}
-			else
-			{
+				//todo teams?
+				$submission = new ilExSubmission($this->assignment, $member_id);
+
+				//todo add the repo to map class autoloader
+				include_once "Modules/Exercise/Submission/classes/class.ilExcSubmissionRepository.php";
+				$submission_repository = new ilExSubmissionRepository();
+
+				//last opening time
+				$last_opening = $submission_repository->getLastOpeningHTMLView($this->ass_id, $submission->getTableUserWhere(true));
+
+				//last submission time
+				$submission_time = $submission_repository->getLastSubmission($this->ass_id,$submission->getTableUserWhere(true));
+
 				$origin_path_filename = $this->getSubmissionZipFile($member_id);
 
-				if($origin_path_filename)
+				list($external_path, $internal_file_path) = explode(CLIENT_ID."/",$origin_path_filename);
+				list($obj_date, $obj_id) = explode("_", basename($origin_path_filename));
+				$obj_dir = "prtf_".$obj_id;
+
+				$view_url = ILIAS_WEB_DIR.DIRECTORY_SEPARATOR.CLIENT_ID.DIRECTORY_SEPARATOR.dirname($internal_file_path).DIRECTORY_SEPARATOR.$obj_dir.DIRECTORY_SEPARATOR."index.html";
+
+
+				if($last_opening > $submission_time)
 				{
-					$file_copied = $this->copyFileToWebDir($origin_path_filename);
-
-					if($file_copied)
-					{
-						ilUtil::unzip($file_copied, true);
-						//TODO delete zip file?
-						$submission->updateWebDirAccessTime();
-
-						die("Files copied!");
-					}
-					else
-					{
-						die("Files not copied");
-						//TODO ilUtil send message, files cant be copied
-					}
+					//TODO check if the files exists
+					$res = array(
+						"result" => true,
+						"msg" => "opening",
+						"url" => $view_url
+					);
 				}
 				else
 				{
-					//TODO ilUtil send message nothing to show
+					if($origin_path_filename)
+					{
+						$file_copied = $this->copyFileToWebDir($origin_path_filename);
+
+						if($file_copied)
+						{
+							//TODO delete zip file
+							ilUtil::unzip($file_copied, true);
+							$submission->updateWebDirAccessTime();
+							$res = array(
+								"result" => true,
+								"msg" => "copied and opening",
+								"url" => $view_url
+							);
+						}
+						else
+						{
+							$res = array(
+								"result" => false,
+								"msg" => "error when copy",
+								"url" => null
+							);
+						}
+					}
+					else
+					{
+						$res = array(
+							"result" => false,
+							"msg" => "no origin",
+							"url" => null
+						);
+					}
 				}
-
 			}
-
 		}
+
+		echo(json_encode($res));
+		exit();
 	}
 
 	/**
-	 * Returns the ZIP file path
+	 * Returns the ZIP file path from outside web directory
 	 * @param int user who created the submission
 	 * @return string|null
 	 */
@@ -2308,6 +2337,7 @@ class ilExerciseManagementGUI
 	}
 
 	/**
+	 * TODO send the origin path like now and send the final path completely. extract the list from here
 	 * Generate the directories and copy the file fi necessary. Returns the file copied path.
 	 * @param string $external_file
 	 * @return bool |string
@@ -2315,16 +2345,18 @@ class ilExerciseManagementGUI
 	protected function copyFileToWebDir(string $origin_path_filename)
 	{
 		list($external_path, $internal_file_path) = explode(CLIENT_ID."/",$origin_path_filename);
-		$internal_dirs = explode("/",$internal_file_path);
-		$zip_file = array_pop($internal_dirs);
-		$internal_path = implode("/", $internal_dirs);
+
+		$internal_dirs = dirname($internal_file_path);
+		$zip_file = basename($internal_file_path);
+
 		//TODO permissions
-		if (!is_dir(ILIAS_ABSOLUTE_PATH."/".ILIAS_WEB_DIR."/".CLIENT_ID."/".$internal_path))
+		$dir = ILIAS_ABSOLUTE_PATH.DIRECTORY_SEPARATOR.ILIAS_WEB_DIR.DIRECTORY_SEPARATOR.CLIENT_ID.DIRECTORY_SEPARATOR.$internal_dirs;
+		if (!is_dir($dir))
 		{
-			shell_exec("mkdir -p ".ILIAS_ABSOLUTE_PATH."/".ILIAS_WEB_DIR."/".CLIENT_ID."/".$internal_path);
+			shell_exec("mkdir -p ".$dir);
 		}
 
-		$file = ILIAS_ABSOLUTE_PATH."/".ILIAS_WEB_DIR."/".CLIENT_ID."/".$internal_path."/".$zip_file;
+		$file = ILIAS_ABSOLUTE_PATH.DIRECTORY_SEPARATOR.ILIAS_WEB_DIR.DIRECTORY_SEPARATOR.CLIENT_ID.DIRECTORY_SEPARATOR.$internal_dirs.DIRECTORY_SEPARATOR.$zip_file;
 		if (!file_exists($file))
 		{
 			shell_exec("cp ".$origin_path_filename." ".$file);
@@ -2335,4 +2367,3 @@ class ilExerciseManagementGUI
 		return false;
 	}
 }
-
