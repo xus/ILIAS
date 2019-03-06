@@ -2234,8 +2234,7 @@ class ilExerciseManagementGUI
 	}
 
 	/**
-	 * TODO use web access checker and refactor this method to split responsabilities.
-	 * TODO ajax msg strings hardcoded and not defined.
+	 * TODO use web access checker
 	 * Open HTML view for portfolio submissions
 	 */
 	public function openSubmissionViewObject()
@@ -2340,7 +2339,6 @@ class ilExerciseManagementGUI
 	}
 
 	/**
-	 * TODO send the origin path like now and send the final path completely. extract the list from here
 	 * Generate the directories and copy the file fi necessary. Returns the file copied path.
 	 * @param string $external_file
 	 * @return bool |string
@@ -2370,7 +2368,12 @@ class ilExerciseManagementGUI
 		return false;
 	}
 
-	protected function getWebFilePathFromExternalFilePath(string $external_file_path)
+	/**
+	 * Get the object specific file path from an external full file path.
+	 * @param string $external_file_path
+	 * @return string
+	 */
+	protected function getWebFilePathFromExternalFilePath(string $external_file_path): string
 	{
 		list($external_path, $internal_file_path) = explode(CLIENT_ID."/",$external_file_path);
 
