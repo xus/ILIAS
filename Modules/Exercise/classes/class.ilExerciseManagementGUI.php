@@ -60,7 +60,15 @@ class ilExerciseManagementGUI
 	protected $exercise; // [ilObjExercise]
 	protected $assignment; // [ilExAssignment]
 
+	/**
+	 * @var \ILIAS\BackgroundTasks\Task\TaskFactory
+	 */
 	protected $task_factory;
+
+	/**
+	 * @var ilLogger
+	 */
+	protected $log;
 
 	/**
 	 * @var ilObjUser
@@ -92,6 +100,7 @@ class ilExerciseManagementGUI
 		$this->ui_renderer = $DIC->ui()->renderer();
 		$this->user = $DIC->user();
 		$this->toolbar = $DIC->toolbar();
+		$this->log = ilLoggerFactory::getLogger("exc");
 
 		$this->ctrl = $DIC->ctrl();
 		$this->tabs_gui = $DIC->tabs();
@@ -2255,19 +2264,20 @@ class ilExerciseManagementGUI
 
 				$origin_path_filename = $this->getSubmissionZipFile($member_id);
 
-				list($external_path, $internal_file_path) = explode(CLIENT_ID."/",$origin_path_filename);
+				$internal_file_path = $this->getWebFilePathFromExternalFilePath($origin_path_filename);
+
 				list($obj_date, $obj_id) = explode("_", basename($origin_path_filename));
+
+				//TODO Open this for non portfolio objects.
 				$obj_dir = "prtf_".$obj_id;
 
 				$view_url = ILIAS_WEB_DIR.DIRECTORY_SEPARATOR.CLIENT_ID.DIRECTORY_SEPARATOR.dirname($internal_file_path).DIRECTORY_SEPARATOR.$obj_dir.DIRECTORY_SEPARATOR."index.html";
-
 
 				if($last_opening > $submission_time)
 				{
 					//TODO check if the files exists
 					$res = array(
 						"result" => true,
-						"msg" => "opening",
 						"url" => $view_url
 					);
 				}
@@ -2283,28 +2293,20 @@ class ilExerciseManagementGUI
 							unlink($file_copied);
 
 							$submission->updateWebDirAccessTime();
+
 							$res = array(
 								"result" => true,
-								"msg" => "copied and opening",
 								"url" => $view_url
 							);
 						}
 						else
 						{
-							$res = array(
-								"result" => false,
-								"msg" => "error when copy",
-								"url" => null
-							);
+							$this->log->debug("Zip file not copied.");
 						}
 					}
 					else
 					{
-						$res = array(
-							"result" => false,
-							"msg" => "no origin",
-							"url" => null
-						);
+						$this->log->debug("Original file to copy not found");
 					}
 				}
 			}
@@ -2345,7 +2347,7 @@ class ilExerciseManagementGUI
 	 */
 	protected function copyFileToWebDir(string $origin_path_filename)
 	{
-		list($external_path, $internal_file_path) = explode(CLIENT_ID."/",$origin_path_filename);
+		$internal_file_path = $this->getWebFilePathFromExternalFilePath($origin_path_filename);
 
 		$internal_dirs = dirname($internal_file_path);
 		$zip_file = basename($internal_file_path);
@@ -2366,5 +2368,12 @@ class ilExerciseManagementGUI
 		}
 
 		return false;
+	}
+
+	protected function getWebFilePathFromExternalFilePath(string $external_file_path)
+	{
+		list($external_path, $internal_file_path) = explode(CLIENT_ID."/",$external_file_path);
+
+		return $internal_file_path;
 	}
 }
