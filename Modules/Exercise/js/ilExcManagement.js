@@ -77,11 +77,10 @@ il.ExcManagement = {
 				member_id: member_id,
 			},
 			success: function (response) {
-				alert("ok"+response.msg);
 				window.open(response.url, "_blank");
 			}
 		}).fail(function() {
-			alert("KO");
+
 		});
 	}
 
