@@ -514,15 +514,10 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 					$file_info["files"]["download_new_url"]
 				);				
 			}
-
 		}
 
 		if($this->ass_type->supportsWebAccessDirectory())
 		{
-			/**
-			 * TODO
-			 * Check the WAC
-			 */
 			$url = $ilCtrl->getLinkTarget($this->getParentObject(), "openSubmissionView", "", true, false);
 			$actions->addItem(
 				$this->lng->txt("exc_tbl_action_open_submission").$counter,
@@ -536,7 +531,6 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 				"il.ExcManagement.openSubmissionHTML('".$url."');"
 			);
 		}
-
 		
 		if(!$has_no_team_yet &&
 			$a_ass->hasActiveIDl() &&

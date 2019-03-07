@@ -2,8 +2,6 @@
 
 /* Copyright (c) 1998-2019 ILIAS open source, Extended GPL, see docs/LICENSE */
 
-require_once("Modules/Exercise/Submission/classes/class.ilExcSubmissionInterface.php");
-
 /**
  * Submission repository
  *
@@ -27,14 +25,6 @@ class ilExSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		$this->db = (is_null($db))
 			? $DIC->database()
 			: $db;
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	public function getSubmissionType()
-	{
-		//TODO
 	}
 
 	/**

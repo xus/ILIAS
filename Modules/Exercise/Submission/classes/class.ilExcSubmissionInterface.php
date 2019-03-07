@@ -10,12 +10,6 @@
 interface ilExcSubmissionRepositoryInterface
 {
 	/**
-	 * TODO phpdocs return string, submissiontype interface
-	 * @return mixed
-	 */
-	public function getSubmissionType();
-
-	/**
 	 * Get User who submitted.
 	 * @param int $submission_id
 	 * @return int
@@ -31,6 +25,7 @@ interface ilExcSubmissionRepositoryInterface
 	public function getLastSubmission(int $assignment_id, string $extra_where): string;
 
 	/**
+	 * Get mysql timestamp with the last HTML opening view date
 	 * @param int $assignment_id
 	 * @param string $extra_where
 	 * @return string

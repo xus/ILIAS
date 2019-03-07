@@ -2234,7 +2234,6 @@ class ilExerciseManagementGUI
 	}
 
 	/**
-	 * TODO use web access checker
 	 * Open HTML view for portfolio submissions
 	 */
 	public function openSubmissionViewObject()
@@ -2248,11 +2247,8 @@ class ilExerciseManagementGUI
 
 			if(ilObjUser::_exists($member_id, false, 'usr'))
 			{
-				//todo teams?
 				$submission = new ilExSubmission($this->assignment, $member_id);
 
-				//todo add the repo to map class autoloader
-				include_once "Modules/Exercise/Submission/classes/class.ilExcSubmissionRepository.php";
 				$submission_repository = new ilExSubmissionRepository();
 
 				//last opening time
