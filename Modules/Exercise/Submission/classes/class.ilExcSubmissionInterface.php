@@ -31,4 +31,11 @@ interface ilExcSubmissionRepositoryInterface
 	 * @return string
 	 */
 	public function getLastOpeningHTMLView(int $assignment_id, string $extra_where);
+
+	/**
+	 * Get number of submissions from assignment id
+	 * @param int $assignment_id
+	 * @return int
+	 */
+	public function hasSubmissions(int $assignment_id): int;
 }

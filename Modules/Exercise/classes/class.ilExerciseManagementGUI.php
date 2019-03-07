@@ -2289,7 +2289,7 @@ class ilExerciseManagementGUI
 							ilUtil::unzip($file_copied, true);
 							unlink($file_copied);
 
-							$submission->updateWebDirAccessTime();
+							$submission_repository->updateWebDirAccessTime();
 
 							$res = array(
 								"result" => true,

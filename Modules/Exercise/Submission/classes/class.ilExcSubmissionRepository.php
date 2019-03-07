@@ -9,6 +9,8 @@
  */
 class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 {
+	const TABLE_NAME = "exc_returned";
+
 	/**
 	 * @var ilDBInterface
 	 */
@@ -32,7 +34,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	 */
 	public function getUserId(int $submission_id): int
 	{
-		$q = "SELECT user_id FROM exc_returned".
+		$q = "SELECT user_id FROM ".self::TABLE_NAME.
 			" WHERE returned_id = ".$this->db->quote($submission_id, "integer");
 		$usr_set = $this->db->query($q);
 		return $this->db->fetchAssoc($usr_set);
@@ -45,7 +47,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	{
 		$this->db->setLimit(1);
 
-		$q = "SELECT ts FROM exc_returned".
+		$q = "SELECT ts FROM ".self::TABLE_NAME.
 			" WHERE ass_id = ".$this->db->quote($assignment_id, "integer").
 			" AND (filename IS NOT NULL OR atext IS NOT NULL)".
 			" AND ts IS NOT NULL".
@@ -66,7 +68,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	{
 		$this->db->setLimit(1);
 
-		$q = "SELECT web_dir_access_time FROM exc_returned".
+		$q = "SELECT web_dir_access_time FROM ".self::TABLE_NAME.
 			" WHERE ass_id = ".$this->db->quote($assignment_id, "integer").
 			" AND (filename IS NOT NULL OR atext IS NOT NULL)".
 			" AND web_dir_access_time IS NOT NULL".
@@ -78,5 +80,31 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		$data = $this->db->fetchAssoc($res);
 
 		return ilUtil::getMySQLTimestamp($data["web_dir_access_time"]);
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function hasSubmissions(int $ass_id): int
+	{
+		$query = "SELECT * FROM ".self::TABLE_NAME.
+			" WHERE ass_id = ".$this->db->quote($ass_id, "integer").
+			" AND (filename IS NOT NULL OR atext IS NOT NULL)".
+			" AND ts IS NOT NULL";
+		$res = $this->db->query($query);
+		return $res->numRows($res);
+	}
+
+	/**
+	 * Update web_dir_access_time. It defines last HTML opening data.
+	 * @param int $assignment_id
+	 * @param int $member_id
+	 */
+	public function updateWebDirAccessTime(int $assignment_id, int $member_id)
+	{
+		$this->db->manipulate("UPDATE ".self::TABLE_NAME.
+			" SET web_dir_access_time = ".$this->db->quote(ilUtil::now(), "timestamp").
+			" WHERE ass_id = ".$this->db->quote($assignment_id, "integer").
+			" AND user_id = ".$this->db->quote($member_id, "integer"));
 	}
 }
