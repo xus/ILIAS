@@ -7,7 +7,7 @@
  *
  * @author Jesús López <lopez@leifos.com>
  */
-class ilExSubmissionRepository implements ilExcSubmissionRepositoryInterface
+class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 {
 	/**
 	 * @var ilDBInterface
