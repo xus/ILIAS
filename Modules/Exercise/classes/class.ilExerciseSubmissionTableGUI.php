@@ -519,12 +519,6 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 
 		if($this->ass_type->supportsWebAccessDirectory())
 		{
-			//todo check params here
-
-			global $DIC;
-			$tpl = $DIC->ui()->mainTemplate();
-			$tpl->addJavaScript("Modules/Exercise/js/ilExcManagement.js");
-
 			/**
 			 * TODO
 			 * Check the WAC
