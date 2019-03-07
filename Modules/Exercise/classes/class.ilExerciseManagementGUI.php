@@ -2272,6 +2272,8 @@ class ilExerciseManagementGUI
 
 				$view_url = ILIAS_WEB_DIR.DIRECTORY_SEPARATOR.CLIENT_ID.DIRECTORY_SEPARATOR.dirname($internal_file_path).DIRECTORY_SEPARATOR.$obj_dir.DIRECTORY_SEPARATOR."index.html";
 
+				ilWACSignedPath::signFolderOfStartFile($view_url);
+
 				if($last_opening > $submission_time)
 				{
 					//TODO check if the files exists
