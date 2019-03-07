@@ -2265,8 +2265,7 @@ class ilExerciseManagementGUI
 
 				list($obj_date, $obj_id) = explode("_", basename($origin_path_filename));
 
-				//TODO Open this for non portfolio objects.
-				$obj_dir = "prtf_".$obj_id;
+				$obj_dir = $this->assignment->getAssignmentType()->getStringIdentifier()."_".$obj_id;
 
 				$view_url = ILIAS_WEB_DIR.DIRECTORY_SEPARATOR.CLIENT_ID.DIRECTORY_SEPARATOR.dirname($internal_file_path).DIRECTORY_SEPARATOR.$obj_dir.DIRECTORY_SEPARATOR."index.html";
 

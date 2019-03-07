@@ -111,4 +111,9 @@ class ilExAssTypeBlog implements ilExAssignmentTypeInterface
 		return false;
 	}
 
+	public function getStringIdentifier(): string
+	{
+		// TODO: Implement getSubmissionStringIdentifier() method.
+	}
+
 }

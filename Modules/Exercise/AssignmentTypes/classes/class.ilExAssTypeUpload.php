@@ -96,4 +96,11 @@ class ilExAssTypeUpload implements ilExAssignmentTypeInterface
 		return false;
 	}
 
+	/**
+	 *  @inheritdoc
+	 */
+	public function getStringIdentifier(): string
+	{
+		// TODO: Implement getSubmissionStringIdentifier() method.
+	}
 }

@@ -21,6 +21,8 @@ class ilExAssTypePortfolio implements ilExAssignmentTypeInterface
 	 */
 	protected $lng;
 
+	protected $identifier_str;
+
 	/**
 	 * Constructor
 	 *
@@ -108,6 +110,14 @@ class ilExAssTypePortfolio implements ilExAssignmentTypeInterface
 	public function supportsWebAccessDirectory() : bool
 	{
 		return true;
+	}
+
+	/**
+	 *  @inheritdoc
+	 */
+	public function getStringIdentifier(): string
+	{
+		return ilExAssignmentTypes::STR_IDENTIFIER_PORTFOLIO;
 	}
 
 }
