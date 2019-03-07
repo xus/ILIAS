@@ -33,7 +33,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	public function getUserId(int $submission_id): int
 	{
 		$q = "SELECT user_id FROM exc_returned".
-			" WHERE returned_id = ".$this->db->quote($submisison_id, "integer");
+			" WHERE returned_id = ".$this->db->quote($submission_id, "integer");
 		$usr_set = $this->db->query($q);
 		return $this->db->fetchAssoc($usr_set);
 	}
