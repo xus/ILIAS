@@ -17,7 +17,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	protected $db;
 
 	/**
-	 * ilExSubmissionRepository constructor.
+	 * ilExcSubmissionRepository constructor.
 	 * @param ilDBInterface $db
 	 */
 	public function __construct(ilDBInterface $db = null)

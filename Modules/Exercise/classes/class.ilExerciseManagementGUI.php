@@ -2249,7 +2249,7 @@ class ilExerciseManagementGUI
 			{
 				$submission = new ilExSubmission($this->assignment, $member_id);
 
-				$submission_repository = new ilExSubmissionRepository();
+				$submission_repository = new ilExcSubmissionRepository();
 
 				//last opening time
 				$last_opening = $submission_repository->getLastOpeningHTMLView($this->ass_id, $submission->getTableUserWhere(true));
