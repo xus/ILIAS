@@ -428,8 +428,10 @@ class ilExerciseManagementGUI
 					$ilToolbar->addSeparator();
 				}
 			}
-								
-			if(ilExSubmission::hasAnySubmissions($this->assignment->getId()))
+
+			$submission_repository = new ilExcSubmissionRepository($this->db);
+
+			if($submission_repository->hasSubmissions($this->assignment->getId()))
 			{
 				$ass_type = $this->assignment->getType();
 				//todo change addFormButton for addButtonInstance
