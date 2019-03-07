@@ -520,7 +520,7 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 		{
 			$url = $ilCtrl->getLinkTarget($this->getParentObject(), "openSubmissionView", "", true, false);
 			$actions->addItem(
-				$this->lng->txt("exc_tbl_action_open_submission").$counter,
+				$this->lng->txt("exc_tbl_action_open_submission"),
 				"",
 				"#",
 				"",
