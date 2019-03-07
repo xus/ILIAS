@@ -43,7 +43,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	/**
 	 * @inheritdoc
 	 */
-	public function getLastSubmission(int $assignment_id, string $extra_where): string
+	public function getLastSubmission(int $assignment_id, string $extra_where)
 	{
 		$this->db->setLimit(1);
 
@@ -92,7 +92,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 			" AND (filename IS NOT NULL OR atext IS NOT NULL)".
 			" AND ts IS NOT NULL";
 		$res = $this->db->query($query);
-		return $res->numRows($res);
+		return (int)$res->numRows($res);
 	}
 
 	/**

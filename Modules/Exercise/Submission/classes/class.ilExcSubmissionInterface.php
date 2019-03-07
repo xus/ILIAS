@@ -20,9 +20,9 @@ interface ilExcSubmissionRepositoryInterface
 	 * Get mysql timestamp with the last submission date.
 	 * @param int $assignment_id
 	 * @param string extra condition to add in the sql where clause
-	 * @return string
+	 * @return string | null
 	 */
-	public function getLastSubmission(int $assignment_id, string $extra_where): string;
+	public function getLastSubmission(int $assignment_id, string $extra_where);
 
 	/**
 	 * Get mysql timestamp with the last HTML opening view date
