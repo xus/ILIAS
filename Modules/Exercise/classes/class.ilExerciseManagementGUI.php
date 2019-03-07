@@ -2291,7 +2291,7 @@ class ilExerciseManagementGUI
 							ilUtil::unzip($file_copied, true);
 							unlink($file_copied);
 
-							$submission_repository->updateWebDirAccessTime();
+							$submission_repository->updateWebDirAccessTime($this->assignment->getId(), $member_id);
 
 							$res = array(
 								"result" => true,
