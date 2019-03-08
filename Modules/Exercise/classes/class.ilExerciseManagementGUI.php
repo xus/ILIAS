@@ -2240,6 +2240,10 @@ class ilExerciseManagementGUI
 	 */
 	public function openSubmissionViewObject()
 	{
+		global $DIC;
+
+		$web_filesystem = $DIC->filesystem()->web();
+
 		$res = array("result" => false);
 
 		if($this->ctrl->isAsynch())
@@ -2247,65 +2251,64 @@ class ilExerciseManagementGUI
 			$ass_id = (int)$_POST["ass_id"];
 			$member_id = (int)$_POST["member_id"];
 
-			if(ilObjUser::_exists($member_id, false, 'usr'))
+			if(!ilObjUser::_exists($member_id, false, 'usr'))
 			{
-				$submission = new ilExSubmission($this->assignment, $member_id);
+				echo(json_encode($res));
+				exit();
+			}
 
-				$submission_repository = new ilExcSubmissionRepository();
+			$submission = new ilExSubmission($this->assignment, $member_id);
 
-				//last opening time
-				$last_opening = $submission_repository->getLastOpeningHTMLView($this->ass_id, $submission->getTableUserWhere(true));
+			$submission_repository = new ilExcSubmissionRepository();
 
-				//last submission time
-				$submission_time = $submission_repository->getLastSubmission($this->ass_id,$submission->getTableUserWhere(true));
+			$last_opening = $submission_repository->getLastOpeningHTMLView($this->ass_id, $submission->getTableUserWhere(true));
 
-				$origin_path_filename = $this->getSubmissionZipFile($member_id);
+			$submission_time = $submission_repository->getLastSubmission($this->ass_id,$submission->getTableUserWhere(true));
 
-				$internal_file_path = $this->getWebFilePathFromExternalFilePath($origin_path_filename);
+			$zip_original_full_path = $this->getSubmissionZipFile($submission);
 
-				list($obj_date, $obj_id) = explode("_", basename($origin_path_filename));
+			$zip_internal_path = $this->getWebFilePathFromExternalFilePath($zip_original_full_path);
 
-				$obj_dir = $this->assignment->getAssignmentType()->getStringIdentifier()."_".$obj_id;
+			list($obj_date, $obj_id) = explode("_", basename($zip_original_full_path));
+			$obj_dir = $this->assignment->getAssignmentType()->getStringIdentifier()."_".$obj_id;
+			$index_html_file = ILIAS_WEB_DIR.DIRECTORY_SEPARATOR.CLIENT_ID.DIRECTORY_SEPARATOR.dirname($zip_internal_path).DIRECTORY_SEPARATOR.$obj_dir.DIRECTORY_SEPARATOR."index.html";
 
-				$view_url = ILIAS_WEB_DIR.DIRECTORY_SEPARATOR.CLIENT_ID.DIRECTORY_SEPARATOR.dirname($internal_file_path).DIRECTORY_SEPARATOR.$obj_dir.DIRECTORY_SEPARATOR."index.html";
+			ilWACSignedPath::signFolderOfStartFile($index_html_file);
 
-				ilWACSignedPath::signFolderOfStartFile($view_url);
-
-				if($last_opening > $submission_time)
+			if($last_opening > $submission_time && $web_filesystem->has($index_html_file))
+			{
+				$res = array(
+					"result" => true,
+					"url" => $index_html_file
+				);
+			}
+			else
+			{
+				if($zip_original_full_path)
 				{
-					//TODO check if the files exists
-					$res = array(
-						"result" => true,
-						"url" => $view_url
-					);
-				}
-				else
-				{
-					if($origin_path_filename)
+					$file_copied = $this->copyFileToWebDir($zip_original_full_path, $zip_internal_path);
+
+					if($file_copied)
 					{
-						$file_copied = $this->copyFileToWebDir($origin_path_filename);
+						ilUtil::unzip($file_copied, true);
 
-						if($file_copied)
-						{
-							ilUtil::unzip($file_copied, true);
-							unlink($file_copied);
+						$web_filesystem->delete($zip_internal_path);
 
-							$submission_repository->updateWebDirAccessTime($this->assignment->getId(), $member_id);
+						$submission_repository->updateWebDirAccessTime($this->assignment->getId(), $member_id);
 
-							$res = array(
-								"result" => true,
-								"url" => $view_url
-							);
-						}
-						else
-						{
-							$this->log->debug("Zip file not copied.");
-						}
+						$res = array(
+							"result" => true,
+							"url" => $index_html_file
+						);
 					}
 					else
 					{
-						$this->log->debug("Original file to copy not found");
+						$this->log->debug("Zip file not copied.");
 					}
+				}
+				else
+				{
+					$this->log->debug("Original file to copy not found");
 				}
 			}
 		}
@@ -2316,15 +2319,11 @@ class ilExerciseManagementGUI
 
 	/**
 	 * Returns the ZIP file path from outside web directory
-	 * @param int user who created the submission
+	 * @param ilExSubmission user who created the submission
 	 * @return string|null
 	 */
-	protected function getSubmissionZipFile(int $a_member_id)
+	protected function getSubmissionZipFile(ilExSubmission $submission): ?string
 	{
-		$ass = new ilExAssignment($this->ass_id);
-
-		$submission = new ilExSubmission($ass, $a_member_id);
-
 		$submitted = $submission->getFiles();
 
 		if (count($submitted) > 0)
@@ -2340,31 +2339,33 @@ class ilExerciseManagementGUI
 	/**
 	 * Generate the directories and copy the file fi necessary. Returns the file copied path.
 	 * @param string $external_file
-	 * @return bool |string
+	 * @return null |string
 	 */
-	protected function copyFileToWebDir(string $origin_path_filename)
+	protected function copyFileToWebDir(string $origin_path_filename, string $internal_file_path): ?string
 	{
-		$internal_file_path = $this->getWebFilePathFromExternalFilePath($origin_path_filename);
+		global $DIC;
+
+		$web_filesystem = $DIC->filesystem()->web();
+		$data_filesystem = $DIC->filesystem()->storage();
 
 		$internal_dirs = dirname($internal_file_path);
 		$zip_file = basename($internal_file_path);
 
-		//TODO permissions
-		$dir = ILIAS_ABSOLUTE_PATH.DIRECTORY_SEPARATOR.ILIAS_WEB_DIR.DIRECTORY_SEPARATOR.CLIENT_ID.DIRECTORY_SEPARATOR.$internal_dirs;
-		if (!is_dir($dir))
+		if($data_filesystem->has($internal_file_path))
 		{
-			shell_exec("mkdir -p ".$dir);
+			if(!$web_filesystem->hasDir($internal_dirs)){
+				$web_filesystem->createDir($internal_dirs);
+			}
+
+			if(!$web_filesystem->has($internal_file_path)){
+				$stream = $data_filesystem->readStream($internal_file_path);
+				$web_filesystem->writeStream($internal_file_path, $stream);
+				//TODO find a better way to get this path- filesystem getPath(internal_file_path)
+				return ILIAS_ABSOLUTE_PATH.DIRECTORY_SEPARATOR.ILIAS_WEB_DIR.DIRECTORY_SEPARATOR.CLIENT_ID.DIRECTORY_SEPARATOR.$internal_dirs.DIRECTORY_SEPARATOR.$zip_file;
+			}
 		}
 
-		$file = ILIAS_ABSOLUTE_PATH.DIRECTORY_SEPARATOR.ILIAS_WEB_DIR.DIRECTORY_SEPARATOR.CLIENT_ID.DIRECTORY_SEPARATOR.$internal_dirs.DIRECTORY_SEPARATOR.$zip_file;
-		if (!file_exists($file))
-		{
-			shell_exec("cp ".$origin_path_filename." ".$file);
-
-			return $file;
-		}
-
-		return false;
+		return null;
 	}
 
 	/**
@@ -2378,4 +2379,6 @@ class ilExerciseManagementGUI
 
 		return $internal_file_path;
 	}
+
+	//TODO: When deleting particular submission: check if the submission type has access to the web directory and delete all dir/files if any.
 }
