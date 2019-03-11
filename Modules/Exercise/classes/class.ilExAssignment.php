@@ -2567,14 +2567,9 @@ class ilExAssignment
 		return $calculated_deadlines;
 	}
 
-	/**
-	 * Returns if the submissions can be versioned.
-	 *
-	 * @return bool
-	 */
 	public function isVersionable()
 	{
-		if($this->types->getSubmissionType($this->id))
+		if($this->getType() == ilExAssignment::TYPE_TEXT)
 		{
 			$exc_settings = new ilSetting("excs");
 			if($exc_settings->get("enable_versioning")) {
