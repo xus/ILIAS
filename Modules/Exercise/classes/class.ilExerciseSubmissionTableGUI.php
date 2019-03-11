@@ -515,6 +515,39 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 				);				
 			}
 		}
+
+		if($a_ass->isVersionable() && $this->mode == self::MODE_BY_ASSIGNMENT)
+		{
+			$revision = new ilExSubmissionRevision($a_row['submission_obj']);
+			$number_of_revisions = $revision->getLastVersionNumber();
+			$is_submission_versioned = $revision->isVersioned();
+
+			if($number_of_revisions) {
+				$this->tpl->setVariable("VAL_VERSION", $number_of_revisions);
+			} else {
+				$this->tpl->setVariable("VAL_VERSION", "");
+			}
+
+			$ilCtrl->setParameterByClass("ilExSubmissionPanelsHandlerGUI", "ass_id", $a_ass->getId());
+
+			if(!$is_submission_versioned && $a_row['submission_obj']->hasSubmitted())
+			{
+				$actions->addItem(
+					$this->lng->txt("exc_tbl_freeze_version"),
+					"",
+					$ilCtrl->getLinkTargetByClass("ilExerciseManagementGUI", "confirmFreezeSubmission")
+				);
+			}
+
+			if($number_of_revisions)
+			{
+				$actions->addItem(
+					$this->lng->txt("exc_tbl_show_frozen_versions"),
+					"",
+					$ilCtrl->getLinkTargetByClass("ilExSubmissionPanelsHandlerGUI", "showVersions")
+				);
+			}
+		}
 		
 		if(!$has_no_team_yet &&
 			$a_ass->hasActiveIDl() &&
@@ -621,40 +654,6 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 				"",
 				$ilCtrl->getLinkTargetByClass("ilExSubmissionTeamGUI", "showTeamLog")
 			);	
-		}
-
-		//TODO Extract this from here.
-		if($a_ass->isVersionable() && $this->mode == self::MODE_BY_ASSIGNMENT)
-		{
-			$revision = new ilExSubmissionRevision($a_row['submission_obj']);
-			$number_of_revisions = $revision->getLastVersionNumber();
-			$is_submission_versioned = $revision->isVersioned();
-
-			if($number_of_revisions) {
-				$this->tpl->setVariable("VAL_VERSION", $number_of_revisions);
-			} else {
-				$this->tpl->setVariable("VAL_VERSION", "");
-			}
-
-			$ilCtrl->setParameterByClass("ilExSubmissionPanelsHandlerGUI", "ass_id", $a_ass->getId());
-
-			if(!$is_submission_versioned && $a_row['submission_obj']->hasSubmitted())
-			{
-				$actions->addItem(
-					$this->lng->txt("exc_tbl_freeze_version"),
-					"",
-					$ilCtrl->getLinkTargetByClass("ilExerciseManagementGUI", "confirmFreezeSubmission")
-				);
-			}
-
-			if($number_of_revisions)
-			{
-				$actions->addItem(
-					$this->lng->txt("exc_tbl_show_frozen_versions"),
-					"",
-					$ilCtrl->getLinkTargetByClass("ilExSubmissionPanelsHandlerGUI", "showVersions")
-				);
-			}
 		}
 		
 		$this->tpl->setVariable("ACTIONS", $actions->getHTML());
