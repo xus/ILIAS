@@ -638,7 +638,7 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 
 			$ilCtrl->setParameterByClass("ilExSubmissionPanelsHandlerGUI", "ass_id", $a_ass->getId());
 
-			if(!$is_submission_versioned)
+			if(!$is_submission_versioned && $a_row['submission_obj']->hasSubmitted())
 			{
 				$actions->addItem(
 					$this->lng->txt("exc_tbl_freeze_version"),
