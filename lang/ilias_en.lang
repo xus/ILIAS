@@ -15000,3 +15000,5 @@ crs#:#crs_timings_short_start_end_rel#:#Suggested Start (in days)
 crs#:#crs_tile_and_objective_view_not_supported#:#You cannot activate both "Tile Presentation" and "Learning Objectives Presentation" at the same time.
 crs#:#crs_tile_and_session_limit_not_supported#:#You cannot activate both "Tile Presentation" and "Session Limitation" at the same time.
 exc#:#exc_tbl_action_open_submission#:#Open Submission
+exc#:#exc_copy_zip_error#:#The submission can not be opened. An error occurred when copying the files.
+exc#:#exc_find_zip_error#:#The submission can not be opened. The original files are not found.

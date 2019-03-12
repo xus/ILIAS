@@ -2242,15 +2242,8 @@ class ilExerciseManagementGUI
 	{
 		global $DIC;
 
-		$web_filesystem = $DIC->filesystem()->web();
-
 		$ass_id = (int)$_GET["ass_id"];
 		$member_id = (int)$_GET["member_id"];
-
-		if(!ilObjUser::_exists($member_id, false, 'usr'))
-		{
-			die(" TODO-> exit here");
-		}
 
 		$submission = new ilExSubmission($this->assignment, $member_id);
 
@@ -2270,36 +2263,35 @@ class ilExerciseManagementGUI
 
 		ilWACSignedPath::signFolderOfStartFile($index_html_file);
 
+		$web_filesystem = $DIC->filesystem()->web();
+
 		if($last_opening > $submission_time && $web_filesystem->has($index_html_file))
 		{
 			ilUtil::redirect($index_html_file);
 		}
-		else
+		if($zip_original_full_path)
 		{
-			if($zip_original_full_path)
+			$file_copied = $this->copyFileToWebDir($zip_original_full_path, $zip_internal_path);
+
+			if($file_copied)
 			{
-				$file_copied = $this->copyFileToWebDir($zip_original_full_path, $zip_internal_path);
+				ilUtil::unzip($file_copied, true);
 
-				if($file_copied)
-				{
-					ilUtil::unzip($file_copied, true);
+				$web_filesystem->delete($zip_internal_path);
 
-					$web_filesystem->delete($zip_internal_path);
+				$submission_repository->updateWebDirAccessTime($this->assignment->getId(), $member_id);
 
-					$submission_repository->updateWebDirAccessTime($this->assignment->getId(), $member_id);
-
-					ilUtil::redirect($index_html_file);
-				}
-				else
-				{
-					$this->log->debug("Zip file not copied.");
-				}
+				ilUtil::redirect($index_html_file);
 			}
-			else
-			{
-				$this->log->debug("Original file to copy not found");
-			}
+
+			$error_msg = $this->lng->txt("exc_copy_zip_error");
 		}
+
+		if(!$error_msg) {
+			$error_msg = $this->lng->txt("exc_find_zip_error");
+		}
+
+		ilUtil::sendFailure($error_msg);
 	}
 
 	/**
