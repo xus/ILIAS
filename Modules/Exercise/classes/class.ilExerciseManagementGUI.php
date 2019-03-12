@@ -2244,77 +2244,62 @@ class ilExerciseManagementGUI
 
 		$web_filesystem = $DIC->filesystem()->web();
 
-		$res = array("result" => false);
+		$ass_id = (int)$_GET["ass_id"];
+		$member_id = (int)$_GET["member_id"];
 
-		if($this->ctrl->isAsynch())
+		if(!ilObjUser::_exists($member_id, false, 'usr'))
 		{
-			$ass_id = (int)$_POST["ass_id"];
-			$member_id = (int)$_POST["member_id"];
+			die(" TODO-> exit here");
+		}
 
-			if(!ilObjUser::_exists($member_id, false, 'usr'))
+		$submission = new ilExSubmission($this->assignment, $member_id);
+
+		$submission_repository = new ilExcSubmissionRepository();
+
+		$last_opening = $submission_repository->getLastOpeningHTMLView($this->ass_id, $submission->getTableUserWhere(true));
+
+		$submission_time = $submission_repository->getLastSubmission($this->ass_id,$submission->getTableUserWhere(true));
+
+		$zip_original_full_path = $this->getSubmissionZipFile($submission);
+
+		$zip_internal_path = $this->getWebFilePathFromExternalFilePath($zip_original_full_path);
+
+		list($obj_date, $obj_id) = explode("_", basename($zip_original_full_path));
+		$obj_dir = $this->assignment->getAssignmentType()->getStringIdentifier()."_".$obj_id;
+		$index_html_file = ILIAS_WEB_DIR.DIRECTORY_SEPARATOR.CLIENT_ID.DIRECTORY_SEPARATOR.dirname($zip_internal_path).DIRECTORY_SEPARATOR.$obj_dir.DIRECTORY_SEPARATOR."index.html";
+
+		ilWACSignedPath::signFolderOfStartFile($index_html_file);
+
+		if($last_opening > $submission_time && $web_filesystem->has($index_html_file))
+		{
+			ilUtil::redirect($index_html_file);
+		}
+		else
+		{
+			if($zip_original_full_path)
 			{
-				echo(json_encode($res));
-				exit();
-			}
+				$file_copied = $this->copyFileToWebDir($zip_original_full_path, $zip_internal_path);
 
-			$submission = new ilExSubmission($this->assignment, $member_id);
-
-			$submission_repository = new ilExcSubmissionRepository();
-
-			$last_opening = $submission_repository->getLastOpeningHTMLView($this->ass_id, $submission->getTableUserWhere(true));
-
-			$submission_time = $submission_repository->getLastSubmission($this->ass_id,$submission->getTableUserWhere(true));
-
-			$zip_original_full_path = $this->getSubmissionZipFile($submission);
-
-			$zip_internal_path = $this->getWebFilePathFromExternalFilePath($zip_original_full_path);
-
-			list($obj_date, $obj_id) = explode("_", basename($zip_original_full_path));
-			$obj_dir = $this->assignment->getAssignmentType()->getStringIdentifier()."_".$obj_id;
-			$index_html_file = ILIAS_WEB_DIR.DIRECTORY_SEPARATOR.CLIENT_ID.DIRECTORY_SEPARATOR.dirname($zip_internal_path).DIRECTORY_SEPARATOR.$obj_dir.DIRECTORY_SEPARATOR."index.html";
-
-			ilWACSignedPath::signFolderOfStartFile($index_html_file);
-
-			if($last_opening > $submission_time && $web_filesystem->has($index_html_file))
-			{
-				$res = array(
-					"result" => true,
-					"url" => $index_html_file
-				);
-			}
-			else
-			{
-				if($zip_original_full_path)
+				if($file_copied)
 				{
-					$file_copied = $this->copyFileToWebDir($zip_original_full_path, $zip_internal_path);
+					ilUtil::unzip($file_copied, true);
 
-					if($file_copied)
-					{
-						ilUtil::unzip($file_copied, true);
+					$web_filesystem->delete($zip_internal_path);
 
-						$web_filesystem->delete($zip_internal_path);
+					$submission_repository->updateWebDirAccessTime($this->assignment->getId(), $member_id);
 
-						$submission_repository->updateWebDirAccessTime($this->assignment->getId(), $member_id);
-
-						$res = array(
-							"result" => true,
-							"url" => $index_html_file
-						);
-					}
-					else
-					{
-						$this->log->debug("Zip file not copied.");
-					}
+					ilUtil::redirect($index_html_file);
 				}
 				else
 				{
-					$this->log->debug("Original file to copy not found");
+					$this->log->debug("Zip file not copied.");
 				}
 			}
+			else
+			{
+				$this->log->debug("Original file to copy not found");
+			}
 		}
-
-		echo(json_encode($res));
-		exit();
 	}
 
 	/**

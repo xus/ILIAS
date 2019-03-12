@@ -518,17 +518,17 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 
 		if($this->ass_type->supportsWebAccessDirectory())
 		{
-			$url = $ilCtrl->getLinkTarget($this->getParentObject(), "openSubmissionView", "", true, false);
+			$url = $ilCtrl->getLinkTarget($this->getParentObject(), "openSubmissionView");
 			$actions->addItem(
 				$this->lng->txt("exc_tbl_action_open_submission"),
 				"",
-				"#",
+				$url,
 				"",
 				"",
-				"",
+				"_blank",
 				"",
 				false,
-				"il.ExcManagement.openSubmissionHTML('".$url."');"
+				""
 			);
 		}
 		
