@@ -91,7 +91,7 @@ class ilExAssTypeUploadTeam implements ilExAssignmentTypeInterface
 	/**
 	 * @inheritdoc
 	 */
-	public function supportsWebAccessDirectory(): bool
+	public function supportsWebDirAccess(): bool
 	{
 		return false;
 	}

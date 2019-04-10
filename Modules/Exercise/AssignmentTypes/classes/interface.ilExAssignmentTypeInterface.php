@@ -64,7 +64,7 @@ interface ilExAssignmentTypeInterface
 	 *
 	 * @return bool
 	 */
-	public function supportsWebAccessDirectory() : bool;
+	public function supportsWebDirAccess() : bool;
 
 	/**
 	 * Returns the short string identifier
