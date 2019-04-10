@@ -201,7 +201,6 @@ class ilObjExerciseGUI extends ilObjectGUI
 
 			case "ilportfolioexercisegui":
 				$this->ctrl->saveParameter($this, array("part_id"));
-				include_once "Modules/Exercise/classes/class.ilPortfolioExerciseGUI.php";
 				$gui = new ilPortfolioExerciseGUI($this->object, $this->initSubmission());
 				$ilCtrl->forwardCommand($gui);
 				break;
