@@ -2258,8 +2258,18 @@ class ilExerciseManagementGUI
 		$zip_internal_path = $this->getWebFilePathFromExternalFilePath($zip_original_full_path);
 
 		list($obj_date, $obj_id) = explode("_", basename($zip_original_full_path));
+
 		$obj_dir = $this->assignment->getAssignmentType()->getStringIdentifier()."_".$obj_id;
-		$index_html_file = ILIAS_WEB_DIR.DIRECTORY_SEPARATOR.CLIENT_ID.DIRECTORY_SEPARATOR.dirname($zip_internal_path).DIRECTORY_SEPARATOR.$obj_dir.DIRECTORY_SEPARATOR."index.html";
+
+		$index_html_file = ILIAS_WEB_DIR.
+			DIRECTORY_SEPARATOR.
+			CLIENT_ID.
+			DIRECTORY_SEPARATOR.
+			dirname($zip_internal_path).
+			DIRECTORY_SEPARATOR.
+			$obj_dir.
+			DIRECTORY_SEPARATOR.
+			"index.html";
 
 		ilWACSignedPath::signFolderOfStartFile($index_html_file);
 
@@ -2314,7 +2324,8 @@ class ilExerciseManagementGUI
 	}
 
 	/**
-	 * Generate the directories and copy the file fi necessary. Returns the file copied path.
+	 * Generate the directories and copy the file if necessary.
+	 * Returns the copied file path.
 	 * @param string $external_file
 	 * @return null |string
 	 */
@@ -2330,15 +2341,25 @@ class ilExerciseManagementGUI
 
 		if($data_filesystem->has($internal_file_path))
 		{
-			if(!$web_filesystem->hasDir($internal_dirs)){
+			if(!$web_filesystem->hasDir($internal_dirs))
+			{
 				$web_filesystem->createDir($internal_dirs);
 			}
 
-			if(!$web_filesystem->has($internal_file_path)){
+			if(!$web_filesystem->has($internal_file_path))
+			{
 				$stream = $data_filesystem->readStream($internal_file_path);
 				$web_filesystem->writeStream($internal_file_path, $stream);
-				//TODO find a better way to get this path- filesystem getPath(internal_file_path)
-				return ILIAS_ABSOLUTE_PATH.DIRECTORY_SEPARATOR.ILIAS_WEB_DIR.DIRECTORY_SEPARATOR.CLIENT_ID.DIRECTORY_SEPARATOR.$internal_dirs.DIRECTORY_SEPARATOR.$zip_file;
+
+				return ILIAS_ABSOLUTE_PATH.
+					DIRECTORY_SEPARATOR.
+					ILIAS_WEB_DIR.
+					DIRECTORY_SEPARATOR.
+					CLIENT_ID.
+					DIRECTORY_SEPARATOR.
+					$internal_dirs.
+					DIRECTORY_SEPARATOR.
+					$zip_file;
 			}
 		}
 
