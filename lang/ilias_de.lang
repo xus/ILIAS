@@ -15075,3 +15075,6 @@ content#:#cont_Separator#:#Begrenzer
 content#:#cont_StandardCenter#:#Standard Zentriert
 content#:#cont_Interaction#:#Interaktion
 content#:#cont_Background#:#Hintergrund
+exc#:#exc_tbl_action_open_submission#:#Open Submission
+exc#:#exc_copy_zip_error#:#The submission can not be opened. An error occurred when copying the files.
+exc#:#exc_find_zip_error#:#The submission can not be opened. The original files are not found.

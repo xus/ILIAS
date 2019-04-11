@@ -445,20 +445,6 @@ class ilExSubmission
 		return $success;
 	}
 	
-	public static function hasAnySubmissions($a_ass_id)
-	{
-		global $DIC;
-
-		$ilDB = $DIC->database();
-		
-		$query = "SELECT * FROM exc_returned".
-			" WHERE ass_id = ".$ilDB->quote($a_ass_id, "integer").
-			" AND (filename IS NOT NULL OR atext IS NOT NULL)".
-			" AND ts IS NOT NULL";
-		$res = $ilDB->query($query);
-		return $res->numRows($res);
-	}
-	
 	public static function getAllAssignmentFiles($a_exc_id, $a_ass_id)
 	{
 		global $DIC;
@@ -1296,7 +1282,7 @@ class ilExSubmission
 	 * @param
 	 * @return
 	 */
-	protected function getTableUserWhere($a_team_mode = false)
+	public function getTableUserWhere($a_team_mode = false)
 	{
 		$ilDB = $this->db;
 
@@ -1457,7 +1443,6 @@ class ilExSubmission
 			}
 		}
 	}
-	
 	
 	//
 	// GUI helper
