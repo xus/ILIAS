@@ -16,7 +16,7 @@ require_once "./Services/Object/classes/class.ilObjectGUI.php";
 * @ilCtrl_Calls ilObjExerciseGUI: ilObjectCopyGUI, ilExportGUI
 * @ilCtrl_Calls ilObjExerciseGUI: ilCommonActionDispatcherGUI, ilCertificateGUI 
 * @ilCtrl_Calls ilObjExerciseGUI: ilExAssignmentEditorGUI, ilExSubmissionGUI
-* @ilCtrl_Calls ilObjExerciseGUI: ilExerciseManagementGUI, ilExcCriteriaCatalogueGUI
+* @ilCtrl_Calls ilObjExerciseGUI: ilExerciseManagementGUI, ilExcCriteriaCatalogueGUI, ilObjectMetaDataGUI
 * 
 * @ingroup ModulesExercise
 */
@@ -447,7 +447,8 @@ class ilObjExerciseGUI extends ilObjectGUI
 			$this->object->getId(),
 			$a_form,
 			array(
-				ilObjectServiceSettingsGUI::ORGU_POSITION_ACCESS
+				ilObjectServiceSettingsGUI::ORGU_POSITION_ACCESS,
+				ilObjectServiceSettingsGUI::CUSTOM_METADATA
 			)
 		);
 		
@@ -535,6 +536,20 @@ class ilObjExerciseGUI extends ilObjectGUI
 			$this->tabs_gui->addTab('learning_progress',
 				$lng->txt('learning_progress'),
 				$this->ctrl->getLinkTargetByClass(array('ilobjexercisegui','illearningprogressgui'),''));
+		}
+
+		// meta data
+		if ($this->access->checkAccess('write','',$this->object->getRefId()))
+		{
+			$mdgui = new ilObjectMetaDataGUI($this->object);
+			$mdtab = $mdgui->getTab();
+			if($mdtab)
+			{
+				$this->tabs_gui->addTarget("meta_data",
+					$mdtab,
+					"",
+					"ilobjectmetadatagui");
+			}
 		}
 
 		$_GET["sort_order"] = $save_sort_order;		// hack, part ii
