@@ -198,6 +198,13 @@ class ilObjExerciseGUI extends ilObjectGUI
 				$crit_gui = new ilExcCriteriaCatalogueGUI($this->object);
 				$this->ctrl->forwardCommand($crit_gui);
 				break;
+
+			case 'ilobjectmetadatagui';
+				$this->checkPermissionBool("write",'','',$this->object->getRefId());
+				$this->tabs_gui->setTabActive('meta_data');
+				$md_gui = new ilObjectMetaDataGUI($this->object);
+				$this->ctrl->forwardCommand($md_gui);
+				break;
 				
 			default:						
 				if(!$cmd)
