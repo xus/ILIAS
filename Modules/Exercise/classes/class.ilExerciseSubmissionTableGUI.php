@@ -531,7 +531,7 @@ abstract class ilExerciseSubmissionTableGUI extends ilTable2GUI
 		if($this->ass_type != null && $this->ass_type->supportsWebDirAccess() && $a_row['submission_obj']->hasSubmitted())
 		{
 			$url = $ilCtrl->getLinkTarget($this->getParentObject(), "openSubmissionView");
-			$items[] = $this->ui_factory->link()->standard($this->lng->txt("exc_open_submission"), $url)->withOpenInNewViewport(true);
+			$items[] = $this->ui_factory->link()->standard($this->lng->txt("exc_tbl_action_open_submission"), $url)->withOpenInNewViewport(true);
 		}
 
 		if(!$has_no_team_yet &&
