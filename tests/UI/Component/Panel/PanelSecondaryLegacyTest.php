@@ -46,7 +46,7 @@ class PanelSecodaryLegacyTest extends ILIAS_UI_TestBase {
 		$this->assertEquals($secondary_panel->getTitle(), "title");
 	}
 
-	public function test_get_legacy() {
+	public function test_get_legacy_component() {
 		$f = $this->getFactory();
 
 		$legacy =  $this->getLegacy();
