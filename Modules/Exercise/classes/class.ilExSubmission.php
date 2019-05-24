@@ -76,7 +76,6 @@ class ilExSubmission
 		{
 			if(!$a_team)
 			{
-				include_once "Modules/Exercise/classes/class.ilExAssignmentTeam.php";
 				$this->team = ilExAssignmentTeam::getInstanceByUserId($this->assignment->getId(), $this->user_id);
 			}
 			else
@@ -87,7 +86,6 @@ class ilExSubmission
 		
 		if($this->assignment->getPeerReview())
 		{
-			include_once "Modules/Exercise/classes/class.ilExPeerReview.php";
 			$this->peer_review = new ilExPeerReview($this->assignment);
 		}
 	}
@@ -95,19 +93,6 @@ class ilExSubmission
 	public function getSubmissionType()
 	{
 		return $this->assignment->getAssignmentType()->getSubmissionType();
-		/*switch($this->assignment->getType())
-		{
-			case ilExAssignment::TYPE_UPLOAD_TEAM:					
-			case ilExAssignment::TYPE_UPLOAD:		
-				return "File";
-
-			case ilExAssignment::TYPE_BLOG:			
-			case ilExAssignment::TYPE_PORTFOLIO:
-				return "Object";
-
-			case ilExAssignment::TYPE_TEXT:												
-				return "Text";	
-		};*/
 	}
 	
 	
@@ -300,7 +285,6 @@ class ilExSubmission
 	
 	protected function initStorage()
 	{
-		include_once("./Modules/Exercise/classes/class.ilFSStorageExercise.php");
 		return new ilFSStorageExercise($this->assignment->getExerciseId(), $this->assignment->getId());
 	}
 
@@ -319,6 +303,7 @@ class ilExSubmission
 		{
 			$storage_id = $this->getUserId();
 		}
+
 		return $storage_id;
 	}
 
@@ -354,23 +339,18 @@ class ilExSubmission
 		$deliver_result = $this->initStorage()->uploadFile($a_http_post_files, $storage_id, $unzip);
 
 		if ($deliver_result)
-		{			
-			$next_id = $ilDB->nextId("exc_returned");
-			$query = sprintf("INSERT INTO exc_returned ".
-							 "(returned_id, obj_id, user_id, filename, filetitle, mimetype, ts, ass_id, late, team_id) ".
-							 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-				$ilDB->quote($next_id, "integer"),
-				$ilDB->quote($this->assignment->getExerciseId(), "integer"),
-				$ilDB->quote($user_id, "integer"),
-				$ilDB->quote($deliver_result["fullname"], "text"),
-				$ilDB->quote(ilFileUtils::getValidFilename($a_http_post_files["name"]), "text"),
-				$ilDB->quote($deliver_result["mimetype"], "text"),
-				$ilDB->quote(ilUtil::now(), "timestamp"),
-				$ilDB->quote($this->assignment->getId(), "integer"),
-				$ilDB->quote($this->isLate(), "integer"),
-				$ilDB->quote($team_id, "integer")
+		{
+			$repository = new ilExcSubmissionRepository($ilDB);
+			$repository->insertFile(
+				$this->assignment->getExerciseId(),
+				$this->assignment->getId(),
+				$user_id,
+				$team_id,
+				ilFileUtils::getValidFilename($a_http_post_files["name"]),
+				$deliver_result["fullname"],
+				$deliver_result["mimetype"],
+				$this->isLate()
 			);
-			$ilDB->manipulate($query);
 		
 			if($this->team)
 			{				
@@ -395,8 +375,6 @@ class ilExSubmission
 		$newDir = ilUtil::ilTempnam();
 		ilUtil::makeDir($newDir);
 
-		include_once ("Services/Utilities/classes/class.ilFileUtils.php");
-		
 		$success = true;
 		
 		try 
@@ -451,17 +429,14 @@ class ilExSubmission
 
 		$ilDB = $DIC->database();
 		
-		include_once("./Modules/Exercise/classes/class.ilFSStorageExercise.php");
 		$storage = new ilFSStorageExercise($a_exc_id, $a_ass_id);
 		$path = $storage->getAbsoluteSubmissionPath();
 
-		include_once("./Modules/Exercise/AssignmentTypes/classes/class.ilExAssignmentTypes.php");
 		$ass_type = ilExAssignmentTypes::getInstance()->getById(ilExAssignment::lookupType($a_ass_id));
 
-		$query = "SELECT * FROM exc_returned WHERE ass_id = ".
-			$ilDB->quote($a_ass_id, "integer");
+		$repository = new ilExcSubmissionRepository($ilDB);
+		$res = $repository->getAllByAssignmentId($a_ass_id);
 
-		$res = $ilDB->query($query);
 		while($row = $ilDB->fetchAssoc($res))
 		{
 			if ($ass_type->isSubmissionAssignedToTeam())
@@ -492,11 +467,9 @@ class ilExSubmission
 
 		$ass_type = ilExAssignmentTypes::getInstance()->getById(ilExAssignment::lookupType($a_ass_id));
 
-		$query = "SELECT * FROM exc_returned WHERE ass_id = ".
-			$ilDB->quote($a_ass_id, "integer") .
-			" AND user_id IN (".implode(',',$a_users).")";
+		$repository = new ilExcSubmissionRepository($ilDB);
+		$res = $repository->getAllByUserIds($a_ass_id, $a_users);
 
-		$res = $ilDB->query($query);
 		while($row = $ilDB->fetchAssoc($res))
 		{
 			if ($ass_type->isSubmissionAssignedToTeam())
@@ -517,6 +490,7 @@ class ilExSubmission
 	}
 
 	/**
+	 * // TODO Solve this get table user where
 	 * Get submission items (not only files)
 	 * @todo this also returns non-file entries, rename this, see dev.txt.php
 	 * @param array|null $a_file_ids
@@ -576,7 +550,6 @@ class ilExSubmission
 				{
 					$storage_id = $row["user_id"];
 				}
-
 
 				$row["filename"] = $path.
 					"/".$storage_id."/".basename($row["filename"]);
@@ -640,12 +613,12 @@ class ilExSubmission
 		global $DIC;
 
 		$ilDB = $DIC->database();
-		
-		$set = $ilDB->query("SELECT obj_id".
-			" FROM exc_returned".
-			" WHERE returned_id = ".$ilDB->quote($a_returned_id, "integer"));
-		$row = $ilDB->fetchAssoc($set);
-		return (int)$row["obj_id"];		
+
+		$repository = new ilExcSubmissionRepository($ilDB);
+		$res = $repository->getExerciseIdByReturnedId($a_ass_id, $a_users);
+		$row = $ilDB->fetchAssoc($res);
+
+		return (int)$row["obj_id"];
 	}
 	
 	/**
@@ -662,10 +635,9 @@ class ilExSubmission
 
 		$ilDB = $DIC->database();
 		
-		$set = $ilDB->query("SELECT obj_id, ass_id".
-			" FROM exc_returned".
-			" WHERE user_id = ".$ilDB->quote($a_user_id, "integer").
-			" AND filetitle = ".$ilDB->quote($a_filetitle, "text"));
+		$repository = new ilExcSubmissionRepository($ilDB);
+		$set = $repository->getSubmissionByUserIdAndFiletitle($a_user_id, $a_filetitle);
+
 		$res = array();
 		while($row = $ilDB->fetchAssoc($set))
 		{
@@ -766,9 +738,6 @@ class ilExSubmission
 	 */
 	public static function deleteUser($a_exc_id, $a_user_id)
 	{
-		
-		include_once("./Modules/Exercise/classes/class.ilExAssignment.php");
-		
 		foreach(ilExAssignment::getInstancesByExercise($a_exc_id) as $ass)
 		{
 			$submission = new self($ass, $a_user_id);
@@ -793,13 +762,9 @@ class ilExSubmission
 		$ilDB = $this->db;
 		$ilUser = $this->user;
 	
-		$q = "SELECT download_time FROM exc_usr_tutor WHERE ".
-			" ass_id = ".$ilDB->quote($this->getAssignment()->getId(), "integer")." AND ".
-			$ilDB->in("usr_id", $a_user_ids, "", "integer")." AND ".
-			" tutor_id = ".$ilDB->quote($ilUser->getId(), "integer");
-		$lu_set = $ilDB->query($q);
-		$lu_rec = $ilDB->fetchAssoc($lu_set);
-		return $lu_rec["download_time"];		
+		$repository = new ilExcSubmissionRepository($ilDB);
+
+		return $repository->getLastDownloadTime();
 	}
 	
 	function downloadFiles(array $a_file_ids = null, $a_only_new = false, $a_peer_review_mask_filename = false)
@@ -1360,6 +1325,7 @@ class ilExSubmission
 	// 
 	
 	/**
+	 * TODO move the persistence to repo
 	 * Add personal resource or repository object (ref_id) to assigment
 	 * 
 	 * @param int $a_wsp_id
@@ -1416,6 +1382,7 @@ class ilExSubmission
 	}
 	
 	/**
+	 * //TODO move to repo
 	 * Remove personal resource to assigment
 	 * 
 	 * @param int $a_returned_id 
@@ -1460,11 +1427,8 @@ class ilExSubmission
 			$id = $files["returned_id"];
 			if($id)
 			{
-				$ilDB->manipulate("UPDATE exc_returned".
-					" SET atext = ".$ilDB->quote($a_text, "text").
-					", ts = ".$ilDB->quote(ilUtil::now(), "timestamp").
-					", late = ".$ilDB->quote($this->isLate(), "integer").
-					" WHERE returned_id = ".$ilDB->quote($id, "integer"));
+				$repository = new ilExcSubmissionRepository($ilDB);
+				$repository->updateSubmittedText($id, $text);
 				return $id;
 			}
 		}
@@ -1675,29 +1639,21 @@ class ilExSubmission
 	{
 		global $DIC;
 
-		$db = $DIC->database();
+		$ilDB = $DIC->database();
 
-		$query = "SELECT * FROM exc_returned r LEFT JOIN exc_assignment a".
-			" ON (r.ass_id = a.id) ".
-			" WHERE r.filetitle = ".$db->quote($a_filename, "string");
+		$repository = new ilExcSubmissionRepository($ilDB);
+		$set = $repository->getSubmissionsByFilename($a_filename, $a_assignment_types);
 
-		if (is_array($a_assignment_types) && count($a_assignment_types) > 0)
-		{
-			$query.= " AND ".$db->in("a.type", $a_assignment_types, false, "integer");
-		}
-
-		$set = $db->query($query);
 		$rets = array();
 		while ($rec = $db->fetchAssoc($set))
 		{
 			$rets[] = $rec;
 		}
 
-
 		return $rets;
 	}
 	
-	/*
+	/**
 	 * @param $a_user_id
 	 * @return string
 	 */
@@ -1724,14 +1680,10 @@ class ilExSubmission
 		global $DIC;
 
 		$ilDB = $DIC->database();
-
 		$participants = array();
-		$query = "SELECT user_id FROM exc_returned WHERE ass_id = ".
-			$ilDB->quote($a_ass_id, "integer") .
-			" AND obj_id = ".
-			$ilDB->quote($a_exercise_id, "integer");
 
-		$res = $ilDB->query($query);
+		$repository = new ilExcSubmissionRepository($ilDB);
+		$res = $repository->getAssignmentParticipants($a_exercise_id, $a_ass_id);
 
 		while($row = $ilDB->fetchAssoc($res))
 		{
