@@ -491,6 +491,9 @@ class ilExSubmission
 
 	/**
 	 * // TODO Solve this get table user where
+	 *
+	 * //TODO THis method is called without params in 99% of the cases. Split it in specific needs.
+	 *
 	 * Get submission items (not only files)
 	 * @todo this also returns non-file entries, rename this, see dev.txt.php
 	 * @param array|null $a_file_ids
@@ -1376,7 +1379,7 @@ class ilExSubmission
 
 		$repository = new ilExcSubmissionRepository($ilDB);
 
-		return $respository->insert($data);
+		return $repository->insert($data);
 	}
 	
 	/**
