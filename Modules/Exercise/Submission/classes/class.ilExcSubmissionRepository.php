@@ -186,4 +186,28 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 
 		$this->db->manipulate($query);
 	}
+
+	// TODO convert this to data object
+	public function insert(array $data) : int
+	{
+		$next_id = $this->db->nextId("exc_returned");
+
+		$query = "INSERT INTO " . self::TABLE_NAME .
+			" (returned_id, obj_id, user_id, filetitle, ass_id, ts, atext, late, team_id)" .
+			" VALUES (" .
+			$this->db->quote($next_id, "integer") . ", " .
+			$this->db->quote($data['obj_id'], "integer") . ", " .
+			$this->db->quote($data['user_id'], "integer") . ", " .
+			$this->db->quote($data['filetitle'], "text") . ", " .
+			$this->db->quote($data['ass_id'], "integer") . ", " .
+			$this->db->quote($data['ts'], "timestamp") . ", " .
+			$this->db->quote($data['atext'], "text") . ", " .
+			$this->db->quote($data['late'], "integer") . ", " .
+			$this->db->quote($data['team_id'], "integer") .
+			")";
+
+		$this->db->manipulate($query);
+
+		return $next_id;
+	}
 }

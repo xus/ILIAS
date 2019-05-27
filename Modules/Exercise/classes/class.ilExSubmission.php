@@ -1362,23 +1362,21 @@ class ilExSubmission
 			}
 		}
 
-		$next_id = $ilDB->nextId("exc_returned");
-		$query = sprintf("INSERT INTO exc_returned ".
-						 "(returned_id, obj_id, user_id, filetitle, ass_id, ts, atext, late, team_id) ".
-						 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-			$ilDB->quote($next_id, "integer"),
-			$ilDB->quote($this->assignment->getExerciseId(), "integer"),
-			$ilDB->quote($user_id, "integer"),
-			$ilDB->quote($a_wsp_id, "text"),
-			$ilDB->quote($this->assignment->getId(), "integer"),
-			$ilDB->quote(ilUtil::now(), "timestamp"),
-			$ilDB->quote($a_text, "text"),
-			$ilDB->quote($this->isLate(), "integer"),
-			$ilDB->quote($team_id, "integer")
+		//TODO convert this to data object
+		$data = array(
+			"obj_id"    =>  $this->assignment->getExerciseId(),
+			"user_id"   =>  $user_id,
+			"filetitle" =>  $a_wsp_id,
+			"ass_id"    =>  $this->assignment->getId(),
+			"ts"        =>  ilUtil::now(),
+			"atext"     =>  $a_text,
+			"late"      =>  $this->isLate(),
+			"team_id"   =>  $team_id
 		);
-		$ilDB->manipulate($query);
-		
-		return $next_id;
+
+		$repository = new ilExcSubmissionRepository($ilDB);
+
+		return $respository->insert($data);
 	}
 	
 	/**
