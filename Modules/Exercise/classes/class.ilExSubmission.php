@@ -51,6 +51,11 @@ class ilExSubmission
 	 * @var ilExAssignmentTypes
 	 */
 	protected $ass_types;
+
+	/**
+	 * @var ilExcSubmissionRepository
+	 */
+	protected $repository_object;
 	
 	public function __construct(ilExAssignment $a_ass, $a_user_id, ilExAssignmentTeam $a_team = null, $a_is_tutor = false, $a_public_submissions = false)
 	{				
@@ -88,6 +93,9 @@ class ilExSubmission
 		{
 			$this->peer_review = new ilExPeerReview($this->assignment);
 		}
+
+		$this->repository_object = new ilExcSubmissionRepository($this->db);
+
 	}
 		
 	public function getSubmissionType()
@@ -313,8 +321,6 @@ class ilExSubmission
 	 */
 	function uploadFile($a_http_post_files, $unzip = false)
 	{
-		$ilDB = $this->db;
-
 		if(!$this->canAddFile())
 		{
 			return false;
@@ -340,8 +346,7 @@ class ilExSubmission
 
 		if ($deliver_result)
 		{
-			$repository = new ilExcSubmissionRepository($ilDB);
-			$repository->insertFile(
+			$this->repository_object->insertFile(
 				$this->assignment->getExerciseId(),
 				$this->assignment->getId(),
 				$user_id,
@@ -762,12 +767,10 @@ class ilExSubmission
 	
 	protected function getLastDownloadTime(array $a_user_ids)
 	{
-		$ilDB = $this->db;
-		$ilUser = $this->user;
-	
-		$repository = new ilExcSubmissionRepository($ilDB);
+		$ass_id = $this->getAssignment()->getId();
+		$tutor_id = $this->user->getId();
 
-		return $repository->getLastDownloadTime();
+		return $this->repository_object->getLastDownloadTime($ass_id, $a_user_ids, $tutor_id);
 	}
 	
 	function downloadFiles(array $a_file_ids = null, $a_only_new = false, $a_peer_review_mask_filename = false)
@@ -1338,8 +1341,6 @@ class ilExSubmission
 	 */
 	function addResourceObject($a_wsp_id, $a_text = null)
 	{
-		$ilDB = $this->db;
-
 		if ($this->getAssignment()->getAssignmentType()->isSubmissionAssignedToTeam())
 		{
 			$user_id = 0;
@@ -1377,9 +1378,7 @@ class ilExSubmission
 			"team_id"   =>  $team_id
 		);
 
-		$repository = new ilExcSubmissionRepository($ilDB);
-
-		return $repository->insert($data);
+		return $this->repository_object->insert($data);
 	}
 	
 	/**
@@ -1407,8 +1406,6 @@ class ilExSubmission
 	 */
 	function updateTextSubmission($a_text)
 	{
-		$ilDB = $this->db;
-		
 		$files = $this->getFiles();
 		
 		// no text = remove submission
@@ -1428,8 +1425,7 @@ class ilExSubmission
 			$id = $files["returned_id"];
 			if($id)
 			{
-				$repository = new ilExcSubmissionRepository($ilDB);
-				$repository->updateSubmittedText($id, $text);
+				$this->repository_object->updateSubmittedText($id, $text);
 				return $id;
 			}
 		}
