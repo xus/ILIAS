@@ -440,22 +440,22 @@ class ilExSubmission
 		$ass_type = ilExAssignmentTypes::getInstance()->getById(ilExAssignment::lookupType($a_ass_id));
 
 		$repository = new ilExcSubmissionRepository($ilDB);
-		$res = $repository->getAllByAssignmentId($a_ass_id);
+		$submissions = $repository->getAllByAssignmentId($a_ass_id);
 
-		while($row = $ilDB->fetchAssoc($res))
+		foreach ($submissions as $submission)
 		{
 			if ($ass_type->isSubmissionAssignedToTeam())
 			{
-				$storage_id = $row["team_id"];
+				$storage_id = $submission["team_id"];
 			}
 			else
 			{
-				$storage_id = $row["user_id"];
+				$storage_id = $submission["user_id"];
 			}
 
-			$row["timestamp"] = $row["ts"];
-			$row["filename"] = $path."/".$storage_id."/".basename($row["filename"]);
-			$delivered[] = $row;
+			$submission["timestamp"] = $submission["ts"];
+			$submission["filename"] = $path."/".$storage_id."/".basename($submission["filename"]);
+			$delivered[] = $submission;
 		}
 		
 		return $delivered ? $delivered : array();
@@ -473,22 +473,22 @@ class ilExSubmission
 		$ass_type = ilExAssignmentTypes::getInstance()->getById(ilExAssignment::lookupType($a_ass_id));
 
 		$repository = new ilExcSubmissionRepository($ilDB);
-		$res = $repository->getAllByUserIds($a_ass_id, $a_users);
+		$submissions = $repository->getAllByUserIds($a_ass_id, $a_users);
 
-		while($row = $ilDB->fetchAssoc($res))
+		foreach($submissions as $submission)
 		{
 			if ($ass_type->isSubmissionAssignedToTeam())
 			{
-				$storage_id = $row["team_id"];
+				$storage_id = $submission["team_id"];
 			}
 			else
 			{
-				$storage_id = $row["user_id"];
+				$storage_id = $submission["user_id"];
 			}
 
-			$row["timestamp"] = $row["ts"];
-			$row["filename"] = $path."/".$storage_id."/".basename($row["filename"]);
-			$delivered[] = $row;
+			$submission["timestamp"] = $submission["ts"];
+			$submission["filename"] = $path."/".$storage_id."/".basename($submission["filename"]);
+			$delivered[] = $submission;
 		}
 
 		return $delivered ? $delivered : array();
@@ -623,10 +623,8 @@ class ilExSubmission
 		$ilDB = $DIC->database();
 
 		$repository = new ilExcSubmissionRepository($ilDB);
-		$res = $repository->getExerciseIdByReturnedId($a_ass_id, $a_users);
-		$row = $ilDB->fetchAssoc($res);
 
-		return (int)$row["obj_id"];
+		return (int)$repository->getExerciseIdByReturnedId($a_ass_id, $a_users);
 	}
 	
 	/**
@@ -644,14 +642,7 @@ class ilExSubmission
 		$ilDB = $DIC->database();
 		
 		$repository = new ilExcSubmissionRepository($ilDB);
-		$set = $repository->getSubmissionByUserIdAndFiletitle($a_user_id, $a_filetitle);
-
-		$res = array();
-		while($row = $ilDB->fetchAssoc($set))
-		{
-			$res[$row["ass_id"]] = $row;
-		}
-		return $res;
+		return $repository->getSubmissionByUserIdAndFiletitle($a_user_id, $a_filetitle);
 	}
 	
 	function deleteAllFiles()
@@ -1425,7 +1416,7 @@ class ilExSubmission
 			$id = $files["returned_id"];
 			if($id)
 			{
-				$this->repository_object->updateSubmittedText($id, $text);
+				$this->repository_object->updateSubmittedText($id, $a_text, $this->isLate());
 				return $id;
 			}
 		}
@@ -1639,15 +1630,8 @@ class ilExSubmission
 		$ilDB = $DIC->database();
 
 		$repository = new ilExcSubmissionRepository($ilDB);
-		$set = $repository->getSubmissionsByFilename($a_filename, $a_assignment_types);
 
-		$rets = array();
-		while ($rec = $db->fetchAssoc($set))
-		{
-			$rets[] = $rec;
-		}
-
-		return $rets;
+		return $repository->getSubmissionsByFilename($a_filename, $a_assignment_types);
 	}
 	
 	/**
@@ -1680,14 +1664,9 @@ class ilExSubmission
 		$participants = array();
 
 		$repository = new ilExcSubmissionRepository($ilDB);
-		$res = $repository->getAssignmentParticipants($a_exercise_id, $a_ass_id);
 
-		while($row = $ilDB->fetchAssoc($res))
-		{
-			$participants[] = $row['user_id'];
-		}
+		return $repository->getAssignmentParticipants($a_exercise_id, $a_ass_id);
 
-		return $participants;
 	}
 }
 
