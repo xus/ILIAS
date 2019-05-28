@@ -429,6 +429,7 @@ class ilExerciseManagementGUI
 				}
 			}
 
+			// TODO smells. Wrap this repo call in ilExSubmission (ilExSubmission->updateWebDirAccessTime)
 			$submission_repository = new ilExcSubmissionRepository($this->db);
 
 			if($submission_repository->hasSubmissions($this->assignment->getId()))
@@ -2299,6 +2300,7 @@ class ilExerciseManagementGUI
 
 				$web_filesystem->delete($zip_internal_path);
 
+				// TODO smells. Wrap this repo call in ilExSubmission (ilExSubmission->updateWebDirAccessTime)
 				$submission_repository = new ilExcSubmissionRepository();
 				$submission_repository->updateWebDirAccessTime($this->assignment->getId(), $member_id);
 
