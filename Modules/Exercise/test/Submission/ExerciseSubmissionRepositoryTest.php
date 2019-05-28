@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 
-require_once("/Users/xus/Sites/ILIAS/Modules/Exercise/Submission/classes/class.ilExcSubmissionRepository.php");
-require_once("/Users/xus/Sites/ILIAS/Modules/Exercise/Submission/classes/class.ilExcSubmissionRepositoryInterface.php");
-
 class ExerciseSubmissionRepositoryTest extends TestCase
 {
 	const TEAM_ID_ZERO = 0;
