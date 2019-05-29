@@ -24,9 +24,6 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	const COL_MIMETYPE = "mimetype";
 	const COL_TEAM_ID = "team_id";
 
-	// TODO another table here??? code smell?¿
-	const TABLE_USER_TUTOR = "exc_usr_tutor";
-
 	/**
 	 * @var ilDBInterface
 	 */
@@ -48,7 +45,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	/**
 	 * @inheritdoc
 	 */
-	public function getUserId(int $submission_id): int
+	public function getUserId(int $submission_id) : int
 	{
 		$q = "SELECT " . self::COL_USER_ID . " FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_RETURNED_ID . " = " . $this->db->quote($submission_id, "integer");
@@ -61,7 +58,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	/**
 	 * @inheritdoc
 	 */
-	public function hasSubmissions(int $ass_id): int
+	public function hasSubmissions(int $ass_id) : int
 	{
 		$query = "SELECT * FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_ASS_ID . " = " . $this->db->quote($ass_id, "integer") .
@@ -78,7 +75,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	 * @param int $assignment_id
 	 * @param int $member_id
 	 */
-	public function updateWebDirAccessTime(int $assignment_id, int $member_id)
+	public function updateWebDirAccessTime(int $assignment_id, int $member_id) : void
 	{
 		$this->db->manipulate("UPDATE " . self::TABLE_NAME .
 			" SET " . self::COL_WEB_DIR_ACCESS_TIME . " = " . $this->db->quote(ilUtil::now(), "timestamp") .
@@ -86,7 +83,11 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 			" AND " . self::COL_USER_ID . " = " . $this->db->quote($member_id, "integer"));
 	}
 
-	public function getAllByAssignmentId($a_ass_id)
+	/**
+	 * @param int $a_ass_id
+	 * @return array
+	 */
+	public function getAllByAssignmentId(int $a_ass_id) : array
 	{
 		$query = "SELECT * FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_ASS_ID . " = " .
@@ -97,7 +98,12 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAll($result);
 	}
 
-	public function getAllByUserIds(int $ass_id, array $user_ids)
+	/**
+	 * @param int $ass_id
+	 * @param array $user_ids
+	 * @return array
+	 */
+	public function getAllByUserIds(int $ass_id, array $user_ids) : array
 	{
 		$query = "SELECT * FROM ".self::TABLE_NAME .
 			" WHERE " . self::COL_ASS_ID . " = " .
@@ -109,7 +115,11 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAll($result);
 	}
 
-	public function getExerciseIdByReturnedId(int $returned_id)
+	/**
+	 * @param int $returned_id
+	 * @return int exercise id
+	 */
+	public function getExerciseIdByReturnedId(int $returned_id) : int
 	{
 		$query = "SELECT " . self::COL_OBJ_ID . " FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_RETURNED_ID . " = " . $this->db->quote($returned_id, "integer");
@@ -122,6 +132,11 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 
 	}
 
+	/**
+	 * @param int $exercise_id
+	 * @param int $assignment_id
+	 * @return array
+	 */
 	public function getAssignmentParticipants(int $exercise_id, int $assignment_id) : array
 	{
 		$query = "SELECT " . self::COL_USER_ID . " FROM " . self::TABLE_NAME .
@@ -141,8 +156,12 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $participants;
 	}
 
-	//TODO join exc_assignment ¿?¿
-	public function getSubmissionsByFilename(string $filename, array $assignment_types)
+	/**
+	 * @param string $filename
+	 * @param array $assignment_types
+	 * @return array
+	 */
+	public function getSubmissionsByFilename(string $filename, array $assignment_types) : array
 	{
 		$query = "SELECT * FROM " . self::TABLE_NAME. " r" .
 			" LEFT JOIN exc_assignment a" .
@@ -173,7 +192,12 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 			" WHERE " . self::COL_RETURNED_ID . " = " . $this->db->quote($id, "integer"));
 	}
 
-	public function getSubmissionByUserIdAndFileTitle(int $user_id, string $filetitle)
+	/**
+	 * @param int $user_id
+	 * @param string $filetitle
+	 * @return array
+	 */
+	public function getSubmissionByUserIdAndFileTitle(int $user_id, string $filetitle) : array
 	{
 		$query = "SELECT " . self::COL_OBJ_ID . ", ass_id" .
 			" FROM " . self::TABLE_NAME.
@@ -185,10 +209,15 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAll($result);
 	}
 
-	//TODO most probably this method has to be removed from this class
-	public function getLastDownloadTime(int $assignment_id, array $user_ids, int $tutor_id)
+	/**
+	 * @param int $assignment_id
+	 * @param array $user_ids
+	 * @param int $tutor_id
+	 * @return string
+	 */
+	public function getLastDownloadTime(int $assignment_id, array $user_ids, int $tutor_id) : string
 	{
-		$query = "SELECT download_time FROM ".self::TABLE_USER_TUTOR .
+		$query = "SELECT download_time FROM exc_usr_tutor" .
  			" WHERE  ass_id = " . $this->db->quote($assignment_id, "integer") .
 			" AND " . $this->db->in("usr_id", $user_ids, "", "integer") .
 			" AND tutor_id = " . $this->db->quote($tutor_id, "integer");
@@ -199,7 +228,27 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $lu_rec["download_time"];
 	}
 
-	public function insertFile($exercise_id, $assignment_id, $user_id, $team_id, $post_file_name, $result_fullname, $result_mimetype, $is_late)
+	/**
+	 * Insert for submission type upload in the database
+	 * @param int $exercise_id
+	 * @param int $assignment_id
+	 * @param int $user_id
+	 * @param int $team_id
+	 * @param string $post_file_name
+	 * @param string $result_fullname
+	 * @param string $result_mimetype
+	 * @param bool $is_late
+	 * @throws ilFileUtilsException
+	 */
+	public function insertFile(
+		int $exercise_id,
+		int $assignment_id,
+		int $user_id,
+		int $team_id,
+		string $post_file_name,
+		string $result_fullname,
+		string $result_mimetype,
+		bool $is_late) : void
 	{
 		$next_id = $this->db->nextId(self::TABLE_NAME);
 
@@ -230,7 +279,11 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		$this->db->manipulate($query);
 	}
 
-	// TODO convert this to data object
+	/**
+	 * Insert submission in the database
+	 * @param array $data
+	 * @return int
+	 */
 	public function insert(array $data) : int
 	{
 		$next_id = $this->db->nextId("exc_returned");
