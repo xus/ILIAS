@@ -3,7 +3,7 @@
 /* Copyright (c) 1998-2019 ILIAS open source, Extended GPL, see docs/LICENSE */
 
 /**
- * Submission repository
+ * Persistence Layer - Submission Repository
  *
  * @author Jesús López <lopez@leifos.com>
  */
