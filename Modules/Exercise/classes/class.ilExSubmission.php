@@ -513,7 +513,7 @@ class ilExSubmission
 		$sql = "SELECT * FROM exc_returned".
 			" WHERE ass_id = ".$ilDB->quote($this->getAssignment()->getId(), "integer");
 
-		$sql.= " AND ".$this->getTableUserWhere(true);
+		$sql.= " AND ".$this->getTableUserWhere();
 
 
 		if($a_file_ids)
@@ -588,7 +588,7 @@ class ilExSubmission
 			? $a_tutor
 			: $ilUser->getId();
 
-		$where = " AND ".$this->getTableUserWhere(true);
+		$where = " AND ".$this->getTableUserWhere();
 
 		$q = "SELECT exc_returned.returned_id AS id ".
 			"FROM exc_usr_tutor, exc_returned ".
@@ -669,7 +669,7 @@ class ilExSubmission
 		$ilDB = $this->db;
 
 
-		$where = " AND ".$this->getTableUserWhere(true);
+		$where = " AND ".$this->getTableUserWhere();
 
 
 		if(!sizeof($file_id_array))
@@ -1247,7 +1247,7 @@ class ilExSubmission
 	 * @param
 	 * @return
 	 */
-	public function getTableUserWhere($a_team_mode = false)
+	public function getTableUserWhere()
 	{
 		$ilDB = $this->db;
 
@@ -1258,14 +1258,7 @@ class ilExSubmission
 		}
 		else
 		{
-			if ($a_team_mode)
-			{
-				$where = " " . $ilDB->in("user_id", $this->getUserIds(), "", "integer") . " ";
-			}
-			else
-			{
-				$where = " user_id = ".$ilDB->quote($this->getUserId(), "integer");
-			}
+			$where = " " . $ilDB->in("user_id", $this->getUserIds(), "", "integer") . " ";
 		}
 		return $where;
 	}
@@ -1285,7 +1278,7 @@ class ilExSubmission
 
 		$q = "SELECT obj_id,user_id,ts FROM exc_returned".
 			" WHERE ass_id = ".$ilDB->quote($this->assignment->getId(), "integer").
-			" AND ".$this->getTableUserWhere(true).
+			" AND ".$this->getTableUserWhere().
 			" AND (filename IS NOT NULL OR atext IS NOT NULL)".
 			" AND ts IS NOT NULL".
 			" ORDER BY ts DESC";
@@ -1306,7 +1299,7 @@ class ilExSubmission
 			" WHERE ass_id = ".$this->db->quote($this->assignment->getId(), "integer").
 			" AND (filename IS NOT NULL OR atext IS NOT NULL)".
 			" AND web_dir_access_time IS NOT NULL".
-			" AND ".$this->getTableUserWhere(true).
+			" AND ".$this->getTableUserWhere().
 			" ORDER BY web_dir_access_time DESC";
 
 		$res = $this->db->query($q);
@@ -1381,12 +1374,24 @@ class ilExSubmission
 	public function deleteResourceObject($a_returned_id)
 	{
 		$ilDB = $this->db;
-		
-		$ilDB->manipulate("DELETE FROM exc_returned".
-			" WHERE obj_id = ".$ilDB->quote($this->assignment->getExerciseId(), "integer").
-			" AND ".$this->getTableUserWhere(false).
-			" AND ass_id = ".$ilDB->quote($this->assignment->getId(), "integer").
-			" AND returned_id = ".$ilDB->quote($a_returned_id, "integer"));		
+
+		if($this->getAssignment()->getAssignmentType()->isSubmissionAssignedToTeam())
+		{
+			$ilDB->manipulate("DELETE FROM exc_returned".
+				" WHERE obj_id = " . $ilDB->quote($this->assignment->getExerciseId(), "integer") .
+				" AND team_id = " . $ilDB->quote($this->getTeam()->getId(), "integer") .
+				" AND ass_id = " . $ilDB->quote($this->assignment->getId(), "integer") .
+				" AND returned_id = " . $ilDB->quote($a_returned_id, "integer"));
+		}
+		else
+		{
+			$ilDB->manipulate("DELETE FROM exc_returned".
+				" WHERE obj_id = " . $ilDB->quote($this->assignment->getExerciseId(), "integer") .
+				" AND user_id = " . $ilDB->quote($this->getUserId(), "integer") .
+				" AND ass_id = " . $ilDB->quote($this->assignment->getId(), "integer") .
+				" AND returned_id = " . $ilDB->quote($a_returned_id, "integer"));
+		}
+
 	}
 	
 	/**
