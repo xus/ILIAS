@@ -508,68 +508,91 @@ class ilExSubmission
 	 */
 	function getFiles(array $a_file_ids = null, $a_only_valid = false, $a_min_timestamp = null)
 	{
-		$ilDB = $this->db;
-		
-		$sql = "SELECT * FROM exc_returned".
-			" WHERE ass_id = ".$ilDB->quote($this->getAssignment()->getId(), "integer");
+		$is_submission_assigned_to_team = $this->getAssignment()->getAssignmentType()->isSubmissionAssignedToTeam();
 
-		$sql.= " AND ".$this->getTableUserWhere();
-
-
-		if($a_file_ids)
+		// backwards compatibility (I only found this method with params in this->downloadFiles)
+		// if no conflicst we can create an extra method with file ids and timestamp and remove this conditional.
+		if($a_file_ids || $a_min_timestamp)
 		{
-			$sql .= " AND ".$ilDB->in("returned_id", $a_file_ids, false, "integer");
-		}
-		
-		if($a_min_timestamp)
-		{
-			$sql .= " AND ts > ".$ilDB->quote($a_min_timestamp, "timestamp");
-		}	
-		
-		$result = $ilDB->query($sql);
-		
-		$delivered_files = array();
-		if ($ilDB->numRows($result))
-		{
-			$path = $this->initStorage()->getAbsoluteSubmissionPath();
-		
-			while ($row = $ilDB->fetchAssoc($result))
+			if($is_submission_assigned_to_team)
 			{
-				// blog/portfolio/text submissions
-				if($a_only_valid && 
-					!$row["filename"] &&
-					!(trim($row["atext"])))
-				{
-					continue;
-				}
-				
-				$row["owner_id"] = $row["user_id"];
-				$row["timestamp"] = $row["ts"];
-				$row["timestamp14"] = substr($row["ts"], 0, 4).
-					substr($row["ts"], 5, 2).substr($row["ts"], 8, 2).
-					substr($row["ts"], 11, 2).substr($row["ts"], 14, 2).
-					substr($row["ts"], 17, 2);
-
-				if ($this->getAssignment()->getAssignmentType()->isSubmissionAssignedToTeam())
-				{
-					$storage_id = $row["team_id"];
-				}
-				else
-				{
-					$storage_id = $row["user_id"];
-				}
-
-				$row["filename"] = $path.
-					"/".$storage_id."/".basename($row["filename"]);
-
-				// see 22301, 22719
-				if (is_file($row["filename"]) || (!$this->assignment->getAssignmentType()->usesFileUpload()))
-				{
-					array_push($delivered_files, $row);
-				}
+				$submissions = $this->repository_object->getTeamSubmissionsBySubmissionsIdAndTimestamp(
+					$this->getAssignment()->getId(),
+					$this->getTeam()->getId(),
+					$a_file_ids,
+					$a_min_timestamp);
+			}
+			else
+			{
+				$submissions = $this->repository_object->getUsersSubmissionsBySubmissionsIdAndTimestamp(
+					$this->getAssignment()->getId(),
+					$this->getUserIds(),
+					$a_file_ids,
+					$a_min_timestamp);
 			}
 		}
-				
+		else
+		{
+			if($is_submission_assigned_to_team)
+			{
+				$submissions = $this->repository_object->getAllByAssignmentIdAndTeamId(
+					$this->getAssignment()->getId(),
+					$this->getTeam()->getId());
+			}
+			else
+			{
+				$submissions = $this->repository_object->getAllByUserIds(
+					$this->getAssignment()->getId(),
+					$this->getUserIds());
+			}
+
+		}
+
+		$delivered_files = array();
+
+		if(!$submissions)
+		{
+			return $delivered_files;
+		}
+
+		$path = $this->initStorage()->getAbsoluteSubmissionPath();
+
+		foreach($submissions as $submission)
+		{
+			// blog/portfolio/text submissions
+			if($a_only_valid &&
+				!$submission["filename"] &&
+				!(trim($submission["atext"])))
+			{
+				continue;
+			}
+
+			$submission["owner_id"] = $submission["user_id"];
+			$submission["timestamp"] = $submission["ts"];
+			$submission["timestamp14"] = substr($submission["ts"], 0, 4).
+				substr($submission["ts"], 5, 2).substr($submission["ts"], 8, 2).
+				substr($submission["ts"], 11, 2).substr($submission["ts"], 14, 2).
+				substr($submission["ts"], 17, 2);
+
+			if ($is_submission_assigned_to_team)
+			{
+				$storage_id = $submission["team_id"];
+			}
+			else
+			{
+				$storage_id = $submission["user_id"];
+			}
+
+			$submission["filename"] = $path.
+				"/".$storage_id."/".basename($submission["filename"]);
+
+			// see 22301, 22719
+			if (is_file($submission["filename"]) || (!$this->assignment->getAssignmentType()->usesFileUpload()))
+			{
+				array_push($delivered_files, $submission);
+			}
+		}
+
 		return $delivered_files;
 	}
 		

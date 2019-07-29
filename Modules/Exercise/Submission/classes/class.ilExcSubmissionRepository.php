@@ -98,6 +98,60 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAll($result);
 	}
 
+	public function getAllByAssignmentIdAndTeamId(int $ass_id, int $team_id) : array
+	{
+		$query = "SELECT * FROM " . self::TABLE_NAME .
+			" WHERE " . self::COL_ASS_ID . " = " .
+			$this->db->quote($ass_id, "integer") .
+			" AND " . self::COL_TEAM_ID . " = " .
+			$this->db->quote($team_id, "integer");
+
+		$result = $this->db->query($query);
+
+		return $this->db->fetchAll($result);
+	}
+
+	public function getTeamSubmissionsBySubmissionsIdAndTimestamp(int $ass_id, int $team_id, array $submission_ids, int $min_timestamp)
+	{
+		$sql = "SELECT * FROM " . self::TABLE_NAME .
+			" WHERE " . self::COL_ASS_ID . " = " .
+			$this->db->quote($ass_id, "integer") .
+			" AND " . self::COL_TEAM_ID . " = " .
+			$this->db->quote($team_id, "integer");
+
+		if($submission_ids) {
+			$sql .= " AND ".$this->db->in("returned_id", $submission_ids, false, "integer");
+		}
+
+		if($min_timestamp) {
+			$sql .= " AND ts > ".$ilDB->quote($min_timestamp, "timestamp");
+		}
+
+		$result = $this->db->query($sql);
+
+		return $this->db->fetchAll($result);
+	}
+
+	public function getUsersSubmissionsBySubmissionsIdAndTimestamp(int $ass_id, array $user_ids, array $submission_ids, int $min_timestamp)
+	{
+		$sql = "SELECT * FROM " . self::TABLE_NAME .
+			" WHERE " . self::COL_ASS_ID . " = " .
+			$this->db->quote($ass_id, "integer") .
+			" AND " . $this->db->in(self::COL_USER_ID, $user_ids, false, "integer");
+
+		if($submission_ids) {
+			$sql .= " AND ".$this->db->in("returned_id", $submission_ids, false, "integer");
+		}
+
+		if($min_timestamp) {
+			$sql .= " AND ts > ".$this->db->quote($min_timestamp, "timestamp");
+		}
+
+		$result = $this->db->query($sql);
+
+		return $this->db->fetchAll($result);
+	}
+
 	/**
 	 * @param int $ass_id
 	 * @param array $user_ids
