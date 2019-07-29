@@ -314,4 +314,38 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 
 		return $next_id;
 	}
+
+	/**
+	 * Delete one submission for an specific user and assignment.
+	 * @param int $exercise_id
+	 * @param int $user_id
+	 * @param int $assignment_id
+	 * @param int $submission_id
+	 */
+	public function deleteUserSubmission(int $exercise_id, int $user_id, int $assignment_id, int $submission_id) : void
+	{
+		$this->db->manipulate("DELETE FROM " . self::TABLE_NAME .
+			" WHERE obj_id = " . $this->db->quote($exercise_id, "integer") .
+			" AND user_id = " . $this->db->quote($user_id, "integer") .
+			" AND ass_id = " . $this->db->quote($assignment_id, "integer") .
+			" AND returned_id = " . $this->db->quote($submission_id, "integer")
+		);
+	}
+
+	/**
+	 * Delete one submission for an specific team and assignment.
+	 * @param int $exercise_id
+	 * @param int $team_id
+	 * @param int $assignment_id
+	 * @param int $submission_id
+	 */
+	public function deleteTeamSubmission(int $exercise_id, int $team_id, int $assignment_id, int $submission_id) : void
+	{
+		$this->db->manipulate("DELETE FROM " . self::TABLE_NAME .
+			" WHERE obj_id = " . $this->db->quote($exercise_id, "integer") .
+			" AND team_id = " . $this->db->quote($team_id, "integer") .
+			" AND ass_id = " . $this->db->quote($assignment_id, "integer") .
+			" AND returned_id = " . $this->db->quote($submission_id, "integer")
+		);
+	}
 }

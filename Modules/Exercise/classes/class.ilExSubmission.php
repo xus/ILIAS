@@ -1373,25 +1373,24 @@ class ilExSubmission
 	 */
 	public function deleteResourceObject($a_returned_id)
 	{
-		$ilDB = $this->db;
-
 		if($this->getAssignment()->getAssignmentType()->isSubmissionAssignedToTeam())
 		{
-			$ilDB->manipulate("DELETE FROM exc_returned".
-				" WHERE obj_id = " . $ilDB->quote($this->assignment->getExerciseId(), "integer") .
-				" AND team_id = " . $ilDB->quote($this->getTeam()->getId(), "integer") .
-				" AND ass_id = " . $ilDB->quote($this->assignment->getId(), "integer") .
-				" AND returned_id = " . $ilDB->quote($a_returned_id, "integer"));
+			$this->repository_object->deleteTeamSubmission(
+				$this->assignment->getExerciseId(),
+				$this->getTeam()->getId(),
+				$this->assignment->getId(),
+				$a_returned_id
+			);
 		}
 		else
 		{
-			$ilDB->manipulate("DELETE FROM exc_returned".
-				" WHERE obj_id = " . $ilDB->quote($this->assignment->getExerciseId(), "integer") .
-				" AND user_id = " . $ilDB->quote($this->getUserId(), "integer") .
-				" AND ass_id = " . $ilDB->quote($this->assignment->getId(), "integer") .
-				" AND returned_id = " . $ilDB->quote($a_returned_id, "integer"));
+			$this->repository_object->deleteUserSubmission(
+				$this->assignment->getExerciseId(),
+				$this->getUserId(),
+				$this->assignment->getId(),
+				$a_returned_id
+			);
 		}
-
 	}
 	
 	/**
