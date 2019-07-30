@@ -442,4 +442,36 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 			" AND " . $this->db->in(self::COL_RETURNED_ID, $submission_ids, false, "integer")
 		);
 	}
+
+	public function getLastWebDirectoryAccessByTeam(int $assignment_id, int $team_id)
+	{
+		$this->db->setLimit(1, 0);
+
+		$q = "SELECT web_dir_access_time FROM " . self::TABLE_NAME .
+			" WHERE ass_id = " . $this->db->quote($assignment_id, "integer") .
+			" AND (filename IS NOT NULL OR atext IS NOT NULL)" .
+			" AND web_dir_access_time IS NOT NULL" .
+			" AND " . self::COL_TEAM_ID . " = " . $this->db->quote($team_id, "integer") .
+			" ORDER BY web_dir_access_time DESC";
+
+		$res = $this->db->query($q);
+
+		return $this->db->fetchAssoc($res);
+	}
+
+	public function getLastWebDirectoryAccessByUsers(int $assignment_id, array $user_ids)
+	{
+		$this->db->setLimit(1, 0);
+
+		$q = "SELECT web_dir_access_time FROM " . self::TABLE_NAME .
+			" WHERE ass_id = " . $this->db->quote($assignment_id, "integer") .
+			" AND (filename IS NOT NULL OR atext IS NOT NULL)" .
+			" AND web_dir_access_time IS NOT NULL" .
+			" AND " . $this->db->in(self::COL_USER_ID, $user_ids, false, "integer") .
+			" ORDER BY web_dir_access_time DESC";
+
+		$res = $this->db->query($q);
+
+		return $this->db->fetchAssoc($res);
+	}
 }

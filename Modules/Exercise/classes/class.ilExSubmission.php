@@ -1309,25 +1309,17 @@ class ilExSubmission
 	}
 
 	/**
-	 * TODO -> get rid of getTableUserWhere and move to repository class
 	 * Get a mysql timestamp from the last HTML view opening.
 	 */
 	public function getLastOpeningHTMLView()
 	{
-		$this->db->setLimit(1);
+		if ($this->getAssignment()->getAssignmentType()->isSubmissionAssignedToTeam()) {
+			$access_data = $this->repository_object->getLastWebDirectoryAccessByTeam($this->assignment->getId(),$this->getTeam()->getId());
+		} else {
+			$access_data = $this->repository_object->getLastWebDirectoryAccessByUsers($this->assignment->getId(),$this->getUserIds());
+		}
 
-		$q = "SELECT web_dir_access_time FROM exc_returned".
-			" WHERE ass_id = ".$this->db->quote($this->assignment->getId(), "integer").
-			" AND (filename IS NOT NULL OR atext IS NOT NULL)".
-			" AND web_dir_access_time IS NOT NULL".
-			" AND ".$this->getTableUserWhere().
-			" ORDER BY web_dir_access_time DESC";
-
-		$res = $this->db->query($q);
-
-		$data = $this->db->fetchAssoc($res);
-
-		return ilUtil::getMySQLTimestamp($data["web_dir_access_time"]);
+		return ilUtil::getMySQLTimestamp($access_data["web_dir_access_time"]);
 	}
 
 	
