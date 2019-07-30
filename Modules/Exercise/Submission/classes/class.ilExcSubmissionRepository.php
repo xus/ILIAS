@@ -124,7 +124,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		}
 
 		if($min_timestamp) {
-			$sql .= " AND ts > ".$ilDB->quote($min_timestamp, "timestamp");
+			$sql .= " AND ts > ".$this->db->quote($min_timestamp, "timestamp");
 		}
 
 		$result = $this->db->query($sql);
@@ -152,6 +152,30 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAll($result);
 	}
 
+	//TODO: Why we are checking if its a team or a bunch of users when we have the submissions who are PK in the DB (getTeamSubmissionsByIds, and getUsersSubmissionsByIds)
+	public function getTeamSubmissionsByIds(int $ass_id, int $team_id, array $submission_ids)
+	{
+		$sql = "SELECT * FROM " . self::TABLE_NAME .
+			" WHERE " . self::COL_TEAM_ID . " = " . $this->db->quote($team_id, "integer") .
+			" AND " . $this->db->in(self::COL_RETURNED_ID, $submission_ids, false, "integer");
+
+		$result = $this->db->query($sql);
+
+		return $this->db->fetchAll($result);
+	}
+
+	//read TODO from getTeamSubmissionsByIds
+	public function getUsersSubmissionsByIds(int $ass_id, array $users_ids, array $submission_ids)
+	{
+		$sql = "SELECT * FROM " . self::TABLE_NAME .
+			" WHERE " . $this->db->in(self::COL_USER_ID, $users_ids, false, "integer") .
+			" AND " . $this->db->in(self::COL_RETURNED_ID, $submission_ids, false, "integer");
+
+		$result = $this->db->query($sql);
+
+		return $this->db->fetchAll($result);
+	}
+
 	/**
 	 * @param int $ass_id
 	 * @param array $user_ids
@@ -162,7 +186,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		$query = "SELECT * FROM ".self::TABLE_NAME .
 			" WHERE " . self::COL_ASS_ID . " = " .
 			$this->db->quote($ass_id, "integer") .
-			" AND " . self::COL_USER_ID . " IN (" . implode(',' , $user_ids) . ")";
+			" AND " . $this->db->in(self::COL_USER_ID, $user_ids, false, "integer");
 
 		$result = $this->db->query($query);
 
@@ -400,6 +424,22 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 			" AND team_id = " . $this->db->quote($team_id, "integer") .
 			" AND ass_id = " . $this->db->quote($assignment_id, "integer") .
 			" AND returned_id = " . $this->db->quote($submission_id, "integer")
+		);
+	}
+
+	public function deleteByTeamAndIds(int $team_id, array $submission_ids)
+	{
+		$this->db->manipulate("DELETE FROM " . self::TABLE_NAME .
+			" WHERE team_id = " . $this->db->quote($team_id, "integer") .
+			" AND " . $this->db->in("returned_id", $submission_ids, false, "integer")
+		);
+	}
+
+	public function deleteByUsersAndIds(array $user_ids, array $submission_ids)
+	{
+		$this->db->manipulate("DELETE FROM " . self::TABLE_NAME .
+			" WHERE " . $this->db->in(self::COL_USER_ID, $user_ids, false, "integer") .
+			" AND " . $this->db->in(self::COL_RETURNED_ID, $submission_ids, false, "integer")
 		);
 	}
 }

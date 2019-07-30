@@ -682,74 +682,72 @@ class ilExSubmission
 	}
 
 	/**
+	 * Todo this method can be refactored creating 2 new small methods depending on dealing with team or individuals
+	 * Todo this method does too much
 	* Deletes already delivered files
 	* @param array $file_id_array An array containing database ids of the delivered files
 	* @param numeric $user_id The database id of the user
 	* @access	public
 	*/
 	function deleteSelectedFiles(array $file_id_array)
-	{		
-		$ilDB = $this->db;
-
-
-		$where = " AND ".$this->getTableUserWhere();
-
-
-		if(!sizeof($file_id_array))
-		{
+	{
+		if(!sizeof($file_id_array)) {
 			return;
 		}
-		
-		if (count($file_id_array))
-		{										
-			$result = $ilDB->query("SELECT * FROM exc_returned".
-				" WHERE ".$ilDB->in("returned_id", $file_id_array, false, "integer").
-				$where);
-			
-			if ($ilDB->numRows($result))
-			{								
-				$result_array = array();
-				while ($row = $ilDB->fetchAssoc($result))
+
+		if ($this->getAssignment()->getAssignmentType()->isSubmissionAssignedToTeam()) {
+			$submissions = $this->repository_object->getTeamSubmissionsByIds($this->assignment->getId(), $this->getTeam()->getId(), $file_id_array);
+		} else {
+			$submissions = $this->repository_object->getUsersSubmissionsByIds($this->assignment->getId(), $this->getUserIds(), $file_id_array);
+		}
+
+		if(empty($submissions)) {
+			return;
+		}
+
+		$result_array = array();
+
+		foreach($submissions as $submission)
+		{
+			$submission["timestamp"] = $submission["ts"];
+			array_push($result_array, $submission);
+		}
+
+		// delete the entries in the database
+		if ($this->getAssignment()->getAssignmentType()->isSubmissionAssignedToTeam()) {
+			$this->repository_object->deleteByTeamAndIds($this->getTeam()->getId(), $file_id_array);
+		} else {
+			$this->repository_object->deleteByUsersAndIds($this->getUserIds(), $file_id_array);
+		}
+
+		// delete the files
+		$path = $this->initStorage()->getAbsoluteSubmissionPath();
+		foreach ($result_array as $key => $value)
+		{
+			if($value["filename"])
+			{
+				if($this->team)
 				{
-					$row["timestamp"] = $row["ts"];
-					array_push($result_array, $row);
+					$this->team->writeLog(ilExAssignmentTeam::TEAM_LOG_REMOVE_FILE,
+						$value["filetitle"]);
 				}
-				
-				// delete the entries in the database
-				$ilDB->manipulate("DELETE FROM exc_returned".
-					" WHERE ".$ilDB->in("returned_id", $file_id_array, false, "integer").
-					$where);
-				
-				// delete the files				
-				$path = $this->initStorage()->getAbsoluteSubmissionPath();
-				foreach ($result_array as $key => $value)
+
+				if ($this->getAssignment()->getAssignmentType()->isSubmissionAssignedToTeam())
 				{
-					if($value["filename"])
-					{
-						if($this->team)
-						{
-							$this->team->writeLog(ilExAssignmentTeam::TEAM_LOG_REMOVE_FILE, 
-								$value["filetitle"]);
-						}
+					$storage_id = $value["team_id"];
+				}
+				else
+				{
+					$storage_id = $value["user_id"];
+				}
 
-						if ($this->getAssignment()->getAssignmentType()->isSubmissionAssignedToTeam())
-						{
-							$storage_id = $value["team_id"];
-						}
-						else
-						{
-							$storage_id = $value["user_id"];
-						}
-
-						$filename = $path."/".$storage_id."/".basename($value["filename"]);
-						if(file_exists($filename))
-						{
-							unlink($filename);
-						}
-					}
+				$filename = $path."/".$storage_id."/".basename($value["filename"]);
+				if(file_exists($filename))
+				{
+					unlink($filename);
 				}
 			}
-		}		
+		}
 	}
 	
 	/**
@@ -1338,7 +1336,6 @@ class ilExSubmission
 	// 
 	
 	/**
-	 * TODO move the persistence to repo
 	 * Add personal resource or repository object (ref_id) to assigment
 	 * 
 	 * @param int $a_wsp_id
@@ -1389,7 +1386,6 @@ class ilExSubmission
 	}
 	
 	/**
-	 * //TODO move to repo
 	 * Remove personal resource to assigment
 	 * 
 	 * @param int $a_returned_id 
@@ -1688,7 +1684,6 @@ class ilExSubmission
 		global $DIC;
 
 		$ilDB = $DIC->database();
-		$participants = array();
 
 		$repository = new ilExcSubmissionRepository($ilDB);
 
