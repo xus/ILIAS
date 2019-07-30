@@ -706,9 +706,9 @@ class ilExSubmission
 		}
 
 		if ($this->getAssignment()->getAssignmentType()->isSubmissionAssignedToTeam()) {
-			$submissions = $this->repository_object->getTeamSubmissionsByIds($this->assignment->getId(), $this->getTeam()->getId(), $file_id_array);
+			$submissions = $this->repository_object->getTeamSubmissionsByIds($this->getTeam()->getId(), $file_id_array);
 		} else {
-			$submissions = $this->repository_object->getUsersSubmissionsByIds($this->assignment->getId(), $this->getUserIds(), $file_id_array);
+			$submissions = $this->repository_object->getUsersSubmissionsByIds($this->getUserIds(), $file_id_array);
 		}
 
 		if(empty($submissions)) {

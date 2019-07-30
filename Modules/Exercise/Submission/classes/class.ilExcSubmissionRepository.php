@@ -112,7 +112,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAll($result);
 	}
 
-	public function getTeamSubmissionsBySubmissionsIdAndTimestamp(int $ass_id, int $team_id, array $submission_ids, int $min_timestamp)
+	public function getTeamSubmissionsBySubmissionsIdAndTimestamp(int $ass_id, int $team_id, array $submission_ids, int $min_timestamp) : array
 	{
 		$sql = "SELECT * FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_ASS_ID . " = " .
@@ -133,7 +133,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAll($result);
 	}
 
-	public function getUsersSubmissionsBySubmissionsIdAndTimestamp(int $ass_id, array $user_ids, array $submission_ids, int $min_timestamp)
+	public function getUsersSubmissionsBySubmissionsIdAndTimestamp(int $ass_id, array $user_ids, array $submission_ids, int $min_timestamp) : array
 	{
 		$sql = "SELECT * FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_ASS_ID . " = " .
@@ -154,7 +154,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	}
 
 	//TODO: Why we are checking if its a team or a bunch of users when we have the submissions who are PK in the DB (getTeamSubmissionsByIds, and getUsersSubmissionsByIds)
-	public function getTeamSubmissionsByIds(int $ass_id, int $team_id, array $submission_ids)
+	public function getTeamSubmissionsByIds(int $team_id, array $submission_ids) : array
 	{
 		$sql = "SELECT * FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_TEAM_ID . " = " . $this->db->quote($team_id, "integer") .
@@ -166,7 +166,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	}
 
 	//read TODO from getTeamSubmissionsByIds
-	public function getUsersSubmissionsByIds(int $ass_id, array $users_ids, array $submission_ids)
+	public function getUsersSubmissionsByIds(array $users_ids, array $submission_ids) : array
 	{
 		$sql = "SELECT * FROM " . self::TABLE_NAME .
 			" WHERE " . $this->db->in(self::COL_USER_ID, $users_ids, false, "integer") .
@@ -428,7 +428,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		);
 	}
 
-	public function deleteByTeamAndIds(int $team_id, array $submission_ids)
+	public function deleteByTeamAndIds(int $team_id, array $submission_ids) : void
 	{
 		$this->db->manipulate("DELETE FROM " . self::TABLE_NAME .
 			" WHERE team_id = " . $this->db->quote($team_id, "integer") .
@@ -436,7 +436,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		);
 	}
 
-	public function deleteByUsersAndIds(array $user_ids, array $submission_ids)
+	public function deleteByUsersAndIds(array $user_ids, array $submission_ids) : void
 	{
 		$this->db->manipulate("DELETE FROM " . self::TABLE_NAME .
 			" WHERE " . $this->db->in(self::COL_USER_ID, $user_ids, false, "integer") .
@@ -444,7 +444,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		);
 	}
 
-	public function getLastWebDirectoryAccessByTeam(int $assignment_id, int $team_id)
+	public function getLastWebDirectoryAccessByTeam(int $assignment_id, int $team_id) : array
 	{
 		$this->db->setLimit(1, 0);
 
@@ -460,7 +460,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAssoc($res);
 	}
 
-	public function getLastWebDirectoryAccessByUsers(int $assignment_id, array $user_ids)
+	public function getLastWebDirectoryAccessByUsers(int $assignment_id, array $user_ids) : array
 	{
 		$this->db->setLimit(1, 0);
 
@@ -476,7 +476,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAssoc($res);
 	}
 
-	public function getLastSubmissionByTeam(int $assignment_id, int $team_id)
+	public function getLastSubmissionByTeam(int $assignment_id, int $team_id) : array
 	{
 		$this->db->setLimit(1, 0);
 
@@ -492,7 +492,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAssoc($usr_set);
 	}
 
-	public function getLastSubmissionByUsers(int $assignment_id, array $user_ids)
+	public function getLastSubmissionByUsers(int $assignment_id, array $user_ids) : array
 	{
 		$this->db->setLimit(1, 0);
 
@@ -508,7 +508,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAssoc($usr_set);
 	}
 
-	public function getTeamSubmissionIdsByTutorId(int $assignment_id, int $team_id, int $tutor_id)
+	public function getTeamSubmissionIdsByTutorId(int $assignment_id, int $team_id, int $tutor_id) : array
 	{
 		$q = "SELECT exc_returned.returned_id AS id ".
 			"FROM exc_usr_tutor, exc_returned ".
@@ -524,7 +524,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAssoc($new_up_set);
 	}
 
-	public function getUsersSubmissionIdsByTutorId(int $assignment_id, array $user_ids, int $tutor_id)
+	public function getUsersSubmissionIdsByTutorId(int $assignment_id, array $user_ids, int $tutor_id) : array
 	{
 		$q = "SELECT exc_returned.returned_id AS id ".
 			"FROM exc_usr_tutor, exc_returned ".
