@@ -629,9 +629,15 @@ class ilExSubmission
 		}
 
 		$new_up = array();
+
+		if(empty($submission_ids))
+		{
+			return $new_up;
+		}
+
   		foreach ($submission_ids as $submission_id)
 		{
-			$new_up[] = $submission_id["id"];
+			$new_up[] = $submission_id;
 		}
 
 		return $new_up;
@@ -1298,9 +1304,9 @@ class ilExSubmission
 	function getLastSubmission()
 	{
 		if ($this->getAssignment()->getAssignmentType()->isSubmissionAssignedToTeam()) {
-			$submission = $this->repository_object->getLastSubmissionByTeam();
+			$submission = $this->repository_object->getLastSubmissionByTeam($this->assignment->getId(), $this->getTeam()->getId());
 		} else {
-			$submission = $this->repository_object->getLastSubmissionByUsers();
+			$submission = $this->repository_object->getLastSubmissionByUsers($this->assignment->getId(), $this->getUserIds());
 		}
 
 		return ilUtil::getMySQLTimestamp($submission["ts"]);
