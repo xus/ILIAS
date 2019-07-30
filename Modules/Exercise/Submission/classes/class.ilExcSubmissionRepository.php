@@ -507,4 +507,36 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 
 		return $this->db->fetchAssoc($usr_set);
 	}
+
+	public function getTeamSubmissionIdsByTutorId(int $assignment_id, int $team_id, int $tutor_id)
+	{
+		$q = "SELECT exc_returned.returned_id AS id ".
+			"FROM exc_usr_tutor, exc_returned ".
+			"WHERE exc_returned.ass_id = exc_usr_tutor.ass_id ".
+			" AND exc_returned.user_id = exc_usr_tutor.usr_id ".
+			" AND exc_returned.ass_id = ".$this->db->quote($assignment_id, "integer").
+			" AND " . self::COL_TEAM_ID . " = " . $team_id .
+			" AND exc_usr_tutor.tutor_id = ".$this->db->quote($tutor_id, "integer").
+			" AND exc_usr_tutor.download_time < exc_returned.ts ";
+
+		$new_up_set = $this->db->query($q);
+
+		return $this->db->fetchAssoc($new_up_set);
+	}
+
+	public function getUsersSubmissionIdsByTutorId(int $assignment_id, array $user_ids, int $tutor_id)
+	{
+		$q = "SELECT exc_returned.returned_id AS id ".
+			"FROM exc_usr_tutor, exc_returned ".
+			"WHERE exc_returned.ass_id = exc_usr_tutor.ass_id ".
+			" AND exc_returned.user_id = exc_usr_tutor.usr_id ".
+			" AND exc_returned.ass_id = ".$this->db->quote($assignment_id, "integer").
+			" AND " . $this->db->in(self::COL_USER_ID, $user_ids, false, "integer") .
+			" AND exc_usr_tutor.tutor_id = ".$this->db->quote($tutor_id, "integer").
+			" AND exc_usr_tutor.download_time < exc_returned.ts ";
+
+		$new_up_set = $this->db->query($q);
+
+		return $this->db->fetchAssoc($new_up_set);
+	}
 }

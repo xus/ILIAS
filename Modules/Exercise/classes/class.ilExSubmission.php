@@ -605,30 +605,33 @@ class ilExSubmission
 	 */
 	function lookupNewFiles($a_tutor = null)
 	{
-		$ilDB = $this->db;
 		$ilUser = $this->user;
 
   		$tutor = ($a_tutor)
 			? $a_tutor
 			: $ilUser->getId();
 
-		$where = " AND ".$this->getTableUserWhere();
-
-		$q = "SELECT exc_returned.returned_id AS id ".
-			"FROM exc_usr_tutor, exc_returned ".
-			"WHERE exc_returned.ass_id = exc_usr_tutor.ass_id ".
-			" AND exc_returned.user_id = exc_usr_tutor.usr_id ".
-			" AND exc_returned.ass_id = ".$ilDB->quote($this->getAssignment()->getId(), "integer").
-			$where.
-			" AND exc_usr_tutor.tutor_id = ".$ilDB->quote($tutor, "integer").
-			" AND exc_usr_tutor.download_time < exc_returned.ts ";
-
-  		$new_up_set = $ilDB->query($q);
+		if ($this->getAssignment()->getAssignmentType()->isSubmissionAssignedToTeam())
+		{
+			$submission_ids = $this->repository_object->getTeamSubmissionIdsByTutorId(
+				$this->getAssignment()->getId(),
+				$this->getTeam()->getId(),
+				$tutor
+			);
+		}
+		else
+		{
+			$submission_ids = $this->repository_object->getUsersSubmissionIdsByTutorId(
+				$this->getAssignment()->getId(),
+				$this->getUserIds(),
+				$tutor
+			);
+		}
 
 		$new_up = array();
-  		while ($new_up_rec = $ilDB->fetchAssoc($new_up_set))
+  		foreach ($submission_ids as $submission_id)
 		{
-			$new_up[] = $new_up_rec["id"];
+			$new_up[] = $submission_id["id"];
 		}
 
 		return $new_up;
