@@ -11,6 +11,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 {
 	const TABLE_NAME = "exc_returned";
 
+	//TODO: ?? remove all these column constants.
 	const COL_USER_ID = "user_id";
 	const COL_RETURNED_ID = "returned_id";
 	const COL_ASS_ID = "ass_id";
@@ -473,5 +474,37 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		$res = $this->db->query($q);
 
 		return $this->db->fetchAssoc($res);
+	}
+
+	public function getLastSubmissionByTeam(int $assignment_id, int $team_id)
+	{
+		$this->db->setLimit(1, 0);
+
+		$q = "SELECT obj_id, user_id, ts FROM " . self::TABLE_NAME .
+			" WHERE " . self::COL_ASS_ID . " = " . $this->db->quote($assignment_id, "integer") .
+			" AND " . self::COL_TEAM_ID . " = " . $team_id .
+			" AND (filename IS NOT NULL OR atext IS NOT NULL)".
+			" AND ts IS NOT NULL".
+			" ORDER BY ts DESC";
+
+		$usr_set = $this->db->query($q);
+
+		return $this->db->fetchAssoc($usr_set);
+	}
+
+	public function getLastSubmissionByUsers(int $assignment_id, array $user_ids)
+	{
+		$this->db->setLimit(1, 0);
+
+		$q = "SELECT obj_id, user_id, ts FROM " . self::TABLE_NAME .
+			" WHERE " . self::COL_ASS_ID . " = " . $this->db->quote($assignment_id, "integer") .
+			" AND " . $this->db->in(self::COL_USER_ID, $user_ids, false, "integer") .
+			" AND (filename IS NOT NULL OR atext IS NOT NULL)" .
+			" AND ts IS NOT NULL" .
+			" ORDER BY ts DESC";
+
+		$usr_set = $this->db->query($q);
+
+		return $this->db->fetchAssoc($usr_set);
 	}
 }

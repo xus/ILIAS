@@ -4,6 +4,7 @@
 /**
  * Exercise submission
  * //TODO: This class has to much static methods related to delivered "files". Extract them to classes.
+ * //TODO: This class can be split and create a new class "ilExSubmissionTeam" to avoid all the conditionals about teams or individuals.
  *
  * @author Jörg Lützenkirchen <luetzenkirchen@leifos.com>
  * @ingroup ModulesExercise
@@ -1263,6 +1264,7 @@ class ilExSubmission
 
 
 	/**
+	 * TODO remove this method
 	 * Get user/team where clause
 	 *
 	 * @param
@@ -1286,26 +1288,19 @@ class ilExSubmission
 
 
 	/**
-	 * TODO -> get rid of getTableUserWhere and move to repository class
 	 * Get the date of the last submission of a user for the assignment
 	 *
 	 * @return	mixed	false or mysql timestamp of last submission
 	 */
 	function getLastSubmission()
 	{
-		$ilDB = $this->db;
-	
-		$ilDB->setLimit(1);
+		if ($this->getAssignment()->getAssignmentType()->isSubmissionAssignedToTeam()) {
+			$submission = $this->repository_object->getLastSubmissionByTeam();
+		} else {
+			$submission = $this->repository_object->getLastSubmissionByUsers();
+		}
 
-		$q = "SELECT obj_id,user_id,ts FROM exc_returned".
-			" WHERE ass_id = ".$ilDB->quote($this->assignment->getId(), "integer").
-			" AND ".$this->getTableUserWhere().
-			" AND (filename IS NOT NULL OR atext IS NOT NULL)".
-			" AND ts IS NOT NULL".
-			" ORDER BY ts DESC";
-		$usr_set = $ilDB->query($q);
-		$array = $ilDB->fetchAssoc($usr_set);		
-		return ilUtil::getMySQLTimestamp($array["ts"]);  		
+		return ilUtil::getMySQLTimestamp($submission["ts"]);
 	}
 
 	/**
@@ -1321,7 +1316,6 @@ class ilExSubmission
 
 		return ilUtil::getMySQLTimestamp($access_data["web_dir_access_time"]);
 	}
-
 	
 	//
 	// OBJECTS
