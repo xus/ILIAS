@@ -198,7 +198,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	 * @param int $returned_id
 	 * @return int exercise id
 	 */
-	public function getExerciseIdByReturnedId(int $returned_id) : int
+	public function getExerciseIdBySubmissionId(int $returned_id) : int
 	{
 		$query = "SELECT " . self::COL_OBJ_ID . " FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_RETURNED_ID . " = " . $this->db->quote($returned_id, "integer");

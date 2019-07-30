@@ -657,7 +657,7 @@ class ilExSubmission
 
 		$repository = new ilExcSubmissionRepository($ilDB);
 
-		return (int)$repository->getExerciseIdByReturnedId($a_ass_id, $a_users);
+		return (int)$repository->getExerciseIdBySubmissionId($a_returned_id);
 	}
 	
 	/**
