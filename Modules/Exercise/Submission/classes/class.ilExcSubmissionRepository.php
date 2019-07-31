@@ -309,25 +309,10 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 
 	/**
 	 * Insert for submission type upload in the database
-	 * @param int $exercise_id
-	 * @param int $assignment_id
-	 * @param int $user_id
-	 * @param int $team_id
-	 * @param string $post_file_name
-	 * @param string $result_fullname
-	 * @param string $result_mimetype
-	 * @param bool $is_late
+	 * @param ilExcSubmissionData $submission_data
 	 * @throws ilFileUtilsException
 	 */
-	public function insertFile(
-		int $exercise_id,
-		int $assignment_id,
-		int $user_id,
-		int $team_id,
-		string $post_file_name,
-		string $result_fullname,
-		string $result_mimetype,
-		bool $is_late) : void
+	public function insertFile(ilExcSubmissionData $submission_data) : void
 	{
 		$next_id = $this->db->nextId(self::TABLE_NAME);
 
@@ -344,15 +329,15 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 			self::COL_TEAM_ID . ") " .
 			"VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
 			$this->db->quote($next_id, "integer"),
-			$this->db->quote($exercise_id, "integer"),
-			$this->db->quote($user_id, "integer"),
-			$this->db->quote($result_fullname, "text"),
-			$this->db->quote(ilFileUtils::getValidFilename($post_file_name), "text"),
-			$this->db->quote($result_mimetype, "text"),
+			$this->db->quote($submission_data->getExerciseId(), "integer"),
+			$this->db->quote($submission_data->getUserId(), "integer"),
+			$this->db->quote($submission_data->getDeliverResultFullname(), "text"),
+			$this->db->quote(ilFileUtils::getValidFilename($submission_data->getFileName()), "text"),
+			$this->db->quote($submission_data->getDeliverResultMymetype(), "text"),
 			$this->db->quote(ilUtil::now(), "timestamp"),
-			$this->db->quote($assignment_id, "integer"),
-			$this->db->quote($is_late, "integer"),
-			$this->db->quote($team_id, "integer")
+			$this->db->quote($submission_data->getAssignmentId(), "integer"),
+			$this->db->quote($submission_data->isLate(), "integer"),
+			$this->db->quote($submission_data->getTeamId(), "integer")
 		);
 
 		$this->db->manipulate($query);

@@ -347,7 +347,7 @@ class ilExSubmission
 
 		if ($deliver_result)
 		{
-			$this->repository_object->insertFile(
+			$submission_data = new ilExcSubmissionData(
 				$this->assignment->getExerciseId(),
 				$this->assignment->getId(),
 				$user_id,
@@ -357,7 +357,9 @@ class ilExSubmission
 				$deliver_result["mimetype"],
 				$this->isLate()
 			);
-		
+
+			$this->repository_object->insertFile($submission_data);
+
 			if($this->team)
 			{				
 				$this->team->writeLog(ilExAssignmentTeam::TEAM_LOG_ADD_FILE, 
@@ -1297,6 +1299,9 @@ class ilExSubmission
 
 
 	/**
+	 * //TODO I will need to change this logic. The repo should return or ilExcSubmissionData or the timestamp but
+	 * //the current array is not the best way to do this. Actually this array contains the timestamp, the object_id and user id
+	 * //an we are not using the obj_id neither user_id
 	 * Get the date of the last submission of a user for the assignment
 	 *
 	 * @return	mixed	false or mysql timestamp of last submission
