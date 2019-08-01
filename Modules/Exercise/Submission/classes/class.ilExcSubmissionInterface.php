@@ -12,9 +12,9 @@ interface ilExcSubmissionRepositoryInterface
 	/**
 	 * Get User who submitted.
 	 * @param int $submission_id
-	 * @return ilExcSubmissionData
+	 * @return null| ilExcSubmissionData
 	 */
-	public function getById(int $submission_id) : ilExcSubmissionData;
+	public function getById(int $submission_id) : ?ilExcSubmissionData;
 
 	/**
 	 * Get number of submissions from assignment id

@@ -46,7 +46,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	/**
 	 * @inheritdoc
 	 */
-	public function getById(int $submission_id) : ilExcSubmissionData
+	public function getById(int $submission_id) : ?ilExcSubmissionData
 	{
 		$query = "SELECT * FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_RETURNED_ID . " = " . $this->db->quote($submission_id, "integer");
@@ -64,10 +64,10 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 				$row->mimetype,
 				$row->late
 			);
+			return $submission_data;
 		}
 
-		return $submission_data;
-
+		return null;
 	}
 
 	/**
