@@ -46,6 +46,35 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	/**
 	 * @inheritdoc
 	 */
+	public function getById(int $submission_id) : ilExcSubmissionData
+	{
+		$query = "SELECT * FROM " . self::TABLE_NAME .
+			" WHERE " . self::COL_RETURNED_ID . " = " . $this->db->quote($submission_id, "integer");
+
+		$result = $this->db->query($query);
+
+		while($row = $this->db->fetchObject($result)) {
+			$submission_data = new ilExcSubmissionData(
+				$row->obj_id,
+				$row->ass_id,
+				$row->user_id,
+				$row->team_id,
+				$row->filetitle,
+				$row->filename,
+				$row->mimetype,
+				$row->late
+			);
+		}
+
+		return $submission_data;
+
+	}
+
+	/**
+	 * TODO: CHeck if this method is used at all and delete it.
+	 * @param int $submission_id
+	 * @return int
+	 */
 	public function getUserId(int $submission_id) : int
 	{
 		$q = "SELECT " . self::COL_USER_ID . " FROM " . self::TABLE_NAME .
@@ -57,6 +86,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	}
 
 	/**
+	 * TODO COUNT via db or return all and promote the count to ilExSubmission class.
 	 * @inheritdoc
 	 */
 	public function hasSubmissions(int $assignment_id) : int
@@ -192,23 +222,6 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		$result = $this->db->query($query);
 
 		return $this->db->fetchAll($result);
-	}
-
-	/**
-	 * @param int $returned_id
-	 * @return int exercise id
-	 */
-	public function getExerciseIdBySubmissionId(int $returned_id) : int
-	{
-		$query = "SELECT " . self::COL_OBJ_ID . " FROM " . self::TABLE_NAME .
-			" WHERE " . self::COL_RETURNED_ID . " = " . $this->db->quote($returned_id, "integer");
-
-		$result = $this->db->query($query);
-
-		$row = $this->db->fetchAssoc($result);
-
-		return $row[self::COL_OBJ_ID];
-
 	}
 
 	/**

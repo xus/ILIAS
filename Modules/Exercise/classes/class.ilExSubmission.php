@@ -659,7 +659,7 @@ class ilExSubmission
 
 		$repository = new ilExcSubmissionRepository($ilDB);
 
-		return (int)$repository->getExerciseIdBySubmissionId($a_returned_id);
+		return $repository->getById($a_returned_id)->getExerciseId();
 	}
 	
 	/**
