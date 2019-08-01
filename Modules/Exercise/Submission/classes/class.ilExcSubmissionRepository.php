@@ -71,11 +71,12 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	}
 
 	/**
-	 * TODO COUNT via db or return all and promote the count to ilExSubmission class.
 	 * @inheritdoc
 	 */
 	public function hasSubmissions(int $assignment_id) : int
 	{
+		$this->db->setLimit(1, 0);
+
 		$query = "SELECT * FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_ASS_ID . " = " . $this->db->quote($assignment_id, "integer") .
 			" AND (" . self::COL_FILENAME . " IS NOT NULL OR " . self::COL_ATEXT ." IS NOT NULL)" .
@@ -83,7 +84,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 
 		$res = $this->db->query($query);
 
-		return (int)$res->numRows();
+		return $res->numRows();
 	}
 
 	/**
