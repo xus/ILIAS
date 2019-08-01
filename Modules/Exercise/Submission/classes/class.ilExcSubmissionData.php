@@ -50,9 +50,14 @@ class ilExcSubmissionData implements JsonSerializable {
 	 */
 	private $is_late;
 
+	/**
+	 * @var ilDateTime
+	 */
+	private $timestamp;
 
 	/**
-	 * TODO refactor: too many arguments
+	 * TODO refactor: too many arguments O/C principle :S
+	 * TODO this constructor should be independent of the nullable table columns.
 	 * ilExcSubmissionData constructor.
 	 * @param int $exercise_id
 	 * @param int $assignment_id
@@ -62,8 +67,9 @@ class ilExcSubmissionData implements JsonSerializable {
 	 * @param string $deliver_result_fullname
 	 * @param string $deliver_result_mymetype
 	 * @param int $is_late
+	 * @param ilDateTime $timestamp
 	 */
-	public function __construct(int $exercise_id, int $assignment_id, int $user_id, int $team_id, string $file_name, string $deliver_result_fullname, string $deliver_result_mymetype, int $is_late)
+	public function __construct(int $exercise_id, int $assignment_id, int $user_id, int $team_id, string $file_name, string $deliver_result_fullname, string $deliver_result_mymetype, int $is_late, ilDateTime $timestamp = null)
 	{
 		$this->exercise_id= $exercise_id;
 		$this->assignment_id = $assignment_id;
@@ -73,6 +79,7 @@ class ilExcSubmissionData implements JsonSerializable {
 		$this->deliver_result_fullname = $deliver_result_fullname;
 		$this->deliver_result_mymetype = $deliver_result_mymetype;
 		$this->is_late = $is_late;
+		$this->timestamp = $timestamp;
 	}
 
 	/**
@@ -116,6 +123,7 @@ class ilExcSubmissionData implements JsonSerializable {
 	}
 
 	/**
+	 * TODO rename "Deliver" ??¿?¿
 	 * @return string
 	 */
 	public function getDeliverResultFullname(): string
@@ -135,6 +143,16 @@ class ilExcSubmissionData implements JsonSerializable {
 	{
 		return $this->is_late;
 	}
+
+	/**
+	 * todo what is this timestamp coming from?
+	 * @return int
+	 */
+	public function getTimestamp(): ilDateTime
+	{
+		return $this->timestamp;
+	}
+
 
 	/**
 	 * TODO: This method will be useful if ever versioning/eventing are needed.
