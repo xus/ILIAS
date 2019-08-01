@@ -71,21 +71,6 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	}
 
 	/**
-	 * TODO: CHeck if this method is used at all and delete it.
-	 * @param int $submission_id
-	 * @return int
-	 */
-	public function getUserId(int $submission_id) : int
-	{
-		$q = "SELECT " . self::COL_USER_ID . " FROM " . self::TABLE_NAME .
-			" WHERE " . self::COL_RETURNED_ID . " = " . $this->db->quote($submission_id, "integer");
-
-		$usr_set = $this->db->query($q);
-
-		return $this->db->fetchAssoc($usr_set);
-	}
-
-	/**
 	 * TODO COUNT via db or return all and promote the count to ilExSubmission class.
 	 * @inheritdoc
 	 */

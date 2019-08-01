@@ -659,7 +659,12 @@ class ilExSubmission
 
 		$repository = new ilExcSubmissionRepository($ilDB);
 
-		return $repository->getById($a_returned_id)->getExerciseId();
+		$submission = $repository->getById($a_returned_id);
+
+		if($submission) {
+			return $submission->getExerciseId();
+		}
+		return null;
 	}
 	
 	/**
@@ -689,7 +694,7 @@ class ilExSubmission
 		}
 		if(sizeof($files))
 		{
-			$this->deleteSelectedFiles($files);		
+			$this->deleteSelectedFiles($files);
 		}
 	}
 
