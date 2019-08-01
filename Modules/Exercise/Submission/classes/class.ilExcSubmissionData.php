@@ -137,6 +137,7 @@ class ilExcSubmissionData implements JsonSerializable {
 	}
 
 	/**
+	 * TODO: This method will be useful if ever versioning/eventing are needed.
 	 * Specify data which should be serialized to JSON
 	 *
 	 * @link  https://php.net/manual/en/jsonserializable.jsonserialize.php
