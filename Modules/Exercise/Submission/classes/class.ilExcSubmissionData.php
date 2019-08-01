@@ -69,7 +69,7 @@ class ilExcSubmissionData implements JsonSerializable {
 	 * @param int $is_late
 	 * @param ilDateTime $timestamp
 	 */
-	public function __construct(int $exercise_id, int $assignment_id, int $user_id, int $team_id, string $file_name, string $deliver_result_fullname, string $deliver_result_mymetype, int $is_late, ilDateTime $timestamp = null)
+	public function __construct(int $exercise_id, int $assignment_id, int $user_id, int $team_id, string $file_name, ?string $deliver_result_fullname, ?string $deliver_result_mymetype, int $is_late, ilDateTime $timestamp = null)
 	{
 		$this->exercise_id= $exercise_id;
 		$this->assignment_id = $assignment_id;
@@ -148,7 +148,7 @@ class ilExcSubmissionData implements JsonSerializable {
 	 * todo what is this timestamp coming from?
 	 * @return int
 	 */
-	public function getTimestamp(): ilDateTime
+	public function getTimestamp(): ?ilDateTime
 	{
 		return $this->timestamp;
 	}
