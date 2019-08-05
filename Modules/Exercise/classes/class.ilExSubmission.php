@@ -1311,7 +1311,7 @@ class ilExSubmission
 	 *
 	 * @return	mixed	false or mysql timestamp of last submission
 	 */
-	function getLastSubmission()
+	function getLastSubmission() : ?string
 	{
 		if ($this->getAssignment()->getAssignmentType()->isSubmissionAssignedToTeam()) {
 			$submission = $this->repository_object->getLastSubmissionByTeam($this->assignment->getId(), $this->getTeam()->getId());
@@ -1319,7 +1319,11 @@ class ilExSubmission
 			$submission = $this->repository_object->getLastSubmissionByUsers($this->assignment->getId(), $this->getUserIds());
 		}
 
-		return ilUtil::getMySQLTimestamp($submission["ts"]);
+		if($submission) {
+			return ilUtil::getMySQLTimestamp($submission->getTimestamp());
+		}
+
+		return null;
 	}
 
 	/**
