@@ -99,7 +99,6 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->getArrayOfDataObjectsFromQuery($query);
 	}
 
-	//todo array of ilexcsubmissiondata
 	public function getAllByAssignmentIdAndTeamId(int $assignment_id, int $team_id) : array
 	{
 		$query = "SELECT * FROM " . self::TABLE_NAME .
@@ -108,16 +107,13 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 			" AND " . self::COL_TEAM_ID . " = " .
 			$this->db->quote($team_id, "integer");
 
-		$result = $this->db->query($query);
+		return $this->getArrayOfDataObjectsFromQuery($query);
 
-		return $this->db->fetchAll($result);
 	}
-
-	//todo array of ilexcsubmissiondata
 
 	public function getTeamSubmissionsBySubmissionsIdAndTimestamp(int $assignment_id, int $team_id, array $submission_ids, int $min_timestamp) : array
 	{
-		$sql = "SELECT * FROM " . self::TABLE_NAME .
+		$query = "SELECT * FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_ASS_ID . " = " .
 			$this->db->quote($assignment_id, "integer") .
 			" AND " . self::COL_TEAM_ID . " = " .
@@ -131,61 +127,54 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 			$sql .= " AND ts > ".$this->db->quote($min_timestamp, "timestamp");
 		}
 
-		$result = $this->db->query($sql);
+		return $this->getArrayOfDataObjectsFromQuery($query);
 
-		return $this->db->fetchAll($result);
 	}
 
-	//todo array of ilexcsubmissiondata
 	//TODO if submissio_is is null instead aof array
 	public function getUsersSubmissionsBySubmissionsIdAndTimestamp(int $assignment_id, array $user_ids, array $submission_ids, int $min_timestamp) : array
 	{
-		$sql = "SELECT * FROM " . self::TABLE_NAME .
+		$query = "SELECT * FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_ASS_ID . " = " .
 			$this->db->quote($assignment_id, "integer") .
 			" AND " . $this->db->in(self::COL_USER_ID, $user_ids, false, "integer");
 
 		if($submission_ids) {
-			$sql .= " AND ".$this->db->in("returned_id", $submission_ids, false, "integer");
+			$query .= " AND ".$this->db->in("returned_id", $submission_ids, false, "integer");
 		}
 
 		if($min_timestamp) {
-			$sql .= " AND ts > ".$this->db->quote($min_timestamp, "timestamp");
+			$query .= " AND ts > ".$this->db->quote($min_timestamp, "timestamp");
 		}
 
-		$result = $this->db->query($sql);
+		return $this->getArrayOfDataObjectsFromQuery($query);
 
-		return $this->db->fetchAll($result);
 	}
 
-	//todo array of ilexcsubmissiondata
 	//TODO: Why we are checking if its a team or a bunch of users when we have the submissions who are PK in the DB (getTeamSubmissionsByIds, and getUsersSubmissionsByIds)
 	public function getTeamSubmissionsByIds(int $team_id, array $submission_ids) : array
 	{
-		$sql = "SELECT * FROM " . self::TABLE_NAME .
+		$query = "SELECT * FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_TEAM_ID . " = " . $this->db->quote($team_id, "integer") .
 			" AND " . $this->db->in(self::COL_RETURNED_ID, $submission_ids, false, "integer");
 
-		$result = $this->db->query($sql);
+		return $this->getArrayOfDataObjectsFromQuery($query);
 
-		return $this->db->fetchAll($result);
 	}
 
 	//read TODO from getTeamSubmissionsByIds
 	public function getUsersSubmissionsByIds(array $users_ids, array $submission_ids) : array
 	{
-		$sql = "SELECT * FROM " . self::TABLE_NAME .
+		$query = "SELECT * FROM " . self::TABLE_NAME .
 			" WHERE " . $this->db->in(self::COL_USER_ID, $users_ids, false, "integer") .
 			" AND " . $this->db->in(self::COL_RETURNED_ID, $submission_ids, false, "integer");
 
-		$result = $this->db->query($sql);
+		return $this->getArrayOfDataObjectsFromQuery($query);
 
-		return $this->db->fetchAll($result);
 	}
 
 	/**
-	 * 	//todo array of ilexcsubmissiondata
-	 * @param int $ass_id
+	 * @param int $assignment_id
 	 * @param array $user_ids
 	 * @return array
 	 */
@@ -196,9 +185,8 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 			$this->db->quote($assignment_id, "integer") .
 			" AND " . $this->db->in(self::COL_USER_ID, $user_ids, false, "integer");
 
-		$result = $this->db->query($query);
+		return $this->getArrayOfDataObjectsFromQuery($query);
 
-		return $this->db->fetchAll($result);
 	}
 
 	/**
