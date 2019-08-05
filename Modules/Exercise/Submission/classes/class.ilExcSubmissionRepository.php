@@ -137,6 +137,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	}
 
 	//todo array of ilexcsubmissiondata
+	//TODO if submissio_is is null instead aof array
 	public function getUsersSubmissionsBySubmissionsIdAndTimestamp(int $assignment_id, array $user_ids, array $submission_ids, int $min_timestamp) : array
 	{
 		$sql = "SELECT * FROM " . self::TABLE_NAME .
@@ -465,20 +466,14 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	{
 		$this->db->setLimit(1, 0);
 
-		$q = "SELECT * FROM " . self::TABLE_NAME .
+		$query = "SELECT * FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_ASS_ID . " = " . $this->db->quote($assignment_id, "integer") .
 			" AND " . self::COL_TEAM_ID . " = " . $team_id .
 			" AND (filename IS NOT NULL OR atext IS NOT NULL)".
 			" AND ts IS NOT NULL".
 			" ORDER BY ts DESC";
 
-		$result = $this->db->query($q);
-
-		while($row = $this->db->fetchAll($result)) {
-			return $this->getDataObjectFromQuery($row);
-		}
-
-		return null;
+		return $this->getDataObjectFromQuery($query);
 	}
 
 	/**
@@ -497,13 +492,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 			" AND ts IS NOT NULL" .
 			" ORDER BY ts DESC";
 
-		$result = $this->db->query($query);
-
-		while($row = $this->db->fetchAll($result)) {
-			return $this->getDataObjectFromQuery($row);
-		}
-
-		return null;
+		return $this->getDataObjectFromQuery($query);
 	}
 
 	public function getTeamSubmissionIdsByTutorId(int $assignment_id, int $team_id, int $tutor_id) : array
@@ -580,16 +569,20 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	//TODO smell code here.
 	public function mapArrayToExcSubmissionData(array $array_data) : ilExcSubmissionData
 	{
-		return new ilExcSubmissionData(
-			$array_data['obj_id'],
-			$array_data['ass_id'],
-			$array_data['user_id'],
-			$array_data['team_id'],
-			$array_data['filetitle'],
-			$array_data['filename'],
-			$array_data['mimetype'],
-			$array_data['late'],
-			$array_data['timestamp']
+		$data = current($array_data);
+
+		$submission = new ilExcSubmissionData(
+			$data['obj_id'],
+			$data['ass_id'],
+			$data['user_id'],
+			$data['team_id'],
+			$data['filetitle'],
+			$data['filename'],
+			$data['mimetype'],
+			$data['late'],
+			$data['timestamp']
 		);
+
+		return $submission;
 	}
 }
