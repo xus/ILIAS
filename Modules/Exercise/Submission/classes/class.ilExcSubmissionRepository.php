@@ -230,9 +230,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 			$query .= " AND " . $this->db->in("a.type", $assignment_types, false, "integer");
 		}
 
-		$result = $this->db->query($query);
-
-		return $this->db->fetchAll($result);
+		return $this->getArrayOfDataObjectsFromQuery($query);
 	}
 
 	/**
