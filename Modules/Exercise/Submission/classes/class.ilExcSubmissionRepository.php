@@ -249,20 +249,19 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 
 	/**
 	 * TODO READ THIS METHOD--> select obj_id???=?
+	 * THIS AFFECTS checkExercise of ilPortfolioExerciseGUI and ilBlogExerciseGUI
 	 * @param int $user_id
 	 * @param string $filetitle
 	 * @return array
 	 */
 	public function getSubmissionByUserIdAndFileTitle(int $user_id, string $filetitle) : array
 	{
-		$query = "SELECT " . self::COL_OBJ_ID . ", ass_id" .
+		$query = "SELECT *" .
 			" FROM " . self::TABLE_NAME.
 			" WHERE " . self::COL_USER_ID . " = " . $this->db->quote($user_id, "integer") .
 			" AND " . self::COL_FILETITLE . " = " . $this->db->quote($filetitle, "text");
 
-		$result = $this->db->query($query);
-
-		return $this->db->fetchAll($result);
+		return $this->getDataObjectFromQuery($query);
 	}
 
 	/**

@@ -88,7 +88,7 @@ class ilBlogExerciseGUI
 			{					
 				// #9988
 				$active_ref = false;
-				foreach(ilObject::_getAllReferences($exercise["obj_id"]) as $ref_id)
+				foreach(ilObject::_getAllReferences($exerciseget->getExerciseId()) as $ref_id)
 				{
 					if(!$tree->isSaved($ref_id))
 					{
@@ -98,7 +98,7 @@ class ilBlogExerciseGUI
 				}
 				if($active_ref)
 				{					
-					$part = self::getExerciseInfo($exercise["ass_id"]);
+					$part = self::getExerciseInfo($exercise->getAssignmentId());
 					if($part)
 					{
 						$info[] = $part;

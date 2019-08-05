@@ -64,7 +64,8 @@ class ilPortfolioExerciseGUI
 		
 		return true;
 	}
-	
+
+	//Todo this method is an horizontal duplicate of ilBlogExerciseGUI
 	public static function checkExercise($a_user_id, $a_obj_id, $a_add_submit = false, $as_array = false)
 	{			
 		global $DIC;
@@ -73,19 +74,19 @@ class ilPortfolioExerciseGUI
 		
 		$info = array();
 		
-		$exercises = ilExSubmission::findUserFiles($a_user_id, $a_obj_id);
+		$submission_data = ilExSubmission::findUserFiles($a_user_id, $a_obj_id);
 		// #0022794
 		if (!$exercises)
 		{
-			$exercises = ilExSubmission::findUserFiles($a_user_id, $a_obj_id.".sec");
+			$submission_data = ilExSubmission::findUserFiles($a_user_id, $a_obj_id.".sec");
 		}
-		if($exercises)
+		if($submission_data)
 		{
-			foreach($exercises as $exercise)
+			foreach($submission_data as $submission)
 			{
 				// #9988
 				$active_ref = false;
-				foreach(ilObject::_getAllReferences($exercise["obj_id"]) as $ref_id)
+				foreach(ilObject::_getAllReferences($submission->getExerciseId()) as $ref_id)
 				{
 					if(!$tree->isSaved($ref_id))
 					{
@@ -95,7 +96,7 @@ class ilPortfolioExerciseGUI
 				}
 				if($active_ref)
 				{				
-					$part = self::getExerciseInfo($a_user_id, $exercise["ass_id"], $a_add_submit, $as_array);
+					$part = self::getExerciseInfo($a_user_id, $submission->getAssignmentId(), $a_add_submit, $as_array);
 					if($part)
 					{
 						$info[] = $part;
