@@ -48,26 +48,12 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	 */
 	public function getById(int $submission_id) : ?ilExcSubmissionData
 	{
+		$this->db->setLimit(1, 0);
+
 		$query = "SELECT * FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_RETURNED_ID . " = " . $this->db->quote($submission_id, "integer");
 
-		$result = $this->db->query($query);
-
-		while($row = $this->db->fetchObject($result)) {
-			$submission_data = new ilExcSubmissionData(
-				$row->obj_id,
-				$row->ass_id,
-				$row->user_id,
-				$row->team_id,
-				$row->filetitle,
-				$row->filename,
-				$row->mimetype,
-				$row->late
-			);
-			return $submission_data;
-		}
-
-		return null;
+		return $this->getDataObjectFromQuery($query);
 	}
 
 	/**
@@ -110,11 +96,10 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 			" WHERE " . self::COL_ASS_ID . " = " .
 			$this->db->quote($a_ass_id, "integer");
 
-		$result = $this->db->query($query);
-
-		return $this->db->fetchAll($result);
+		return $this->getArrayOfDataObjectsFromQuery($query);
 	}
 
+	//todo array of ilexcsubmissiondata
 	public function getAllByAssignmentIdAndTeamId(int $assignment_id, int $team_id) : array
 	{
 		$query = "SELECT * FROM " . self::TABLE_NAME .
@@ -127,6 +112,8 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 
 		return $this->db->fetchAll($result);
 	}
+
+	//todo array of ilexcsubmissiondata
 
 	public function getTeamSubmissionsBySubmissionsIdAndTimestamp(int $assignment_id, int $team_id, array $submission_ids, int $min_timestamp) : array
 	{
@@ -149,6 +136,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAll($result);
 	}
 
+	//todo array of ilexcsubmissiondata
 	public function getUsersSubmissionsBySubmissionsIdAndTimestamp(int $assignment_id, array $user_ids, array $submission_ids, int $min_timestamp) : array
 	{
 		$sql = "SELECT * FROM " . self::TABLE_NAME .
@@ -169,6 +157,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAll($result);
 	}
 
+	//todo array of ilexcsubmissiondata
 	//TODO: Why we are checking if its a team or a bunch of users when we have the submissions who are PK in the DB (getTeamSubmissionsByIds, and getUsersSubmissionsByIds)
 	public function getTeamSubmissionsByIds(int $team_id, array $submission_ids) : array
 	{
@@ -194,6 +183,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	}
 
 	/**
+	 * 	//todo array of ilexcsubmissiondata
 	 * @param int $ass_id
 	 * @param array $user_ids
 	 * @return array
@@ -271,6 +261,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	}
 
 	/**
+	 * TODO READ THIS METHOD--> select obj_id???=?
 	 * @param int $user_id
 	 * @param string $filetitle
 	 * @return array
@@ -343,6 +334,8 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	}
 
 	/**
+	 * TODO use databoject here
+	 * TODO read if we can use the json serializer for this mater
 	 * Insert submission in the database
 	 * @param array $data
 	 * @return int
@@ -379,6 +372,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	}
 
 	/**
+	 * TODO submission id is unique in the db... why check by exercise id, assignment_id? exc_returned.returned_id
 	 * Delete one submission for an specific user and assignment.
 	 * @param int $exercise_id
 	 * @param int $user_id
@@ -396,6 +390,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 	}
 
 	/**
+	 * TODO submission id is unique in the db... why check by exercise id, assignment_id? exc_returned.returned_id
 	 * Delete one submission for an specific team and assignment.
 	 * @param int $exercise_id
 	 * @param int $team_id
@@ -444,6 +439,7 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAssoc($res);
 	}
 
+	//THIS METHOD CAN BE REMOVED TODO: figure out
 	public function getLastWebDirectoryAccessByUsers(int $assignment_id, array $user_ids) : array
 	{
 		$this->db->setLimit(1, 0);
@@ -460,36 +456,54 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAssoc($res);
 	}
 
-	public function getLastSubmissionByTeam(int $assignment_id, int $team_id) : array
+	/**
+	 * @param int $assignment_id
+	 * @param int $team_id
+	 * @return array
+	 */
+	public function getLastSubmissionByTeam(int $assignment_id, int $team_id) : ?ilExcSubmissionData
 	{
 		$this->db->setLimit(1, 0);
 
-		$q = "SELECT obj_id, user_id, ts FROM " . self::TABLE_NAME .
+		$q = "SELECT * FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_ASS_ID . " = " . $this->db->quote($assignment_id, "integer") .
 			" AND " . self::COL_TEAM_ID . " = " . $team_id .
 			" AND (filename IS NOT NULL OR atext IS NOT NULL)".
 			" AND ts IS NOT NULL".
 			" ORDER BY ts DESC";
 
-		$usr_set = $this->db->query($q);
+		$result = $this->db->query($q);
 
-		return $this->db->fetchAssoc($usr_set);
+		while($row = $this->db->fetchAll($result)) {
+			return $this->getDataObjectFromQuery($row);
+		}
+
+		return null;
 	}
 
-	public function getLastSubmissionByUsers(int $assignment_id, array $user_ids) : array
+	/**
+	 * @param int $assignment_id
+	 * @param array $user_ids
+	 * @return null | ilExcSubmissionData
+	 */
+	public function getLastSubmissionByUsers(int $assignment_id, array $user_ids) : ?ilExcSubmissionData
 	{
 		$this->db->setLimit(1, 0);
 
-		$q = "SELECT obj_id, user_id, ts FROM " . self::TABLE_NAME .
+		$query = "SELECT * FROM " . self::TABLE_NAME .
 			" WHERE " . self::COL_ASS_ID . " = " . $this->db->quote($assignment_id, "integer") .
 			" AND " . $this->db->in(self::COL_USER_ID, $user_ids, false, "integer") .
 			" AND (filename IS NOT NULL OR atext IS NOT NULL)" .
 			" AND ts IS NOT NULL" .
 			" ORDER BY ts DESC";
 
-		$usr_set = $this->db->query($q);
+		$result = $this->db->query($query);
 
-		return $this->db->fetchAssoc($usr_set);
+		while($row = $this->db->fetchAll($result)) {
+			return $this->getDataObjectFromQuery($row);
+		}
+
+		return null;
 	}
 
 	public function getTeamSubmissionIdsByTutorId(int $assignment_id, int $team_id, int $tutor_id) : array
@@ -508,19 +522,74 @@ class ilExcSubmissionRepository implements ilExcSubmissionRepositoryInterface
 		return $this->db->fetchAssoc($new_up_set);
 	}
 
-	public function getUsersSubmissionIdsByTutorId(int $assignment_id, array $user_ids, int $tutor_id) : array
+	/**
+	 * TODO FIX THIS METHOD and rename it getIdsByUserIdsAndTutorId
+	 * @param int $assignment_id
+	 * @param array $user_ids
+	 * @param int $tutor_id
+	 * @return null | array
+	 */
+	public function getUsersSubmissionIdsByTutorId(int $assignment_id, array $user_ids, int $tutor_id) : ?array
 	{
-		$q = "SELECT exc_returned.returned_id AS id ".
-			"FROM exc_usr_tutor, exc_returned ".
-			"WHERE exc_returned.ass_id = exc_usr_tutor.ass_id ".
-			" AND exc_returned.user_id = exc_usr_tutor.usr_id ".
-			" AND exc_returned.ass_id = ".$this->db->quote($assignment_id, "integer").
+		$q = "SELECT exc_returned.returned_id AS id" .
+			" FROM exc_usr_tutor, exc_returned" .
+			" WHERE exc_returned.ass_id = exc_usr_tutor.ass_id" .
+			" AND exc_returned.user_id = exc_usr_tutor.usr_id" .
+			" AND exc_returned.ass_id = ".$this->db->quote($assignment_id, "integer") .
 			" AND " . $this->db->in(self::COL_USER_ID, $user_ids, false, "integer") .
-			" AND exc_usr_tutor.tutor_id = ".$this->db->quote($tutor_id, "integer").
-			" AND exc_usr_tutor.download_time < exc_returned.ts ";
+			" AND exc_usr_tutor.tutor_id = ".$this->db->quote($tutor_id, "integer") .
+			" AND exc_usr_tutor.download_time < exc_returned.ts";
 
 		$new_up_set = $this->db->query($q);
 
 		return $this->db->fetchAssoc($new_up_set);
+	}
+
+	// Utils. Maybe these methods can be extracted from here to be used in other repos
+
+	/**
+	 * Mapping db rows with object data to centralize future changes.
+	 * @param string $query
+	 * @return ilExcSubmissionData
+	 */
+	function getDataObjectFromQuery(string $query) : ?ilExcSubmissionData
+	{
+		$result = $this->db->query($query);
+
+		while($row = $this->db->fetchAll($result))
+		{
+			return $this->mapArrayToExcSubmissionData($row);
+		}
+
+		return null;
+	}
+
+	public function getArrayOfDataObjectsFromQuery(string $query) : array
+	{
+		$result = $this->db->query($query);
+
+		$submissions = array();
+		while($row = $this->db->fetchAll($result))
+		{
+			$submissions[] = $this->mapArrayToExcSubmissionData($row);
+		}
+
+		return $submissions;
+	}
+
+	//TODO smell code here.
+	public function mapArrayToExcSubmissionData(array $array_data) : ilExcSubmissionData
+	{
+		return new ilExcSubmissionData(
+			$array_data['obj_id'],
+			$array_data['ass_id'],
+			$array_data['user_id'],
+			$array_data['team_id'],
+			$array_data['filetitle'],
+			$array_data['filename'],
+			$array_data['mimetype'],
+			$array_data['late'],
+			$array_data['timestamp']
+		);
 	}
 }
