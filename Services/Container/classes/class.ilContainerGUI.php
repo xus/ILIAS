@@ -271,15 +271,8 @@ class ilContainerGUI extends ilObjectGUI implements ilDesktopItemHandling
 
 		$cmd = $ilCtrl->getCmd();
 
-		if (in_array($cmd, array("displayMediaFullscreen", "downloadFile", "displayMedia")))
-		{
-			$this->checkPermission("read");
-		}
-		else
-		{
-			$this->checkPermission("write");
-		}
-		
+		$this->checkPermission("read");
+
 		$ilTabs->clearTargets();
 
 		if ($_GET["redirectSource"] == "ilinternallinkgui")
@@ -330,6 +323,11 @@ class ilContainerGUI extends ilObjectGUI implements ilDesktopItemHandling
 		include_once("./Services/Style/Content/classes/class.ilObjStyleSheet.php");
 		$page_gui->setStyleId(ilObjStyleSheet::getEffectiveContentStyleId(
 			$this->object->getStyleSheetId(), $this->object->getType()));
+
+		if (!$this->access->checkAccess("write", "", $this->ref_id))
+		{
+			$page_gui->setEnableEditing(false);
+		}
 
 		$page_gui->setTemplateTargetVar("ADM_CONTENT");
 		$page_gui->setFileDownloadLink("");
